@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Teslim Tutanağı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('workorders')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">İş Emri · <span th:text="${order.orderNo}">IS-0000</span></div>
+                    <h1 class="page-title">Teslim Tutanağı</h1>
+                    <p class="page-subtitle">
+                        <span th:text="${order.customer.name}">Müşteri</span>
+                        <span class="mx-1">·</span>
+                        <span th:text="${order.vehicle.plate}">34ABC123</span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}(id=${order.id})}">
+                        <i class="bi bi-arrow-left me-1"></i> İş Emrine Dön
+                    </a>
+                    <a class="btn btn-outline-secondary" th:if="${delivery != null}"
+                       th:href="@{/work-orders/{id}/delivery/print(id=${order.id})}">
+                        <i class="bi bi-printer me-1"></i> Yazdır
+                    </a>
+                    <a class="btn btn-outline-secondary" th:if="${delivery != null}"
+                       th:href="@{/work-orders/{id}/delivery.pdf(id=${order.id})}">
+                        <i class="bi bi-filetype-pdf me-1"></i> PDF
+                    </a>
+                </div>
+            </div>
+
+            <div class="alert alert-warning" th:if="${!order.status.completed}"
+                 th:text="${'Teslim tutanağı için iş emri en az Tamamlandı durumunda olmalıdır. Mevcut durum: ' + order.status.label}">
+                Teslim tutanağı için iş emri tamamlanmış olmalıdır.
+            </div>
+
+            <div class="sd-card" th:if="${delivery != null}">
+                <div class="sd-card-header">
+                    <h2><i class="bi bi-box-seam me-2 text-success"></i>Kayıtlı teslim bilgileri</h2>
+                    <span class="record-meta" th:text="${fmt.dateTime(delivery.deliveredAt)}">01.01.2026</span>
+                </div>
+                <div class="sd-card-body">
+                    <div class="summary-strip">
+                        <div class="summary-item">
+                            <span>Teslim alan</span>
+                            <strong th:text="${delivery.receiverName}">Müşteri</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Kilometre</span>
+                            <strong th:text="${delivery.mileage == null ? '—' : fmt.number(delivery.mileage) + ' km'}">—</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Yakıt</span>
+                            <strong th:text="${delivery.fuelLevel.label}">1/2</strong>
+                        </div>
+                    </div>
+                    <div class="mt-3" th:if="${delivery.notes != null}">
+                        <div class="form-section-title">Teslim notu</div>
+                        <div th:text="${delivery.notes}">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" th:action="@{/work-orders/{id}/delivery(id=${order.id})}"
+                  th:object="${deliveryForm}" data-submit-once
+                  sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                <div class="sd-card" th:if="${order.status.completed}">
+                    <div class="sd-card-header">
+                        <h2><i class="bi bi-pencil-square me-2"></i>Teslim bilgilerini <span th:text="${delivery == null ? 'girin' : 'güncelleyin'}">girin</span></h2>
+                        <span class="record-meta">Islak imza için kaydettikten sonra yazdırın</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="receiverName">Teslim alan kişi <span class="required">*</span></label>
+                                <input class="form-control" id="receiverName" type="text" th:field="*{receiverName}"
+                                       th:classappend="${#fields.hasErrors('receiverName')} ? 'is-invalid'"
+                                       maxlength="200">
+                                <div class="invalid-feedback" th:errors="*{receiverName}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="deliveryMileage">Kilometre</label>
+                                <input class="form-control" id="deliveryMileage" type="number" min="0"
+                                       th:field="*{mileage}"
+                                       th:classappend="${#fields.hasErrors('mileage')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{mileage}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="deliveryFuelLevel">Yakıt seviyesi <span class="required">*</span></label>
+                                <select class="form-select" id="deliveryFuelLevel" th:field="*{fuelLevel}"
+                                        th:classappend="${#fields.hasErrors('fuelLevel')} ? 'is-invalid'">
+                                    <option th:each="level : ${fuelLevels}" th:value="${level.name()}"
+                                            th:text="${level.label}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{fuelLevel}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="deliveryNotes">Teslim notu</label>
+                                <textarea class="form-control" id="deliveryNotes" rows="3" th:field="*{notes}"
+                                          maxlength="2000"
+                                          placeholder="Teslim sırasında belirtilmesi gereken notlar"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Müşteri dijital imzası</label>
+                                <div class="signature-pad" data-signature-pad>
+                                    <canvas width="640" height="180" aria-label="Müşteri imza alanı"></canvas>
+                                    <div class="signature-pad-footer">
+                                        <span class="record-meta">Parmağınızla veya fareyle imzalayın.</span>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                data-signature-clear>Temizle</button>
+                                    </div>
+                                    <input type="hidden" th:field="*{signatureData}" data-signature-input>
+                                </div>
+                                <div class="form-text">İmza kayıtla birlikte saklanır ve çıktıda görünür.</div>
+                            </div>
+                        </div>
+                        <div class="toast-inline mt-3">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Tutanak, iş emri toplamını ve yapılan işlemleri de içerir. Müşteri imzası çıktı üzerinde alınır.
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}(id=${order.id})}">Vazgeç</a>
+                        <button class="btn btn-primary" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2-circle me-1"></i> Teslim Tutanağını Kaydet
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

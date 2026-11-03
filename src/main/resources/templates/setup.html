@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('İlk Kurulum')}"></head>
+<body>
+<div class="auth-page">
+    <section class="auth-brand">
+        <div class="auth-brand-top">
+            <span class="sd-brand-mark">
+                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+            </span>
+            <div class="sd-brand-text">
+                <strong>Toyota Plaza Öztoprak</strong>
+                <span>Yetkili Servis ve Bakım</span>
+            </div>
+        </div>
+        <div>
+            <h1>Toyota Plaza Öztoprak kurulumunu tamamlayın.</h1>
+            <p>
+                Sistemde henüz kullanıcı yok. Güvenli bir işletme sahibi hesabı oluşturarak kurulumu tamamlayın.
+                Bu ekran yalnızca hiç kullanıcı yokken erişilebilir.
+            </p>
+            <ul class="auth-features">
+                <li><i class="bi bi-shield-lock"></i> Parolalar BCrypt ile hashlenir</li>
+                <li><i class="bi bi-people"></i> Daha sonra kullanıcı ve rol yönetimi yapılabilir</li>
+                <li><i class="bi bi-journal-check"></i> Tüm kritik işlemler denetim kaydına yazılır</li>
+            </ul>
+        </div>
+        <div class="small" style="color:#8fa6c2;">Varsayılan parola yoktur. Bu hesabı siz oluşturursunuz.</div>
+    </section>
+
+    <section class="auth-form-wrap">
+        <div class="auth-mobile-brand d-lg-none">
+            <span class="sd-brand-mark">
+                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+            </span>
+            <div class="sd-brand-text">
+                <strong>Toyota Plaza Öztoprak</strong>
+                <span>Yetkili Servis ve Bakım</span>
+            </div>
+        </div>
+        <div class="auth-card">
+            <h2>İşletme sahibi hesabı oluştur</h2>
+            <p class="lead">Bu hesap PATRON yetkisiyle oluşturulur ve tüm işlemleri görebilir.</p>
+
+            <form th:action="@{/setup}" th:object="${setupForm}" method="post" data-submit-once>
+                <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}" role="alert">
+                    <div th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="fullName">Ad soyad <span class="required">*</span></label>
+                    <input class="form-control" id="fullName" type="text" th:field="*{fullName}"
+                           th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'" maxlength="100" required>
+                    <div class="invalid-feedback" th:errors="*{fullName}"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="username">Kullanıcı adı <span class="required">*</span></label>
+                    <input class="form-control" id="username" type="text" th:field="*{username}"
+                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                           autocomplete="username" maxlength="50" required>
+                    <div class="invalid-feedback" th:errors="*{username}"></div>
+                    <div class="form-text">3-50 karakter; harf, rakam, nokta, tire ve alt çizgi.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="password">Parola <span class="required">*</span></label>
+                    <div class="input-group">
+                        <input class="form-control" id="password" type="password" th:field="*{password}"
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                               autocomplete="new-password" required>
+                        <button class="btn btn-outline-secondary" type="button"
+                                data-password-toggle="password" aria-label="Parolayı göster">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                        <div class="invalid-feedback" th:errors="*{password}"></div>
+                    </div>
+                    <div class="form-text">En az 10 karakter, büyük harf, küçük harf ve rakam içermelidir.</div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="confirmPassword">Parola tekrarı <span class="required">*</span></label>
+                    <input class="form-control" id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                           th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                           autocomplete="new-password" required>
+                    <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                    Kurulumu tamamla
+                </button>
+            </form>
+            <div class="auth-footer">
+                Kurulum zaten yapıldıysa <a th:href="@{/login}">giriş ekranına</a> dönebilirsiniz.
+            </div>
+        </div>
+    </section>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

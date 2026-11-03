@@ -1,0 +1,6 @@
+# Yerel gelistirme icin: PostgreSQL portunu yalnizca localhost'a acar.
+# Kullanim: docker compose -f docker-compose.yml -f compose.dev.yml up -d db
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"

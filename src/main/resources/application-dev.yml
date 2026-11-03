@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/servisdefteri}
+    username: ${DB_USERNAME:servisdefteri}
+    password: ${DB_PASSWORD:}
+  thymeleaf:
+    cache: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+logging:
+  level:
+    tr.com.servisdefteri: DEBUG
+    org.hibernate.SQL: WARN

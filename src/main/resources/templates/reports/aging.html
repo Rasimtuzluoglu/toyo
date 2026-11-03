@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cari Yaşlandırma')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Rapor</div>
+                    <h1 class="page-title">Cari Yaşlandırma</h1>
+                    <p class="page-subtitle">Açık borçların işlem tarihine göre 0-30, 31-60 ve 61+ gün dağılımı.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/reports}">
+                        <i class="bi bi-arrow-left me-1"></i> Raporlar
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/reports/aging.csv}">
+                        <i class="bi bi-filetype-csv me-1"></i> CSV
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/reports/aging.xlsx}">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-clock"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(currentTotal)}">0,00 ₺</div>
+                    <div class="stat-label">0-30 gün</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-clock-history"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(midTotal)}">0,00 ₺</div>
+                    <div class="stat-label">31-60 gün</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon red"><i class="bi bi-exclamation-triangle"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(oldTotal)}">0,00 ₺</div>
+                    <div class="stat-label">61+ gün</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-calculator"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(grandTotal)}">0,00 ₺</div>
+                    <div class="stat-label">Toplam açık borç</div>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2><i class="bi bi-hourglass-split me-2"></i>Müşteri bazında dağılım</h2>
+                    <span class="record-meta">Yalnızca açık borcu olan müşteriler</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!rows.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Müşteri</th>
+                                <th>Telefon</th>
+                                <th class="text-end">0-30 Gün</th>
+                                <th class="text-end">31-60 Gün</th>
+                                <th class="text-end">61+ Gün</th>
+                                <th class="text-end">Toplam</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="row : ${rows}">
+                                <td>
+                                    <a class="fw-semibold" th:href="@{/accounts/customer/{id}(id=${row.customerId})}"
+                                       th:text="${row.name}">Müşteri</a>
+                                </td>
+                                <td th:text="${row.phone}">Telefon</td>
+                                <td class="text-end money" th:text="${fmt.money(row.current)}">0,00 ₺</td>
+                                <td class="text-end money" th:text="${fmt.money(row.mid)}">0,00 ₺</td>
+                                <td class="text-end money" th:text="${fmt.money(row.old)}">0,00 ₺</td>
+                                <td class="text-end money fw-semibold" th:text="${fmt.money(row.total)}">0,00 ₺</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <th colspan="2">Toplam</th>
+                                <th class="text-end money" th:text="${fmt.money(currentTotal)}">0,00 ₺</th>
+                                <th class="text-end money" th:text="${fmt.money(midTotal)}">0,00 ₺</th>
+                                <th class="text-end money" th:text="${fmt.money(oldTotal)}">0,00 ₺</th>
+                                <th class="text-end money" th:text="${fmt.money(grandTotal)}">0,00 ₺</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${rows.isEmpty()}">
+                    <i class="bi bi-check2-circle"></i>
+                    <strong>Açık borç yok</strong>
+                    Yaşlandırılacak açık borç bulunmuyor.
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

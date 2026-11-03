@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Genel Arama')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Arama</div>
+                    <h1 class="page-title">Arama Sonuçları</h1>
+                    <p class="page-subtitle" th:if="${q != ''}">
+                        <strong th:text="${'“' + q + '”'}"></strong> için müşteri, araç ve iş emri sonuçları.
+                    </p>
+                    <p class="page-subtitle" th:if="${q == ''}">Aramak için üst çubuktaki alana en az 2 karakter yazın.</p>
+                </div>
+            </div>
+
+            <div class="alert alert-info" th:if="${q != '' and q.length() < 2}">
+                Arama yapmak için en az 2 karakter girin.
+            </div>
+
+            <div th:if="${searched}">
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2><i class="bi bi-people me-2"></i>Müşteriler</h2>
+                        <span class="record-meta" th:text="${customers.size()} + ' sonuç'">0 sonuç</span>
+                    </div>
+                    <div class="sd-card-body p-0" th:if="${!customers.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                <tr>
+                                    <th>Müşteri</th>
+                                    <th>Telefon</th>
+                                    <th>Tür</th>
+                                    <th>Durum</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="customer : ${customers}">
+                                    <td>
+                                        <a class="fw-semibold" th:href="@{/customers/{id}(id=${customer.id})}"
+                                           th:text="${customer.name}">Müşteri</a>
+                                    </td>
+                                    <td class="record-meta" th:text="${customer.phone}">Telefon</td>
+                                    <td th:text="${customer.type.label}">Bireysel</td>
+                                    <td>
+                                        <span class="sd-badge"
+                                              th:classappend="${customer.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                              th:text="${customer.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="empty-state" th:if="${customers.isEmpty()}">
+                        <i class="bi bi-person-x"></i>
+                        <strong>Müşteri bulunamadı</strong>
+                    </div>
+                </div>
+
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2><i class="bi bi-car-front me-2"></i>Araçlar</h2>
+                        <span class="record-meta" th:text="${vehicles.size()} + ' sonuç'">0 sonuç</span>
+                    </div>
+                    <div class="sd-card-body p-0" th:if="${!vehicles.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                <tr>
+                                    <th>Plaka</th>
+                                    <th>Araç</th>
+                                    <th>Müşteri</th>
+                                    <th class="text-end">Kilometre</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="vehicle : ${vehicles}">
+                                    <td>
+                                        <a class="fw-semibold" th:href="@{/vehicles/{id}(id=${vehicle.id})}"
+                                           th:text="${vehicle.plate}">34ABC123</a>
+                                    </td>
+                                    <td th:text="${(vehicle.brand == null ? '' : vehicle.brand) + ' ' + (vehicle.model == null ? '' : vehicle.model)}">Marka</td>
+                                    <td th:text="${vehicle.customer.name}">Müşteri</td>
+                                    <td class="text-end money" th:text="${fmt.number(vehicle.currentMileage) + ' km'}">0 km</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="empty-state" th:if="${vehicles.isEmpty()}">
+                        <i class="bi bi-car-front"></i>
+                        <strong>Araç bulunamadı</strong>
+                    </div>
+                </div>
+
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2><i class="bi bi-clipboard-check me-2"></i>İş Emirleri</h2>
+                        <span class="record-meta" th:text="${orders.size()} + ' sonuç'">0 sonuç</span>
+                    </div>
+                    <div class="sd-card-body p-0" th:if="${!orders.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                <tr>
+                                    <th>İş Emri</th>
+                                    <th>Müşteri</th>
+                                    <th>Araç</th>
+                                    <th>Açılış</th>
+                                    <th>Durum</th>
+                                    <th class="text-end">Toplam</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="order : ${orders}">
+                                    <td>
+                                        <a class="fw-semibold" th:href="@{/work-orders/{id}(id=${order.id})}"
+                                           th:text="${order.orderNo}">IS-0000</a>
+                                    </td>
+                                    <td th:text="${order.customer.name}">Müşteri</td>
+                                    <td th:text="${order.vehicle.plate}">34ABC123</td>
+                                    <td class="record-meta" th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</td>
+                                    <td>
+                                        <span class="sd-badge"
+                                              th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                              th:text="${order.status.label}">Durum</span>
+                                    </td>
+                                    <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="empty-state" th:if="${orders.isEmpty()}">
+                        <i class="bi bi-clipboard"></i>
+                        <strong>İş emri bulunamadı</strong>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

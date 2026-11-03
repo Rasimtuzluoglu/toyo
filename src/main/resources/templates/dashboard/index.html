@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Ana Panel')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head dashboard-hero">
+                <div>
+                    <div class="page-eyebrow">İşletme Kokpiti</div>
+                    <h1 class="page-title">
+                        Merhaba, <span th:text="${currentUser.fullName}">kullanıcı</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        <span th:text="${fmt.date(view.today)}">01.01.2026</span>
+                        · Bugünkü operasyon ve finans özeti
+                    </p>
+                    <div class="hero-meta">
+                        <span><strong th:text="${view.activeCustomers}">0</strong> aktif müşteri</span>
+                        <span><strong th:text="${view.activeVehicles}">0</strong> aktif araç</span>
+                        <span><strong th:text="${view.openWorkOrders}">0</strong> açık iş</span>
+                    </div>
+                </div>
+                <div class="page-actions" sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments}">
+                        <i class="bi bi-calendar3 me-1"></i> Randevular
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/customers/new}">
+                        <i class="bi bi-person-plus me-1"></i> Müşteri Ekle
+                    </a>
+                    <a class="btn btn-primary" th:href="@{/work-orders/new}">
+                        <i class="bi bi-plus-lg me-1"></i> İş Emri Aç
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-grid dashboard-kpis">
+                <div class="stat-card kpi-primary">
+                    <span class="stat-icon red"><i class="bi bi-clipboard-check"></i></span>
+                    <div class="stat-value" th:text="${view.openWorkOrders}">0</div>
+                    <div class="stat-label">Açık iş emri</div>
+                    <div class="stat-hint">
+                        <span th:text="${view.inProgressWorkOrders}">0</span> işlemde ·
+                        <a th:href="@{/work-orders/board}">Panoya git</a>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(view.todayCollections)}">0,00 ₺</div>
+                    <div class="stat-label">Bugünkü tahsilat</div>
+                    <div class="stat-hint"><a th:href="@{/payments/new}">Tahsilat kaydet</a></div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-wallet2"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(view.netReceivable)}">0,00 ₺</div>
+                    <div class="stat-label">Kalan net alacak</div>
+                    <div class="stat-hint">
+                        <span th:text="${view.debtorCount}">0</span> borçlu ·
+                        <a th:href="@{/accounts}">Cari hesaplar</a>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-calendar3"></i></span>
+                    <div class="stat-value" th:text="${view.todayAppointments.size()}">0</div>
+                    <div class="stat-label">Bugünkü randevu</div>
+                    <div class="stat-hint"><a th:href="@{/appointments}">Günlük planı gör</a></div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-graph-up-arrow me-2 text-danger"></i>Son 7 gün tahsilat</h2>
+                            <span class="record-meta">Günlük toplam</span>
+                        </div>
+                        <div class="sd-card-body">
+                            <div class="chart-bars" role="img" aria-label="Son yedi günün tahsilat grafiği">
+                                <div class="chart-bar-item" th:each="day : ${view.weeklyCollections}">
+                                    <div class="chart-track">
+                                        <div class="chart-fill"
+                                             th:style="|height:${day.percent == 0 ? 3 : day.percent}%|"
+                                             th:title="${fmt.money(day.amount)}"></div>
+                                    </div>
+                                    <span class="chart-label" th:text="${fmt.dayMonth(day.date)}">01 Oca</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-pie-chart me-2 text-danger"></i>İş emri durumları</h2>
+                            <span class="record-meta" th:text="${view.totalWorkOrders} + ' kayıt'">0 kayıt</span>
+                        </div>
+                        <div class="sd-card-body">
+                            <div th:if="${view.totalWorkOrders == 0}" class="text-muted-soft">
+                                Henüz iş emri kaydı yok.
+                            </div>
+                            <div class="status-list" th:if="${view.totalWorkOrders > 0}">
+                                <div class="status-row" th:each="status : ${view.workOrderStatuses}">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>
+                                            <span class="status-dot"
+                                                  th:classappend="${' dot-' + #strings.toLowerCase(status.status.name())}"></span>
+                                            <span th:text="${status.status.label}">Bekliyor</span>
+                                        </span>
+                                        <strong th:text="${status.count}">0</strong>
+                                    </div>
+                                    <div class="status-track">
+                                        <div class="status-fill"
+                                             th:classappend="${' fill-' + #strings.toLowerCase(status.status.name())}"
+                                             th:style="|width:${status.count * 100.0 / view.totalWorkOrders}%|"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-calendar3 me-2 text-danger"></i>Bugünkü randevular</h2>
+                            <a class="link-quiet" th:href="@{/appointments}">Günlük plan</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!view.todayAppointments.isEmpty()}">
+                            <div class="today-list">
+                                <a class="today-item" th:each="appointment : ${view.todayAppointments}"
+                                   th:href="@{/appointments}">
+                                    <span class="today-time" th:text="${fmt.time(appointment.startsAt)}">09:00</span>
+                                    <span class="today-main">
+                                        <strong th:text="${appointment.customer.name}">Müşteri</strong>
+                                        <span th:text="${appointment.vehicle.plate}">34ABC123</span>
+                                    </span>
+                                    <span class="sd-badge"
+                                          th:classappend="${appointment.status.name() == 'GELDI' ? ' sd-badge-aktif' : (appointment.status.name() == 'IPTAL' ? ' sd-badge-iptal' : ' sd-badge-neutral')}"
+                                          th:text="${appointment.status.label}">Planlandı</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${view.todayAppointments.isEmpty()}">
+                            <i class="bi bi-calendar3"></i>
+                            <strong>Bugün randevu yok</strong>
+                            Günlük plana yeni randevu ekleyebilirsiniz.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-box-seam me-2 text-danger"></i>Teslimata hazır</h2>
+                            <span class="record-meta">Tamamlanan işler</span>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!view.readyForDelivery.isEmpty()}">
+                            <div class="today-list">
+                                <a class="today-item" th:each="order : ${view.readyForDelivery}"
+                                   th:href="@{/work-orders/{id}(id=${order.id})}">
+                                    <span class="today-main">
+                                        <strong th:text="${order.orderNo}">IS-0000</strong>
+                                        <span th:text="${order.customer.name + ' · ' + order.vehicle.plate}">Müşteri</span>
+                                    </span>
+                                    <span class="money fw-semibold" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${view.readyForDelivery.isEmpty()}">
+                            <i class="bi bi-box-seam"></i>
+                            <strong>Teslimata hazır araç yok</strong>
+                            Tamamlanan işler burada listelenir.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12" th:if="${!view.maintenanceReminders.isEmpty()}">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-bell me-2 text-danger"></i>Bakım zamanı gelenler</h2>
+                            <a class="link-quiet" th:href="@{/reports/maintenance}">Tüm liste</a>
+                        </div>
+                        <div class="sd-card-body p-0">
+                            <div class="today-list">
+                                <a class="today-item" th:each="reminder : ${view.maintenanceReminders}"
+                                   th:href="@{/vehicles/{id}(id=${reminder.vehicleId})}">
+                                    <span class="today-main">
+                                        <strong th:text="${reminder.customerName}">Müşteri</strong>
+                                        <span th:text="${reminder.plate + ' · ' + reminder.reason}">34ABC123</span>
+                                    </span>
+                                    <span class="record-meta" th:text="${reminder.daysSince} + ' gün'">180 gün</span>
+                                    <span class="btn btn-outline-secondary btn-sm">Araç</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-hourglass-split me-2 text-warning"></i>Devam eden işler</h2>
+                            <a class="link-quiet" th:href="@{/work-orders/board}">Tümünü gör</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!view.pendingWorkOrders.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>İş Emri</th>
+                                        <th>Müşteri / Araç</th>
+                                        <th>Durum</th>
+                                        <th class="text-end">Tutar</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="order : ${view.pendingWorkOrders}">
+                                        <td>
+                                            <a th:href="@{/work-orders/{id}(id=${order.id})}"
+                                               th:text="${order.orderNo}" class="fw-semibold">IS-000000</a>
+                                        </td>
+                                        <td>
+                                            <div th:text="${order.customer.name}">Müşteri</div>
+                                            <div class="record-meta" th:text="${order.vehicle.plate}">34ABC123</div>
+                                        </td>
+                                        <td>
+                                            <span class="sd-badge"
+                                                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                                  th:text="${order.status.label}">Bekliyor</span>
+                                        </td>
+                                        <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${view.pendingWorkOrders.isEmpty()}">
+                            <i class="bi bi-check2-circle"></i>
+                            <strong>Bekleyen iş yok</strong>
+                            Şu anda tamamlanmayı bekleyen bir iş emri bulunmuyor.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-person-exclamation me-2 text-danger"></i>En yüksek borçlu</h2>
+                            <a class="link-quiet" th:href="@{/reports/balances}">Bakiye raporu</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!view.topDebtors.isEmpty()}">
+                            <div class="list-group list-group-flush">
+                                <a class="list-group-item list-group-item-action px-4 py-3 d-flex justify-content-between align-items-center"
+                                   th:each="row : ${view.topDebtors}"
+                                   th:href="@{/accounts/customer/{id}(id=${row.customerId})}">
+                                    <span>
+                                        <strong class="d-block" th:text="${row.name}">Müşteri</strong>
+                                        <span class="record-meta" th:text="${row.phone}">Telefon</span>
+                                    </span>
+                                    <span class="money money-debt" th:text="${fmt.money(row.balance)}">0,00 ₺</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${view.topDebtors.isEmpty()}">
+                            <i class="bi bi-emoji-smile"></i>
+                            <strong>Borçlu müşteri yok</strong>
+                            Tüm cari hesaplar dengede veya alacaklı görünüyor.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card" th:if="${!view.completedToday.isEmpty()}">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-check2-circle me-2 text-success"></i>Bugün tamamlananlar</h2>
+                            <span class="record-meta">Yarın bu listede görünmez</span>
+                        </div>
+                        <div class="sd-card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>İş Emri</th>
+                                        <th>Müşteri / Araç</th>
+                                        <th>Kapanış</th>
+                                        <th class="text-end">Tutar</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="order : ${view.completedToday}">
+                                        <td>
+                                            <a th:href="@{/work-orders/{id}(id=${order.id})}"
+                                               th:text="${order.orderNo}" class="fw-semibold">IS-000000</a>
+                                        </td>
+                                        <td>
+                                            <div th:text="${order.customer.name}">Müşteri</div>
+                                            <div class="record-meta" th:text="${order.vehicle.plate}">34ABC123</div>
+                                        </td>
+                                        <td class="record-meta"
+                                            th:text="${fmt.dateTime(order.deliveredAt != null ? order.deliveredAt : order.closedAt)}">
+                                            01.01.2026
+                                        </td>
+                                        <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sd-card" th:if="${view.financialVisible}">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-journal-text me-2"></i>Son cari işlemler</h2>
+                            <a class="link-quiet" th:href="@{/accounts}">Cari hesaplar</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!view.recentTransactions.isEmpty()}">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item px-4 py-3" th:each="tx : ${view.recentTransactions}">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <div>
+                                            <div class="fw-semibold" th:text="${tx.customer.name}">Müşteri</div>
+                                            <div class="record-meta" th:text="${tx.description}">Açıklama</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="money"
+                                                 th:classappend="${tx.type.name() == 'BORC'} ? ' money-debt' : ' money-credit'"
+                                                 th:text="${(tx.type.name() == 'BORC' ? '+' : '−') + fmt.money(tx.amount)}">
+                                                0,00 ₺
+                                            </div>
+                                            <div class="record-meta" th:text="${fmt.date(tx.transactionDate)}">01.01.2026</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${view.recentTransactions.isEmpty()}">
+                            <i class="bi bi-journal"></i>
+                            <strong>Cari hareket yok</strong>
+                            Henüz borç veya tahsilat kaydı oluşmadı.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-lightning-charge me-2 text-danger"></i>Hızlı işlemler</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <div class="d-grid gap-2">
+                                <a class="btn btn-outline-secondary text-start" th:href="@{/customers/new}"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                                    <i class="bi bi-person-plus me-2"></i>Yeni müşteri kaydı
+                                </a>
+                                <a class="btn btn-outline-secondary text-start" th:href="@{/vehicles/new}"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                                    <i class="bi bi-car-front me-2"></i>Yeni araç kaydı
+                                </a>
+                                <a class="btn btn-outline-secondary text-start" th:href="@{/work-orders/new}"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                                    <i class="bi bi-clipboard-plus me-2"></i>Yeni iş emri
+                                </a>
+                                <a class="btn btn-outline-secondary text-start" th:href="@{/work-orders/board}">
+                                    <i class="bi bi-calendar2-check me-2"></i>Günlük iş panosu
+                                </a>
+                                <a class="btn btn-outline-secondary text-start" th:href="@{/appointments}"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                                    <i class="bi bi-calendar3 me-2"></i>Randevular
+                                </a>
+                                <a class="btn btn-outline-secondary text-start" th:href="@{/payments/new}"
+                                   sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+                                    <i class="bi bi-cash-coin me-2"></i>Tahsilat kaydet
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Bakiye Raporu')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Rapor</div>
+                    <h1 class="page-title">Müşteri Bakiyeleri</h1>
+                    <p class="page-subtitle">Bakiye, tüm cari hareketlerin borç − alacak toplamıdır.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/reports}">
+                        <i class="bi bi-arrow-left me-1"></i> Raporlar
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/reports/balances.csv}">
+                        <i class="bi bi-filetype-csv me-1"></i> CSV
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/reports/balances.xlsx}">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon red"><i class="bi bi-arrow-up-right"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(receivables)}">0,00 ₺</div>
+                    <div class="stat-label">Toplam alacak</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-arrow-down-left"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(credits)}">0,00 ₺</div>
+                    <div class="stat-label">Toplam alacaklı bakiye</div>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form class="filter-bar" method="get" th:action="@{/reports/balances}">
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="q">Müşteri ara</label>
+                            <input class="form-control" id="q" name="q" type="search" th:value="${q}"
+                                   placeholder="Müşteri adı">
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-search me-1"></i> Filtrele
+                            </button>
+                            <a class="btn btn-outline-secondary" th:href="@{/reports/balances}">Temizle</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2>Bakiye listesi</h2>
+                    <span class="record-meta" th:text="${rows.size()} + ' müşteri'">0 müşteri</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!rows.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Müşteri</th>
+                                <th>Telefon</th>
+                                <th class="text-end">Bakiye</th>
+                                <th>Durum</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="row : ${rows}">
+                                <td>
+                                    <a class="fw-semibold" th:href="@{/customers/{id}(id=${row.customerId})}"
+                                       th:text="${row.name}">Müşteri</a>
+                                </td>
+                                <td class="record-meta" th:text="${row.phone}">Telefon</td>
+                                <td class="text-end money"
+                                    th:classappend="${row.balance.signum() > 0 ? ' money-debt' : (row.balance.signum() < 0 ? ' money-credit' : '')}"
+                                    th:text="${fmt.money(row.balance)}">0,00 ₺</td>
+                                <td>
+                                    <span class="sd-badge"
+                                          th:classappend="${row.balance.signum() > 0 ? ' sd-badge-borclu' : (row.balance.signum() < 0 ? ' sd-badge-alacakli' : ' sd-badge-neutral')}"
+                                          th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Alacaklı' : 'Dengede')}">
+                                        Dengede
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a class="btn btn-outline-secondary btn-sm"
+                                       th:href="@{/accounts/customer/{id}(id=${row.customerId})}">Ekstre</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${rows.isEmpty()}">
+                    <i class="bi bi-people"></i>
+                    <strong>Müşteri bulunamadı</strong>
+                    Arama ölçütlerini değiştirin.
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

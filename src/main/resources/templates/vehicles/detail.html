@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Araç Detayı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('vehicles')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Araç</div>
+                    <h1 class="page-title">
+                        <span th:text="${vehicle.plate}">34ABC123</span>
+                        <span class="sd-badge ms-2"
+                              th:classappend="${vehicle.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                              th:text="${vehicle.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        <span th:text="${(vehicle.brand == null ? '' : vehicle.brand) + ' ' + (vehicle.model == null ? '' : vehicle.model)}">Marka Model</span>
+                        <span th:if="${vehicle.modelYear != null}" th:text="${' · ' + vehicle.modelYear}"></span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/vehicles}">
+                        <i class="bi bi-arrow-left me-1"></i> Liste
+                    </a>
+                    <a class="btn btn-outline-secondary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                       th:href="@{/vehicles/{id}/edit(id=${vehicle.id})}">
+                        <i class="bi bi-pencil me-1"></i> Düzenle
+                    </a>
+                    <a class="btn btn-primary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                       th:href="@{/work-orders/new(customerId=${vehicle.customer.id},vehicleId=${vehicle.id})}">
+                        <i class="bi bi-clipboard-plus me-1"></i> İş Emri Aç
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon blue"><i class="bi bi-speedometer2"></i></span>
+                    <div class="stat-value" th:text="${fmt.number(vehicle.currentMileage) + ' km'}">0 km</div>
+                    <div class="stat-label">Güncel kilometre</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-person"></i></span>
+                    <div class="stat-value" style="font-size:1.05rem;">
+                        <a th:href="@{/customers/{id}(id=${vehicle.customer.id})}"
+                           th:text="${vehicle.customer.name}">Müşteri</a>
+                    </div>
+                    <div class="stat-label">Araç sahibi</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-calendar-check"></i></span>
+                    <div class="stat-value" style="font-size:1.05rem;"
+                         th:text="${lastServiceDate == null ? 'Kayıt yok' : fmt.date(lastServiceDate.toLocalDate())}">—</div>
+                    <div class="stat-label">Son servis tarihi</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-clock-history"></i></span>
+                    <div class="stat-value" th:text="${workOrders.size()}">0</div>
+                    <div class="stat-label">Son iş emri</div>
+                    <div class="stat-hint">En yeni 10 kayıt</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-4">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Araç bilgileri</h2>
+                            <a class="link-quiet" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                               th:href="@{/vehicles/{id}/edit(id=${vehicle.id})}">Düzenle</a>
+                        </div>
+                        <div class="sd-card-body">
+                            <dl class="detail-list">
+                                <div>
+                                    <dt>Plaka</dt>
+                                    <dd class="money" th:text="${vehicle.plate}">34ABC123</dd>
+                                </div>
+                                <div>
+                                    <dt>Marka</dt>
+                                    <dd th:text="${vehicle.brand == null ? '—' : vehicle.brand}">—</dd>
+                                </div>
+                                <div>
+                                    <dt>Model</dt>
+                                    <dd th:text="${vehicle.model == null ? '—' : vehicle.model}">—</dd>
+                                </div>
+                                <div>
+                                    <dt>Model yılı</dt>
+                                    <dd th:text="${vehicle.modelYear == null ? '—' : vehicle.modelYear}">—</dd>
+                                </div>
+                                <div>
+                                    <dt>Şasi (VIN)</dt>
+                                    <dd class="money" th:text="${vehicle.vin == null ? '—' : vehicle.vin}">—</dd>
+                                </div>
+                                <div>
+                                    <dt>Kayıt tarihi</dt>
+                                    <dd th:text="${fmt.dateTime(vehicle.createdAt)}">01.01.2026</dd>
+                                </div>
+                                <div style="grid-column: 1 / -1;" th:if="${vehicle.note != null}">
+                                    <dt>Açıklama</dt>
+                                    <dd th:text="${vehicle.note}">Not</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="sd-card" th:if="${!ownershipHistory.isEmpty()}">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-arrow-left-right me-2"></i>Sahiplik geçmişi</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <div th:each="change : ${ownershipHistory}" class="mb-3 pb-3 border-bottom">
+                                <div class="fw-semibold">
+                                    <span th:text="${change.previousOwner}">Eski</span>
+                                    <i class="bi bi-arrow-right mx-1"></i>
+                                    <span th:text="${change.newOwner}">Yeni</span>
+                                </div>
+                                <div class="record-meta" th:text="${fmt.dateTime(change.changedAt)}">01.01.2026</div>
+                                <div class="record-meta" th:text="${change.note}">Not</div>
+                            </div>
+                            <p class="record-meta mb-0">Geçmiş iş emirleri, işlemin yapıldığı müşteri kaydında korunur.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-8">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-clock-history me-2"></i>Servis geçmişi</h2>
+                            <a class="link-quiet" th:href="@{/work-orders(vehicleId=${vehicle.id})}">Tüm iş emirleri</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!workOrders.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>İş Emri</th>
+                                        <th>Tarih</th>
+                                        <th>İşlem Yapılan Müşteri</th>
+                                        <th>Şikâyet</th>
+                                        <th>Durum</th>
+                                        <th class="text-end">Toplam</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="order : ${workOrders}">
+                                        <td>
+                                            <a class="fw-semibold" th:href="@{/work-orders/{id}(id=${order.id})}"
+                                               th:text="${order.orderNo}">IS-0000</a>
+                                        </td>
+                                        <td class="record-meta" th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</td>
+                                        <td>
+                                            <a th:href="@{/customers/{id}(id=${order.customer.id})}"
+                                               th:text="${order.customer.name}">Müşteri</a>
+                                        </td>
+                                        <td class="record-meta"
+                                            th:text="${order.complaint == null ? '—' : #strings.abbreviate(order.complaint, 60)}">—</td>
+                                        <td>
+                                            <span class="sd-badge"
+                                                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                                  th:text="${order.status.label}">Durum</span>
+                                        </td>
+                                        <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${workOrders.isEmpty()}">
+                            <i class="bi bi-wrench"></i>
+                            <strong>Servis geçmişi yok</strong>
+                            Bu araç için henüz iş emri oluşturulmamış.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

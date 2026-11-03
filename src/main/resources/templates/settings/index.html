@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Ayarlar')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('settings')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Yönetim</div>
+                    <h1 class="page-title">Ayarlar</h1>
+                    <p class="page-subtitle">Yedekleme durumu ve sistem denetim kayıtları.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/settings/audit}">
+                        <i class="bi bi-shield-check me-1"></i> Tüm Denetim Kayıtları
+                    </a>
+                </div>
+            </div>
+
+            <form th:action="@{/settings/business}" method="post" th:object="${businessForm}" data-submit-once>
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2><i class="bi bi-shop me-2"></i>İşletme bilgileri</h2>
+                        <span class="record-meta">İş emri, makbuz ve ekstre çıktılarında görünür</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="businessName">İşletme adı <span class="required">*</span></label>
+                                <input class="form-control" id="businessName" type="text" th:field="*{name}"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" maxlength="200" required>
+                                <div class="invalid-feedback" th:errors="*{name}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="businessPhone">Telefon</label>
+                                <input class="form-control" id="businessPhone" type="tel" th:field="*{phone}"
+                                       th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'" maxlength="30">
+                                <div class="invalid-feedback" th:errors="*{phone}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="businessEmail">E-posta</label>
+                                <input class="form-control" id="businessEmail" type="email" th:field="*{email}"
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" maxlength="150">
+                                <div class="invalid-feedback" th:errors="*{email}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="businessTaxOffice">Vergi dairesi</label>
+                                <input class="form-control" id="businessTaxOffice" type="text" th:field="*{taxOffice}"
+                                       th:classappend="${#fields.hasErrors('taxOffice')} ? 'is-invalid'" maxlength="100">
+                                <div class="invalid-feedback" th:errors="*{taxOffice}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="businessTaxNumber">Vergi / TC kimlik no</label>
+                                <input class="form-control" id="businessTaxNumber" type="text" th:field="*{taxNumber}"
+                                       th:classappend="${#fields.hasErrors('taxNumber')} ? 'is-invalid'" maxlength="20">
+                                <div class="invalid-feedback" th:errors="*{taxNumber}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="businessAddress">Adres</label>
+                                <textarea class="form-control" id="businessAddress" rows="2" th:field="*{address}"
+                                          th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'" maxlength="500"></textarea>
+                                <div class="invalid-feedback" th:errors="*{address}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end">
+                        <button class="btn btn-navy" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2 me-1"></i> İşletme Bilgilerini Kaydet
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-hdd-stack me-2"></i>PostgreSQL Yedekleme</h2>
+                            <span class="sd-badge"
+                                  th:classappend="${backupEnabled} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                  th:text="${backupEnabled ? 'Etkin' : 'Devre Dışı'}">Etkin</span>
+                        </div>
+                        <div class="sd-card-body">
+                            <dl class="detail-list">
+                                <div>
+                                    <dt>Yedek dizini</dt>
+                                    <dd class="money" th:text="${backupDirectory}">/app/backups</dd>
+                                </div>
+                                <div>
+                                    <dt>Saklama süresi</dt>
+                                    <dd th:text="${retentionDays} + ' gün'">14 gün</dd>
+                                </div>
+                                <div>
+                                    <dt>Zamanlama (cron)</dt>
+                                    <dd class="money" th:text="${backupCron}">0 0 2 * * *</dd>
+                                </div>
+                                <div>
+                                    <dt>Yöntem</dt>
+                                    <dd>pg_dump · custom format (.dump)</dd>
+                                </div>
+                            </dl>
+                            <form method="post" th:action="@{/settings/backup-directory}" class="mt-3"
+                                  data-submit-once>
+                                <input type="hidden" name="formToken" th:value="${formToken}">
+                                <label class="form-label" for="backupDirectoryInput">Yedek klasörü</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="backupDirectoryInput" name="directory"
+                                           type="text" th:value="${backupDirectory}"
+                                           placeholder="/app/backups" maxlength="500">
+                                    <button class="btn btn-outline-secondary" type="submit">Kaydet</button>
+                                </div>
+                                <div class="form-text">
+                                    Docker kullanıyorsanız bu yol container içindedir ve kalıcı olması için volume gerekir.
+                                    Bilgisayarınızda istediğiniz klasöre kaydetmek için <strong>Yedek Al ve İndir</strong>
+                                    düğmesini kullanın. Boş bırakılırsa sunucu varsayılanı kullanılır.
+                                </div>
+                            </form>
+                            <div class="alert alert-warning mt-3 mb-0" role="note">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                Otomatik yedek alınması, geri yüklemenin doğrulandığı anlamına gelmez.
+                                Geri yükleme testi <code>docs/BACKUP-RESTORE.md</code> adımlarıyla ayrıca yapılmalıdır.
+                            </div>
+                        </div>
+                        <div class="sd-card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span class="record-meta">Manuel yedek, veritabanı boyutuna göre birkaç saniye sürebilir.</span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <form th:action="@{/settings/backup}" method="post" data-submit-once>
+                                    <input type="hidden" name="formToken" th:value="${formToken}">
+                                    <button class="btn btn-outline-secondary" type="submit" th:disabled="${!backupEnabled}">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                                        <i class="bi bi-hdd-stack me-1"></i> Sunucuda Yedekle
+                                    </button>
+                                </form>
+                                <form th:action="@{/settings/backup}" method="post" data-submit-once>
+                                    <input type="hidden" name="formToken" th:value="${formToken}">
+                                    <input type="hidden" name="download" value="true">
+                                    <button class="btn btn-navy" type="submit" th:disabled="${!backupEnabled}">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                                        <i class="bi bi-download me-1"></i> Yedek Al ve İndir
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-clock-history me-2"></i>Yedekleme geçmişi</h2>
+                            <span class="record-meta" th:text="${backupRuns.size()} + ' kayıt'">0 kayıt</span>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!backupRuns.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>Başlangıç</th>
+                                        <th>Durum</th>
+                                        <th>Dosya</th>
+                                        <th class="text-end">Boyut</th>
+                                        <th>Tetikleyen</th>
+                                        <th class="text-end">İşlem</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="run : ${backupRuns}">
+                                        <td class="record-meta" th:text="${fmt.dateTime(run.startedAt)}">01.01.2026</td>
+                                        <td>
+                                            <span class="sd-badge"
+                                                  th:classappend="${run.status.name() == 'BASARILI' ? ' sd-badge-aktif' : (run.status.name() == 'BASARISIZ' ? ' sd-badge-iptal' : ' sd-badge-neutral')}"
+                                                  th:text="${run.status.label}">Başarılı</span>
+                                        </td>
+                                        <td class="record-meta" th:text="${run.fileName == null ? '—' : run.fileName}">—</td>
+                                        <td class="text-end record-meta" th:text="${fmt.fileSize(run.fileSizeBytes)}">—</td>
+                                        <td class="record-meta" th:text="${run.triggeredBy}">MANUEL</td>
+                                        <td class="text-end">
+                                            <a class="btn btn-outline-secondary btn-sm"
+                                               th:if="${run.status.name() == 'BASARILI'}"
+                                               th:href="@{/settings/backups/{id}/download(id=${run.id})}">İndir</a>
+                                            <span class="record-meta" th:if="${run.status.name() != 'BASARILI'}"
+                                                  th:text="${run.message}">—</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${backupRuns.isEmpty()}">
+                            <i class="bi bi-hdd"></i>
+                            <strong>Henüz yedek yok</strong>
+                            İlk yedeği “Şimdi Yedekle” düğmesiyle veya zamanlanmış görevle alabilirsiniz.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-5">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-shield-lock me-2"></i>Denetim kaydı (son 10)</h2>
+                            <a class="link-quiet" th:href="@{/settings/audit}">Tümü</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!recentAudit.isEmpty()}">
+                            <div class="list-group list-group-flush">
+                                <div class="list-group-item px-4 py-3" th:each="log : ${recentAudit}">
+                                    <div class="d-flex justify-content-between gap-2">
+                                        <div>
+                                            <div class="fw-semibold" th:text="${log.action}">LOGIN</div>
+                                            <div class="record-meta" th:text="${'@' + log.actorUsername}">@kullanici</div>
+                                        </div>
+                                        <div class="record-meta text-end" th:text="${fmt.dateTime(log.createdAt)}">01.01.2026</div>
+                                    </div>
+                                    <div class="record-meta mt-1" th:text="${log.details}">Detay</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${recentAudit.isEmpty()}">
+                            <i class="bi bi-shield"></i>
+                            <strong>Denetim kaydı yok</strong>
+                        </div>
+                    </div>
+
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-gear me-2"></i>Sistem</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <dl class="detail-list">
+                                <div>
+                                    <dt>Uygulama</dt>
+                                    <dd th:text="${businessForm.name} + ' · v1.0.0'">Toyota Plaza Öztoprak · v1.0.0</dd>
+                                </div>
+                                <div>
+                                    <dt>Para birimi</dt>
+                                    <dd>TRY (₺)</dd>
+                                </div>
+                                <div>
+                                    <dt>Saat dilimi</dt>
+                                    <dd>Europe/Istanbul</dd>
+                                </div>
+                                <div>
+                                    <dt>Veritabanı geçmişi</dt>
+                                    <dd>Flyway migration</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

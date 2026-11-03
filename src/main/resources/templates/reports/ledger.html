@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cari Hareket Raporu')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="d-none d-print-block mb-4" th:if="${statement != null}">
+                <h2 style="margin:0;" th:text="${business.name} + ' · Cari Hareket Dökümü'">
+                    Toyota Plaza Öztoprak · Cari Hareket Dökümü
+                </h2>
+                <div th:if="${business.phone != null}" th:text="${business.phone}">Telefon</div>
+                <div th:if="${business.address != null}" th:text="${business.address}">Adres</div>
+                <div class="mt-2" th:text="${statement.customer.name}">Müşteri</div>
+                <div th:text="${'Dönem: ' + fmt.date(statement.start) + ' - ' + fmt.date(statement.end)}"></div>
+            </div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Rapor</div>
+                    <h1 class="page-title">Cari Hareket Dökümü</h1>
+                    <p class="page-subtitle">Müşteri ve tarih aralığı seçerek borç/alacak hareketlerini inceleyin.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/reports}">
+                        <i class="bi bi-arrow-left me-1"></i> Raporlar
+                    </a>
+                    <button class="btn btn-outline-secondary" type="button" th:if="${statement != null}" data-print>
+                        <i class="bi bi-printer me-1"></i> Yazdır
+                    </button>
+                    <a class="btn btn-outline-secondary" th:if="${statement != null}"
+                       th:href="@{/reports/ledger.csv(customerId=${statement.customer.id},start=${statement.start},end=${statement.end})}">
+                        <i class="bi bi-filetype-csv me-1"></i> CSV
+                    </a>
+                    <a class="btn btn-outline-secondary" th:if="${statement != null}"
+                       th:href="@{/reports/ledger.xlsx(customerId=${statement.customer.id},start=${statement.start},end=${statement.end})}">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form class="filter-bar" method="get" th:action="@{/reports/ledger}">
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="customerId">Müşteri</label>
+                            <select class="form-select" id="customerId" name="customerId" required>
+                                <option value="">Müşteri seçin</option>
+                                <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}"
+                                        th:selected="${customerId != null and customerId == c.id}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="start">Başlangıç</label>
+                            <input class="form-control" id="start" name="start" type="date" th:value="${start}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="end">Bitiş</label>
+                            <input class="form-control" id="end" name="end" type="date" th:value="${end}">
+                        </div>
+                        <div th:replace="~{fragments/layout :: datePresets}"></div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-funnel me-1"></i> Uygula
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div th:if="${statement != null}">
+                <div class="summary-strip mb-4">
+                    <div class="summary-item">
+                        <span>Müşteri</span>
+                        <strong th:text="${statement.customer.name}">Müşteri</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Açılış</span>
+                        <strong class="money" th:text="${fmt.money(statement.openingBalance)}">0,00 ₺</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Borç</span>
+                        <strong class="money money-debt" th:text="${fmt.money(statement.totalDebit)}">0,00 ₺</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Alacak</span>
+                        <strong class="money money-credit" th:text="${fmt.money(statement.totalCredit)}">0,00 ₺</strong>
+                    </div>
+                    <div class="summary-item ms-auto">
+                        <span>Kapanış</span>
+                        <strong class="detail-value-lg money" th:text="${fmt.money(statement.closingBalance)}">0,00 ₺</strong>
+                    </div>
+                </div>
+
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Hareketler</h2>
+                        <span class="record-meta"
+                              th:text="${fmt.date(statement.start) + ' - ' + fmt.date(statement.end)}">Dönem</span>
+                    </div>
+                    <div class="sd-card-body p-0" th:if="${!statement.rows.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead>
+                                <tr>
+                                    <th>Tarih</th>
+                                    <th>Tür</th>
+                                    <th>Açıklama</th>
+                                    <th>İş Emri</th>
+                                    <th class="text-end">Borç</th>
+                                    <th class="text-end">Alacak</th>
+                                    <th class="text-end">Bakiye</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="row : ${statement.rows}">
+                                    <td class="record-meta" th:text="${fmt.date(row.date)}">01.01.2026</td>
+                                    <td>
+                                        <span class="sd-badge"
+                                              th:classappend="${row.type.name() == 'BORC'} ? ' sd-badge-borclu' : ' sd-badge-alacakli'"
+                                              th:text="${row.type.label}">Borç</span>
+                                        <span class="sd-badge sd-badge-neutral ms-1" th:if="${row.reversal}">Ters</span>
+                                    </td>
+                                    <td th:text="${row.description}">Açıklama</td>
+                                    <td>
+                                        <a th:if="${row.workOrderId != null}"
+                                           th:href="@{/work-orders/{id}(id=${row.workOrderId})}"
+                                           th:text="${row.workOrderNo}">IS-0000</a>
+                                        <span th:if="${row.workOrderId == null}">—</span>
+                                    </td>
+                                    <td class="text-end money money-debt"
+                                        th:text="${row.debit.signum() > 0 ? fmt.money(row.debit) : ''}"></td>
+                                    <td class="text-end money money-credit"
+                                        th:text="${row.credit.signum() > 0 ? fmt.money(row.credit) : ''}"></td>
+                                    <td class="text-end money fw-semibold" th:text="${fmt.money(row.balance)}">0,00 ₺</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="empty-state" th:if="${statement.rows.isEmpty()}">
+                        <i class="bi bi-journal"></i>
+                        <strong>Hareket yok</strong>
+                        Seçilen dönemde cari hareket bulunmuyor.
+                    </div>
+                </div>
+            </div>
+
+            <div class="sd-card" th:if="${statement == null}">
+                <div class="empty-state">
+                    <i class="bi bi-journal-text"></i>
+                    <strong>Müşteri seçin</strong>
+                    Cari hareket dökümünü görmek için yukarıdan bir müşteri seçin.
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

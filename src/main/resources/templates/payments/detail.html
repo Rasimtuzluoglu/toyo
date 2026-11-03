@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tahsilat Detayı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('payments')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Tahsilat</div>
+                    <h1 class="page-title">
+                        <span th:text="${payment.receiptNo}">TH-0000</span>
+                        <span class="sd-badge ms-2"
+                              th:classappend="${payment.status.name() == 'AKTIF'} ? ' sd-badge-aktif' : ' sd-badge-iptal'"
+                              th:text="${payment.status.label}">Aktif</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        <a th:href="@{/customers/{id}(id=${payment.customer.id})}"
+                           th:text="${payment.customer.name}">Müşteri</a>
+                        <span class="mx-1">·</span>
+                        <span th:text="${fmt.date(payment.paymentDate)}">01.01.2026</span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/payments}">
+                        <i class="bi bi-arrow-left me-1"></i> Liste
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/payments/{id}/receipt(id=${payment.id})}">
+                        <i class="bi bi-printer me-1"></i> Makbuz
+                    </a>
+                    <form th:if="${canCancel and payment.status.name() == 'AKTIF'}"
+                          th:action="@{/payments/{id}/cancel(id=${payment.id})}" method="post"
+                          data-confirm="Bu tahsilat iptal edilsin mi? Cari hesaba ters kayıt işlenecek."
+                          data-submit-once>
+                        <button class="btn btn-outline-danger" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-x-circle me-1"></i> Tahsilatı İptal Et
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-warning" th:if="${payment.status.name() == 'IPTAL'}" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                Bu tahsilat iptal edilmiştir. Cari hesaba ters borç kaydı işlenmiştir; orijinal kayıt silinmemiştir.
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(payment.amount)}">0,00 ₺</div>
+                    <div class="stat-label">Tahsilat tutarı</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-credit-card"></i></span>
+                    <div class="stat-value" style="font-size:1.15rem;" th:text="${payment.method.label}">Nakit</div>
+                    <div class="stat-label">Ödeme yöntemi</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon red"><i class="bi bi-exclamation-circle"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(openDebtTotal)}">0,00 ₺</div>
+                    <div class="stat-label">Kalan açık borç</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon blue"><i class="bi bi-journal-text"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(balance)}">0,00 ₺</div>
+                    <div class="stat-label">Güncel cari bakiye</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-8">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Borç dağıtımları</h2>
+                            <span class="record-meta" th:text="${allocations.size()} + ' dağıtım'">0 dağıtım</span>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!allocations.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>Borç Tarihi</th>
+                                        <th>Açıklama</th>
+                                        <th>Durum</th>
+                                        <th class="text-end">Dağıtılan</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="allocation : ${allocations}">
+                                        <td class="record-meta"
+                                            th:text="${fmt.date(allocation.transaction.transactionDate)}">01.01.2026</td>
+                                        <td th:text="${allocation.transaction.description}">Borç</td>
+                                        <td>
+                                            <span class="sd-badge"
+                                                  th:classappend="${allocation.cancelled} ? ' sd-badge-iptal' : ' sd-badge-aktif'"
+                                                  th:text="${allocation.cancelled ? 'İptal' : 'Aktif'}">Aktif</span>
+                                        </td>
+                                        <td class="text-end money" th:text="${fmt.money(allocation.amount)}">0,00 ₺</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${allocations.isEmpty()}">
+                            <i class="bi bi-wallet2"></i>
+                            <strong>Borca dağıtım yapılmadı</strong>
+                            Bu tahsilat avans/alacak olarak cari hesaba işlendi.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Makbuz bilgileri</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <dl class="detail-list">
+                                <div>
+                                    <dt>Makbuz no</dt>
+                                    <dd class="money" th:text="${payment.receiptNo}">TH-0000</dd>
+                                </div>
+                                <div>
+                                    <dt>Tarih</dt>
+                                    <dd th:text="${fmt.date(payment.paymentDate)}">01.01.2026</dd>
+                                </div>
+                                <div>
+                                    <dt>Kayıt zamanı</dt>
+                                    <dd th:text="${fmt.dateTime(payment.createdAt)}">01.01.2026</dd>
+                                </div>
+                                <div th:if="${payment.cancelledAt != null}">
+                                    <dt>İptal zamanı</dt>
+                                    <dd th:text="${fmt.dateTime(payment.cancelledAt)}">01.01.2026</dd>
+                                </div>
+                                <div style="grid-column: 1 / -1;" th:if="${payment.description != null}">
+                                    <dt>Açıklama</dt>
+                                    <dd th:text="${payment.description}">Açıklama</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="sd-card-footer">
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:href="@{/accounts/customer/{id}(id=${payment.customer.id})}">
+                                <i class="bi bi-journal-text me-1"></i> Müşteri cari ekstresi
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

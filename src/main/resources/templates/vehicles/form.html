@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Araç Kaydı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('vehicles')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Araç Kaydı</div>
+                    <h1 class="page-title" th:text="${vehicle == null ? 'Yeni Araç' : 'Araç Düzenle'}">Yeni Araç</h1>
+                    <p class="page-subtitle">Plaka normalize edilerek saklanır; aynı plaka ikinci kez kaydedilemez.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary"
+                       th:href="${vehicle == null} ? @{/vehicles} : @{/vehicles/{id}(id=${vehicle.id})}">
+                        <i class="bi bi-arrow-left me-1"></i> Geri
+                    </a>
+                </div>
+            </div>
+
+            <form method="post" th:object="${vehicleForm}"
+                  th:action="${vehicle == null} ? @{/vehicles} : @{/vehicles/{id}(id=${vehicle.id})}"
+                  data-submit-once>
+                <input type="hidden" name="formToken" th:if="${vehicle == null}" th:value="${formToken}">
+                <div th:replace="~{fragments/layout :: globalErrors}"></div>
+
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Araç bilgileri</h2>
+                        <span class="record-meta"><span class="text-danger">*</span> zorunlu alan</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="customerId">Araç sahibi <span class="required">*</span></label>
+                                <select class="form-select" id="customerId" th:field="*{customerId}"
+                                        th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid'">
+                                    <option value="">Müşteri seçin</option>
+                                    <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{customerId}"></div>
+                                <div class="form-text" th:if="${vehicle != null}">
+                                    Sahip değiştirildiğinde geçmiş iş emirleri eski müşteri kaydında korunur.
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="plate">Plaka <span class="required">*</span></label>
+                                <input class="form-control text-uppercase" id="plate" type="text" th:field="*{plate}"
+                                       th:classappend="${#fields.hasErrors('plate')} ? 'is-invalid'"
+                                       placeholder="34ABC123" maxlength="20" required>
+                                <div class="invalid-feedback" th:errors="*{plate}"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="modelYear">Model yılı</label>
+                                <input class="form-control" id="modelYear" type="number" th:field="*{modelYear}"
+                                       th:classappend="${#fields.hasErrors('modelYear')} ? 'is-invalid'"
+                                       min="1940" max="2100">
+                                <div class="invalid-feedback" th:errors="*{modelYear}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="brand">Marka</label>
+                                <input class="form-control" id="brand" type="text" th:field="*{brand}"
+                                       th:classappend="${#fields.hasErrors('brand')} ? 'is-invalid'" maxlength="50">
+                                <div class="invalid-feedback" th:errors="*{brand}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="model">Model</label>
+                                <input class="form-control" id="model" type="text" th:field="*{model}"
+                                       th:classappend="${#fields.hasErrors('model')} ? 'is-invalid'" maxlength="50">
+                                <div class="invalid-feedback" th:errors="*{model}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="vin">Şasi numarası (VIN)</label>
+                                <input class="form-control text-uppercase" id="vin" type="text" th:field="*{vin}"
+                                       th:classappend="${#fields.hasErrors('vin')} ? 'is-invalid'" maxlength="30">
+                                <div class="invalid-feedback" th:errors="*{vin}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="currentMileage">Güncel kilometre <span class="required">*</span></label>
+                                <div class="input-group">
+                                    <input class="form-control" id="currentMileage" type="number" th:field="*{currentMileage}"
+                                           th:classappend="${#fields.hasErrors('currentMileage')} ? 'is-invalid'"
+                                           min="0" required>
+                                    <span class="input-group-text">km</span>
+                                </div>
+                                <div class="invalid-feedback d-block" th:errors="*{currentMileage}"></div>
+                                <div class="form-text" th:if="${vehicle != null}">Kilometre geriye alınamaz.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="active">Durum</label>
+                                <div th:if="${vehicle == null or currentUser.role.name() == 'PATRON'}">
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" id="active" type="checkbox" th:field="*{active}">
+                                        <label class="form-check-label" for="active">Aktif araç</label>
+                                    </div>
+                                </div>
+                                <div th:unless="${vehicle == null or currentUser.role.name() == 'PATRON'}">
+                                    <input type="hidden" th:field="*{active}">
+                                    <div class="form-control-plaintext">
+                                        <span class="sd-badge"
+                                              th:classappend="${vehicle.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                              th:text="${vehicle.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="note">Açıklama</label>
+                                <textarea class="form-control" id="note" rows="3" th:field="*{note}"
+                                          th:classappend="${#fields.hasErrors('note')} ? 'is-invalid'" maxlength="1000"></textarea>
+                                <div class="invalid-feedback" th:errors="*{note}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary"
+                           th:href="${vehicle == null} ? @{/vehicles} : @{/vehicles/{id}(id=${vehicle.id})}">Vazgeç</a>
+                        <button class="btn btn-primary" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2 me-1"></i>
+                            <span th:text="${vehicle == null ? 'Aracı Kaydet' : 'Değişiklikleri Kaydet'}">Kaydet</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

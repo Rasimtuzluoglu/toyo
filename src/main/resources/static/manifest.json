@@ -1,0 +1,19 @@
+{
+  "name": "Toyota Plaza Öztoprak Servis Yönetimi",
+  "short_name": "Toyota Plaza",
+  "description": "Müşteri, araç, iş emri, cari hesap ve tahsilat yönetimi",
+  "lang": "tr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#12253d",
+  "icons": [
+    {
+      "src": "/images/toyota.png",
+      "sizes": "583x428",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

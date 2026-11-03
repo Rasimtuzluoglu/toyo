@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('İş Emri Yazdır')}"></head>
+<body>
+<div class="print-toolbar no-print">
+    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}(id=${order.id})}">
+        <i class="bi bi-arrow-left me-1"></i> İş Emrine Dön
+    </a>
+    <button class="btn btn-navy" type="button" data-print>
+        <i class="bi bi-printer me-1"></i> Yazdır
+    </button>
+    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}/pdf(id=${order.id})}">
+        <i class="bi bi-filetype-pdf me-1"></i> PDF İndir
+    </a>
+</div>
+
+<div class="print-page">
+    <div class="print-header">
+        <div>
+            <img class="print-logo" th:src="@{/images/toyota.png}" alt="Toyota">
+            <h1 th:text="${business.name}">Toyota Plaza Öztoprak</h1>
+            <div class="record-meta" th:text="${business.phone == null ? 'Yetkili Servis ve Bakım' : business.phone}">
+                0555 000 00 00
+            </div>
+            <div class="record-meta" th:if="${business.address != null}" th:text="${business.address}">Adres</div>
+            <div class="record-meta" th:if="${business.taxNumber != null}"
+                 th:text="${'VKN: ' + business.taxNumber + (business.taxOffice == null ? '' : ' · ' + business.taxOffice)}">
+                VKN
+            </div>
+        </div>
+        <div class="print-meta">
+            <strong>İŞ EMRİ</strong><br>
+            <span th:text="${order.orderNo}">IS-0000</span><br>
+            <span th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</span><br>
+            <span class="sd-badge"
+                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                  th:text="${order.status.label}">Durum</span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-6">
+            <div class="form-section-title">Müşteri</div>
+            <strong th:text="${order.customer.name}">Müşteri</strong><br>
+            <span th:text="${order.customer.phone}">Telefon</span><br>
+            <span th:if="${order.customer.address != null}" th:text="${order.customer.address}">Adres</span>
+        </div>
+        <div class="col-6">
+            <div class="form-section-title">Araç</div>
+            <strong th:text="${order.vehicle.plate}">34ABC123</strong><br>
+            <span th:text="${(order.vehicle.brand == null ? '' : order.vehicle.brand) + ' ' + (order.vehicle.model == null ? '' : order.vehicle.model)}">Marka Model</span><br>
+            <span th:if="${order.mileage != null}" th:text="${fmt.number(order.mileage) + ' km'}">0 km</span>
+        </div>
+    </div>
+
+    <div class="mb-4" th:if="${order.complaint != null}">
+        <div class="form-section-title">Müşteri şikâyeti</div>
+        <div th:text="${order.complaint}">—</div>
+    </div>
+    <div class="mb-4" th:if="${order.diagnosis != null}">
+        <div class="form-section-title">Tespit edilen arıza</div>
+        <div th:text="${order.diagnosis}">—</div>
+    </div>
+    <div class="mb-4" th:if="${order.workDone != null}">
+        <div class="form-section-title">Yapılan işlemler</div>
+        <div th:text="${order.workDone}">—</div>
+    </div>
+
+    <table class="print-table">
+        <thead>
+        <tr>
+            <th>Tip</th>
+            <th>Açıklama</th>
+            <th class="text-end">Miktar</th>
+            <th class="text-end">Birim Fiyat</th>
+            <th class="text-end">Tutar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.type.label}">Hizmet</td>
+            <td th:text="${item.description}">Açıklama</td>
+            <td class="text-end" th:text="${fmt.number(item.quantity)}">1</td>
+            <td class="text-end" th:text="${fmt.money(item.unitPrice)}">0,00 ₺</td>
+            <td class="text-end" th:text="${fmt.money(item.lineTotal)}">0,00 ₺</td>
+        </tr>
+        <tr th:if="${items.isEmpty()}">
+            <td colspan="5" class="text-center text-muted">Kalem girilmemiş.</td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+            <td colspan="4" class="text-end">İşçilik</td>
+            <td class="text-end" th:text="${fmt.money(order.laborTotal)}">0,00 ₺</td>
+        </tr>
+        <tr>
+            <td colspan="4" class="text-end">Parça</td>
+            <td class="text-end" th:text="${fmt.money(order.partsTotal)}">0,00 ₺</td>
+        </tr>
+        <tr>
+            <td colspan="4" class="text-end"><strong>GENEL TOPLAM</strong></td>
+            <td class="text-end"><strong th:text="${fmt.money(order.totalAmount)}">0,00 ₺</strong></td>
+        </tr>
+        </tfoot>
+    </table>
+
+    <div class="print-footer">
+        <div>
+            <div class="signature">Teslim eden</div>
+        </div>
+        <div>
+            <div class="signature">Müşteri onayı</div>
+        </div>
+    </div>
+    <p class="record-meta mt-4">
+        Bu belge <span th:text="${business.name}">Toyota Plaza Öztoprak</span> tarafından
+        <span th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</span>
+        tarihli iş emri için üretilmiştir. Ödeme ve cari hesap bilgileri işletme kayıtlarında tutulur.
+    </p>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

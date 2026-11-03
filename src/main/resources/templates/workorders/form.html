@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('İş Emri Kaydı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('workorders')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">İş Emri</div>
+                    <h1 class="page-title" th:text="${order == null ? 'Yeni İş Emri' : 'İş Emrini Düzenle'}">Yeni İş Emri</h1>
+                    <p class="page-subtitle">
+                        Müşteri ve araç eşleşmesi sunucu tarafında doğrulanır. Kalemleri kayıttan sonra ekleyebilirsiniz.
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary"
+                       th:href="${order == null} ? @{/work-orders} : @{/work-orders/{id}(id=${order.id})}">
+                        <i class="bi bi-arrow-left me-1"></i> Geri
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card mb-4 quick-start-card" th:if="${order == null}">
+                <div class="sd-card-header">
+                    <h2><i class="bi bi-lightning-charge me-2 text-warning"></i>Plaka ile hızlı başlat</h2>
+                    <span class="record-meta">Kayıtlı plaka ise müşteri ve araç otomatik seçilir</span>
+                </div>
+                <div class="sd-card-body">
+                    <form method="get" th:action="@{/work-orders/new}" class="row g-2 align-items-end">
+                        <div class="col-sm-6 col-md-4">
+                            <label class="form-label" for="quickPlateSearch">Plaka</label>
+                            <input class="form-control" id="quickPlateSearch" name="plate" type="text"
+                                   th:value="${plateQuery}" placeholder="34 ABC 123" maxlength="20"
+                                   autocomplete="off">
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <button class="btn btn-navy w-100" type="submit">
+                                <i class="bi bi-search me-1"></i> Plakayı Ara
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-success d-flex align-items-start gap-2 mt-3 mb-0"
+                         th:if="${plateMatch != null}">
+                        <i class="bi bi-check-circle-fill mt-1"></i>
+                        <div>
+                            <strong th:text="${plateMatch.plate}">34 ABC 123</strong>
+                            <span th:text="${' · ' + plateMatch.customer.name}">Müşteri</span>
+                            bulundu. Aşağıdaki iş emri formu bu müşteri ve araçla dolduruldu.
+                        </div>
+                    </div>
+
+                    <div th:if="${plateNotFound != null}" class="mt-3">
+                        <div class="alert alert-warning d-flex align-items-start gap-2">
+                            <i class="bi bi-info-circle-fill mt-1"></i>
+                            <div>
+                                <strong th:text="${plateNotFound}">34 ABC 123</strong> plakası kayıtlı değil.
+                                Aşağıdaki alanları doldurarak müşteri, araç ve iş emrini tek adımda oluşturabilirsiniz.
+                            </div>
+                        </div>
+
+                        <form method="post" th:action="@{/work-orders/quick}" th:object="${quickForm}"
+                              data-submit-once>
+                            <input type="hidden" name="formToken" th:value="${formToken}">
+                            <input type="hidden" th:field="*{plate}">
+                            <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="quickCustomerName">Müşteri adı <span class="required">*</span></label>
+                                    <input class="form-control" id="quickCustomerName" type="text"
+                                           th:field="*{customerName}"
+                                           th:classappend="${#fields.hasErrors('customerName')} ? 'is-invalid'"
+                                           maxlength="200" placeholder="Ad soyad veya firma unvanı">
+                                    <div class="invalid-feedback" th:errors="*{customerName}"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" for="quickPhone">Telefon <span class="required">*</span></label>
+                                    <input class="form-control" id="quickPhone" type="tel" th:field="*{phone}"
+                                           th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"
+                                           maxlength="30" placeholder="05xx xxx xx xx">
+                                    <div class="invalid-feedback" th:errors="*{phone}"></div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="quickBrand">Marka</label>
+                                    <input class="form-control" id="quickBrand" type="text"
+                                           th:field="*{brand}" maxlength="50" placeholder="Toyota">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="quickModel">Model</label>
+                                    <input class="form-control" id="quickModel" type="text"
+                                           th:field="*{model}" maxlength="50" placeholder="Corolla">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label" for="quickMileage">Kilometre</label>
+                                    <input class="form-control" id="quickMileage" type="number" min="0"
+                                           th:field="*{mileage}" placeholder="0">
+                                    <div class="invalid-feedback d-block" th:errors="*{mileage}"></div>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" type="submit">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                                        <i class="bi bi-check2-circle me-1"></i> Hızlı İş Emri Oluştur
+                                    </button>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label" for="quickComplaint">Müşteri şikâyeti</label>
+                                    <textarea class="form-control" id="quickComplaint" rows="2"
+                                              th:field="*{complaint}" maxlength="2000"
+                                              placeholder="Araç hangi şikâyetle geldi?"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" th:object="${workOrderForm}"
+                  th:action="${order == null} ? @{/work-orders} : @{/work-orders/{id}(id=${order.id})}"
+                  data-submit-once>
+                <input type="hidden" name="formToken" th:if="${order == null}" th:value="${formToken}">
+                <div th:replace="~{fragments/layout :: globalErrors}"></div>
+
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Temel bilgiler</h2>
+                        <span class="record-meta"><span class="text-danger">*</span> zorunlu alan</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="customerSelect">Müşteri <span class="required">*</span></label>
+                                <select class="form-select" id="customerSelect" th:field="*{customerId}"
+                                        th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid'">
+                                    <option value="">Müşteri seçin</option>
+                                    <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{customerId}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vehicleSelect">Araç <span class="required">*</span></label>
+                                <select class="form-select" id="vehicleSelect" th:field="*{vehicleId}"
+                                        th:classappend="${#fields.hasErrors('vehicleId')} ? 'is-invalid'">
+                                    <option value="" data-empty>Önce müşteri seçin</option>
+                                    <option th:each="v : ${vehicles}" th:value="${v.id}"
+                                            th:attr="data-customer=${v.customer.id},data-mileage=${v.currentMileage}"
+                                            th:text="${v.plate + ' · ' + (v.brand == null ? '' : v.brand) + ' ' + (v.model == null ? '' : v.model)}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{vehicleId}"></div>
+                                <div class="form-text">Liste seçilen müşteriye göre filtrelenir.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="assignedUserId">Sorumlu çalışan</label>
+                                <select class="form-select" id="assignedUserId" th:field="*{assignedUserId}">
+                                    <option value="">Atanmadı</option>
+                                    <option th:each="u : ${users}" th:value="${u.id}"
+                                            th:text="${u.fullName + ' · ' + u.role.label}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="openedAt">Açılış tarihi <span class="required">*</span></label>
+                                <input class="form-control" id="openedAt" type="datetime-local" th:field="*{openedAt}"
+                                       th:classappend="${#fields.hasErrors('openedAt')} ? 'is-invalid'" required>
+                                <div class="invalid-feedback" th:errors="*{openedAt}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="mileage">Kilometre</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="mileage" type="number" th:field="*{mileage}"
+                                           th:classappend="${#fields.hasErrors('mileage')} ? 'is-invalid'"
+                                           min="0" placeholder="Araç kilometresi">
+                                    <span class="input-group-text">km</span>
+                                </div>
+                                <div class="invalid-feedback d-block" th:errors="*{mileage}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="complaint">Müşteri şikâyeti</label>
+                                <textarea class="form-control" id="complaint" rows="3" th:field="*{complaint}"
+                                          th:classappend="${#fields.hasErrors('complaint')} ? 'is-invalid'"
+                                          maxlength="2000" placeholder="Araç hangi şikâyetle geldi?"></textarea>
+                                <div class="invalid-feedback" th:errors="*{complaint}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="diagnosis">Tespit edilen arıza</label>
+                                <textarea class="form-control" id="diagnosis" rows="3" th:field="*{diagnosis}"
+                                          th:classappend="${#fields.hasErrors('diagnosis')} ? 'is-invalid'"
+                                          maxlength="2000"></textarea>
+                                <div class="invalid-feedback" th:errors="*{diagnosis}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="workDone">Yapılan işlemler</label>
+                                <textarea class="form-control" id="workDone" rows="3" th:field="*{workDone}"
+                                          th:classappend="${#fields.hasErrors('workDone')} ? 'is-invalid'"
+                                          maxlength="2000"></textarea>
+                                <div class="invalid-feedback" th:errors="*{workDone}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="notes">İç not</label>
+                                <textarea class="form-control" id="notes" rows="2" th:field="*{notes}"
+                                          th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid'"
+                                          maxlength="2000"></textarea>
+                                <div class="invalid-feedback" th:errors="*{notes}"></div>
+                            </div>
+                        </div>
+                        <div class="toast-inline mt-3" th:if="${order != null and order.debited}">
+                            <i class="bi bi-lock me-1"></i>
+                            Bu iş emri borçlandırılmıştır. Müşteri ve araç değiştirilemez; finansal kalemler kilitlidir.
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary"
+                           th:href="${order == null} ? @{/work-orders} : @{/work-orders/{id}(id=${order.id})}">Vazgeç</a>
+                        <button class="btn btn-primary" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2 me-1"></i>
+                            <span th:text="${order == null ? 'İş Emrini Kaydet' : 'Değişiklikleri Kaydet'}">Kaydet</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

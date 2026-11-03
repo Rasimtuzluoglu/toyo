@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Müşteriler')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('customers')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Kayıtlar</div>
+                    <h1 class="page-title">Müşteriler</h1>
+                    <p class="page-subtitle">Bireysel ve firma müşterilerini arayın, yönetin ve cari hesaplarına ulaşın.</p>
+                </div>
+                <div class="page-actions">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-1"></i> Dışa Aktar
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/customers/export.xlsx(q=${q},active=${active},type=${type})}">
+                                    <i class="bi bi-file-earmark-excel me-2 text-success"></i> Excel (.xlsx)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/customers/export.csv(q=${q},active=${active},type=${type})}">
+                                    <i class="bi bi-filetype-csv me-2"></i> CSV
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/customers/new}"
+                       sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                        <i class="bi bi-person-plus me-1"></i> Yeni Müşteri
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form class="filter-bar" method="get" th:action="@{/customers}">
+                        <div>
+                            <label class="form-label" for="q">Ara</label>
+                            <input class="form-control" id="q" name="q" type="search" th:value="${q}"
+                                   placeholder="Ad, firma veya telefon">
+                        </div>
+                        <div>
+                            <label class="form-label" for="type">Müşteri türü</label>
+                            <select class="form-select" id="type" name="type">
+                                <option value="" th:selected="${type == ''}">Tümü</option>
+                                <option th:each="t : ${types}" th:value="${t.name()}"
+                                        th:text="${t.label}" th:selected="${type == t.name()}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="active">Durum</label>
+                            <select class="form-select" id="active" name="active">
+                                <option value="" th:selected="${active == ''}">Tümü</option>
+                                <option value="true" th:selected="${active == 'true'}">Aktif</option>
+                                <option value="false" th:selected="${active == 'false'}">Pasif</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-search me-1"></i> Filtrele
+                            </button>
+                            <a class="btn btn-outline-secondary" th:href="@{/customers}">Temizle</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2>Müşteri listesi</h2>
+                    <span class="record-meta" th:text="${customers.totalElements} + ' kayıt'">0 kayıt</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!customers.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Müşteri</th>
+                                <th>Tür</th>
+                                <th>Telefon</th>
+                                <th>E-posta</th>
+                                <th>Durum</th>
+                                <th>Kayıt Tarihi</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="customer : ${customers.content}">
+                                <td>
+                                    <a class="fw-semibold" th:href="@{/customers/{id}(id=${customer.id})}">
+                                        <span class="table-avatar"
+                                              th:text="${#strings.toUpperCase(#strings.substring(customer.name, 0, 1))}">A</span>
+                                        <span th:text="${customer.name}">Müşteri</span>
+                                    </a>
+                                    <div class="record-meta" th:if="${customer.taxNumber != null}"
+                                         th:text="${'VKN: ' + customer.taxNumber}"></div>
+                                </td>
+                                <td>
+                                    <span class="sd-badge sd-badge-neutral" th:text="${customer.type.label}">Bireysel</span>
+                                </td>
+                                <td class="money" th:text="${customer.phone}">0555</td>
+                                <td class="record-meta" th:text="${customer.email == null ? '—' : customer.email}">—</td>
+                                <td>
+                                    <span class="sd-badge"
+                                          th:classappend="${customer.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                          th:text="${customer.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                </td>
+                                <td class="record-meta" th:text="${fmt.dateTime(customer.createdAt)}">01.01.2026</td>
+                                <td class="text-end">
+                                    <div class="action-row justify-content-end">
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/customers/{id}(id=${customer.id})}">Detay</a>
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                           th:href="@{/customers/{id}/edit(id=${customer.id})}">Düzenle</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${customers.isEmpty()}">
+                    <i class="bi bi-people"></i>
+                    <strong>Müşteri bulunamadı</strong>
+                    Arama ölçütlerini değiştirin veya yeni bir müşteri kaydı oluşturun.
+                </div>
+                <div class="sd-card-footer d-flex justify-content-between align-items-center"
+                     th:if="${customers.totalPages > 1}">
+                    <span class="record-meta"
+                          th:text="${'Sayfa ' + (customers.number + 1) + ' / ' + customers.totalPages}">Sayfa 1 / 1</span>
+                    <nav aria-label="Müşteri sayfaları">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item" th:classappend="${customers.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/customers(page=${customers.number - 1},q=${q},active=${active},type=${type})}">Önceki</a>
+                            </li>
+                            <li class="page-item" th:classappend="${customers.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/customers(page=${customers.number + 1},q=${q},active=${active},type=${type})}">Sonraki</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

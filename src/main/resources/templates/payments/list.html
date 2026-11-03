@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tahsilatlar')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('payments')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Finans</div>
+                    <h1 class="page-title">Tahsilatlar</h1>
+                    <p class="page-subtitle">Nakit, banka ve kart tahsilatlarını görüntüleyin; borç dağıtımlarını izleyin.</p>
+                </div>
+                <div class="page-actions">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-1"></i> Dışa Aktar
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/payments/export.xlsx(customerId=${customerId},method=${method},status=${status},start=${start},end=${end},q=${q})}">
+                                    <i class="bi bi-file-earmark-excel me-2 text-success"></i> Excel (.xlsx)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/payments/export.csv(customerId=${customerId},method=${method},status=${status},start=${start},end=${end},q=${q})}">
+                                    <i class="bi bi-filetype-csv me-2"></i> CSV
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/payments/new}">
+                        <i class="bi bi-plus-lg me-1"></i> Yeni Tahsilat
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form class="filter-bar" method="get" th:action="@{/payments}">
+                        <div>
+                            <label class="form-label" for="q">Ara</label>
+                            <input class="form-control" id="q" name="q" type="search" th:value="${q}"
+                                   placeholder="Makbuz no veya müşteri">
+                        </div>
+                        <div>
+                            <label class="form-label" for="customerId">Müşteri</label>
+                            <select class="form-select" id="customerId" name="customerId">
+                                <option value="">Tümü</option>
+                                <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}"
+                                        th:selected="${customerId != null and customerId == c.id}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="method">Yöntem</label>
+                            <select class="form-select" id="method" name="method">
+                                <option value="" th:selected="${method == ''}">Tümü</option>
+                                <option th:each="m : ${methods}" th:value="${m.name()}" th:text="${m.label}"
+                                        th:selected="${method == m.name()}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="status">Durum</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="" th:selected="${status == ''}">Tümü</option>
+                                <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.label}"
+                                        th:selected="${status == s.name()}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="start">Başlangıç</label>
+                            <input class="form-control" id="start" name="start" type="date" th:value="${start}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="end">Bitiş</label>
+                            <input class="form-control" id="end" name="end" type="date" th:value="${end}">
+                        </div>
+                        <div th:replace="~{fragments/layout :: datePresets}"></div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-search me-1"></i> Filtrele
+                            </button>
+                            <a class="btn btn-outline-secondary" th:href="@{/payments}">Temizle</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2>Tahsilat listesi</h2>
+                    <span class="record-meta" th:text="${payments.totalElements} + ' kayıt'">0 kayıt</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!payments.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Makbuz</th>
+                                <th>Müşteri</th>
+                                <th>Tarih</th>
+                                <th>Yöntem</th>
+                                <th>Durum</th>
+                                <th class="text-end">Tutar</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="payment : ${payments.content}">
+                                <td>
+                                    <a class="fw-semibold" th:href="@{/payments/{id}(id=${payment.id})}"
+                                       th:text="${payment.receiptNo}">TH-0000</a>
+                                </td>
+                                <td>
+                                    <a th:href="@{/customers/{id}(id=${payment.customer.id})}"
+                                       th:text="${payment.customer.name}">Müşteri</a>
+                                </td>
+                                <td class="record-meta" th:text="${fmt.date(payment.paymentDate)}">01.01.2026</td>
+                                <td>
+                                    <span class="sd-badge sd-badge-neutral" th:text="${payment.method.label}">Nakit</span>
+                                </td>
+                                <td>
+                                    <span class="sd-badge"
+                                          th:classappend="${payment.status.name() == 'AKTIF'} ? ' sd-badge-aktif' : ' sd-badge-iptal'"
+                                          th:text="${payment.status.label}">Aktif</span>
+                                </td>
+                                <td class="text-end money fw-semibold" th:text="${fmt.money(payment.amount)}">0,00 ₺</td>
+                                <td class="text-end">
+                                    <div class="action-row justify-content-end">
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/payments/{id}(id=${payment.id})}">Detay</a>
+                                        <a class="btn btn-outline-secondary btn-sm btn-icon"
+                                           th:href="@{/payments/{id}/receipt(id=${payment.id})}"
+                                           title="Makbuz" aria-label="Makbuzu yazdır">
+                                            <i class="bi bi-receipt"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${payments.isEmpty()}">
+                    <i class="bi bi-cash-coin"></i>
+                    <strong>Tahsilat bulunamadı</strong>
+                    Filtreleri değiştirin veya yeni bir tahsilat kaydedin.
+                </div>
+                <div class="sd-card-footer d-flex justify-content-between align-items-center"
+                     th:if="${payments.totalPages > 1}">
+                    <span class="record-meta"
+                          th:text="${'Sayfa ' + (payments.number + 1) + ' / ' + payments.totalPages}">Sayfa 1 / 1</span>
+                    <nav aria-label="Tahsilat sayfaları">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item" th:classappend="${payments.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/payments(page=${payments.number - 1},q=${q},customerId=${customerId},method=${method},status=${status},start=${start},end=${end})}">Önceki</a>
+                            </li>
+                            <li class="page-item" th:classappend="${payments.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/payments(page=${payments.number + 1},q=${q},customerId=${customerId},method=${method},status=${status},start=${start},end=${end})}">Sonraki</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

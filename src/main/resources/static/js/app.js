@@ -1,0 +1,711 @@
+(function () {
+    'use strict';
+
+    function onReady(fn) {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            fn();
+        }
+    }
+
+    function initPaymentAllocator() {
+        var form = document.querySelector('[data-payment-form]');
+        if (!form) {
+            return;
+        }
+        var amountInput = form.querySelector('[data-payment-amount]');
+        var rows = Array.prototype.slice.call(form.querySelectorAll('[data-allocation-amount]'));
+        var summary = document.getElementById('allocationSummary');
+        var money = function (value) {
+            return new Intl.NumberFormat('tr-TR', {style: 'currency', currency: 'TRY'}).format(value || 0);
+        };
+        var parseAmount = function (value) {
+            if (!value) {
+                return 0;
+            }
+            var normalized = String(value).trim();
+            if (normalized.indexOf(',') >= 0) {
+                normalized = normalized.replace(/\./g, '').replace(',', '.');
+            }
+            var parsed = parseFloat(normalized);
+            return isNaN(parsed) ? 0 : parsed;
+        };
+        var updateSummary = function () {
+            if (!summary) {
+                return;
+            }
+            var allocated = rows.reduce(function (total, input) {
+                return total + parseAmount(input.value);
+            }, 0);
+            var amount = parseAmount(amountInput ? amountInput.value : 0);
+            if (amount <= 0 && allocated <= 0) {
+                summary.className = 'toast-inline mt-3';
+                summary.textContent = 'Tahsilat tutarını girin; dağıtımı isterseniz elle veya “Kalanı Dağıt” ile yapın.';
+                return;
+            }
+            var diff = Math.round((amount - allocated) * 100) / 100;
+            if (diff > 0.004) {
+                summary.className = 'toast-inline mt-3';
+                summary.textContent = money(allocated) + ' dağıtıldı; ' + money(diff)
+                    + ' avans olarak cari hesaba işlenecek.';
+            } else if (diff < -0.004) {
+                summary.className = 'alert alert-danger mt-3 mb-0 py-2';
+                summary.textContent = money(allocated) + ' dağıtım, tahsilat tutarından '
+                    + money(Math.abs(diff)) + ' fazla.';
+            } else {
+                summary.className = 'alert alert-success mt-3 mb-0 py-2';
+                summary.textContent = 'Tahsilatın tamamı borçlara dağıtıldı.';
+            }
+        };
+        var allocate = function (useOpenDebtTotal) {
+            var amount = useOpenDebtTotal
+                ? parseFloat(form.getAttribute('data-open-debt-total') || '0')
+                : parseAmount(amountInput ? amountInput.value : 0);
+            if (!amount || amount <= 0) {
+                if (amountInput) {
+                    amountInput.focus();
+                }
+                return;
+            }
+            if (useOpenDebtTotal && amountInput) {
+                amountInput.value = amount.toFixed(2);
+            }
+            var remaining = amount;
+            rows.forEach(function (input) {
+                var cap = parseFloat(input.getAttribute('data-remaining') || '0');
+                var value = Math.max(0, Math.min(remaining, cap));
+                input.value = value > 0 ? value.toFixed(2) : '';
+                remaining = Math.round((remaining - value) * 100) / 100;
+            });
+            updateSummary();
+        };
+        if (amountInput) {
+            amountInput.addEventListener('input', updateSummary);
+        }
+        rows.forEach(function (input) {
+            input.addEventListener('input', updateSummary);
+        });
+        form.querySelectorAll('[data-allocate-remaining]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                allocate(false);
+            });
+        });
+        form.querySelectorAll('[data-fill-open-debt]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                allocate(true);
+            });
+        });
+        updateSummary();
+    }
+
+    onReady(function () {
+        var body = document.body;
+        var toggle = document.querySelector('[data-sidebar-toggle]');
+        var overlay = document.querySelector('[data-sidebar-overlay]');
+
+        if (toggle) {
+            toggle.addEventListener('click', function () {
+                body.classList.toggle('sidebar-open');
+            });
+        }
+        if (overlay) {
+            overlay.addEventListener('click', function () {
+                body.classList.remove('sidebar-open');
+            });
+        }
+
+        document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var targetId = button.getAttribute('data-password-toggle');
+                var input = document.getElementById(targetId);
+                if (!input) {
+                    return;
+                }
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                button.setAttribute('aria-label', show ? 'Parolayı gizle' : 'Parolayı göster');
+                var icon = button.querySelector('i');
+                if (icon) {
+                    icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+                }
+            });
+        });
+
+        document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                var message = form.getAttribute('data-confirm');
+                if (!window.confirm(message)) {
+                    event.preventDefault();
+                }
+            });
+        });
+
+        document.querySelectorAll('form[data-submit-once]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (event.defaultPrevented) {
+                    return;
+                }
+                var button = form.querySelector('button[type="submit"]');
+                if (button && !form.dataset.submitting) {
+                    form.dataset.submitting = 'true';
+                    button.disabled = true;
+                    button.classList.add('disabled');
+                    var spinner = button.querySelector('.spinner-border');
+                    if (spinner) {
+                        spinner.classList.remove('d-none');
+                    }
+                }
+            });
+        });
+
+        var customerSelect = document.getElementById('customerSelect');
+        var vehicleSelect = document.getElementById('vehicleSelect');
+        if (customerSelect && vehicleSelect) {
+            var filter = function () {
+                var customerId = customerSelect.value;
+                var selected = vehicleSelect.value;
+                var visible = 0;
+                Array.prototype.forEach.call(vehicleSelect.options, function (option) {
+                    if (!option.value) {
+                        return;
+                    }
+                    var matches = !customerId || option.getAttribute('data-customer') === customerId;
+                    option.hidden = !matches;
+                    option.disabled = !matches;
+                    if (matches) {
+                        visible++;
+                    }
+                });
+                if (selected) {
+                    var current = Array.prototype.find.call(vehicleSelect.options, function (option) {
+                        return option.value === selected;
+                    });
+                    if (current && current.disabled) {
+                        vehicleSelect.value = '';
+                    }
+                }
+                var empty = vehicleSelect.querySelector('option[data-empty]');
+                if (empty) {
+                    empty.hidden = visible > 0;
+                }
+            };
+            customerSelect.addEventListener('change', filter);
+            filter();
+        }
+
+        var mileageInput = document.getElementById('mileage');
+        if (vehicleSelect && mileageInput) {
+            vehicleSelect.addEventListener('change', function () {
+                var option = vehicleSelect.options[vehicleSelect.selectedIndex];
+                var mileage = option ? option.getAttribute('data-mileage') : null;
+                if (mileage && !mileageInput.value) {
+                    mileageInput.value = mileage;
+                }
+            });
+        }
+
+        document.querySelectorAll('[data-date-preset]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var form = button.closest('form');
+                if (!form) {
+                    return;
+                }
+                var start = form.querySelector('input[name="start"]');
+                var end = form.querySelector('input[name="end"]');
+                if (!start || !end) {
+                    return;
+                }
+                var now = new Date();
+                var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                var firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                var firstOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                var lastOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                var monday = new Date(today);
+                var day = (today.getDay() + 6) % 7;
+                monday.setDate(today.getDate() - day);
+                var preset = button.getAttribute('data-date-preset');
+                var from = today;
+                var to = today;
+                if (preset === 'week') {
+                    from = monday;
+                } else if (preset === 'month') {
+                    from = firstOfMonth;
+                } else if (preset === 'last-month') {
+                    from = firstOfLastMonth;
+                    to = lastOfLastMonth;
+                }
+                var format = function (date) {
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var dayOfMonth = String(date.getDate()).padStart(2, '0');
+                    return date.getFullYear() + '-' + month + '-' + dayOfMonth;
+                };
+                start.value = format(from);
+                end.value = format(to);
+                if (form.requestSubmit) {
+                    form.requestSubmit();
+                } else {
+                    form.submit();
+                }
+            });
+        });
+
+        document.querySelectorAll('[data-item-template]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                var type = document.getElementById('itemType');
+                var description = document.getElementById('itemDescription');
+                var quantity = document.getElementById('itemQuantity');
+                var price = document.getElementById('itemPrice');
+                if (type) {
+                    type.value = button.getAttribute('data-type') || type.value;
+                }
+                if (description) {
+                    description.value = button.getAttribute('data-description') || '';
+                }
+                if (quantity) {
+                    quantity.value = button.getAttribute('data-quantity') || '1';
+                }
+                if (price) {
+                    price.value = button.getAttribute('data-price') || '0';
+                }
+                if (description) {
+                    description.focus();
+                    description.select();
+                }
+                document.querySelectorAll('[data-item-template]').forEach(function (other) {
+                    other.classList.remove('active');
+                });
+                button.classList.add('active');
+            });
+        });
+
+        document.querySelectorAll('[data-signature-pad]').forEach(function (pad) {
+            var canvas = pad.querySelector('canvas');
+            var input = pad.querySelector('[data-signature-input]');
+            var clear = pad.querySelector('[data-signature-clear]');
+            if (!canvas || !input) {
+                return;
+            }
+            var ctx = canvas.getContext('2d');
+            ctx.lineWidth = 2.2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#111111';
+            var drawing = false;
+            var point = function (event) {
+                var rect = canvas.getBoundingClientRect();
+                return {
+                    x: (event.clientX - rect.left) * (canvas.width / rect.width),
+                    y: (event.clientY - rect.top) * (canvas.height / rect.height)
+                };
+            };
+            var start = function (event) {
+                drawing = true;
+                var position = point(event);
+                ctx.beginPath();
+                ctx.moveTo(position.x, position.y);
+                if (canvas.setPointerCapture) {
+                    canvas.setPointerCapture(event.pointerId);
+                }
+                event.preventDefault();
+            };
+            var move = function (event) {
+                if (!drawing) {
+                    return;
+                }
+                var position = point(event);
+                ctx.lineTo(position.x, position.y);
+                ctx.stroke();
+                event.preventDefault();
+            };
+            var end = function () {
+                if (!drawing) {
+                    return;
+                }
+                drawing = false;
+                input.value = canvas.toDataURL('image/png');
+            };
+            canvas.addEventListener('pointerdown', start);
+            canvas.addEventListener('pointermove', move);
+            canvas.addEventListener('pointerup', end);
+            canvas.addEventListener('pointerleave', end);
+            canvas.addEventListener('pointercancel', end);
+            if (clear) {
+                clear.addEventListener('click', function () {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    input.value = '';
+                });
+            }
+            if (input.value) {
+                var existing = new Image();
+                existing.onload = function () {
+                    ctx.drawImage(existing, 0, 0, canvas.width, canvas.height);
+                };
+                existing.src = input.value;
+            }
+        });
+
+        initPaymentAllocator();
+
+        var kanbanForm = document.getElementById('kanbanMoveForm');
+        if (kanbanForm) {
+            var allowedMoves = {
+                BEKLIYOR: ['ISLEMDE'],
+                ISLEMDE: ['TAMAMLANDI'],
+                TAMAMLANDI: ['TESLIM_EDILDI'],
+                TESLIM_EDILDI: []
+            };
+            var draggedCard = null;
+            document.querySelectorAll('.kanban-card[data-order-id]').forEach(function (card) {
+                card.addEventListener('dragstart', function (event) {
+                    draggedCard = card;
+                    card.classList.add('dragging');
+                    event.dataTransfer.effectAllowed = 'move';
+                    event.dataTransfer.setData('text/plain', card.getAttribute('data-order-id'));
+                });
+                card.addEventListener('dragend', function () {
+                    card.classList.remove('dragging');
+                    draggedCard = null;
+                    document.querySelectorAll('.kanban-column').forEach(function (column) {
+                        column.classList.remove('drag-over');
+                    });
+                });
+            });
+            document.querySelectorAll('.kanban-column[data-drop-status]').forEach(function (column) {
+                column.addEventListener('dragover', function (event) {
+                    if (!draggedCard) {
+                        return;
+                    }
+                    var targets = allowedMoves[draggedCard.getAttribute('data-status')] || [];
+                    if (targets.indexOf(column.getAttribute('data-drop-status')) >= 0) {
+                        event.preventDefault();
+                        column.classList.add('drag-over');
+                    }
+                });
+                column.addEventListener('dragleave', function () {
+                    column.classList.remove('drag-over');
+                });
+                column.addEventListener('drop', function (event) {
+                    event.preventDefault();
+                    column.classList.remove('drag-over');
+                    if (!draggedCard) {
+                        return;
+                    }
+                    var target = column.getAttribute('data-drop-status');
+                    var targets = allowedMoves[draggedCard.getAttribute('data-status')] || [];
+                    if (targets.indexOf(target) < 0) {
+                        return;
+                    }
+                    if (!window.confirm('İş emri yeni duruma alınacak. Devam edilsin mi?')) {
+                        return;
+                    }
+                    document.getElementById('kanbanMoveStatus').value = target;
+                    kanbanForm.action = '/work-orders/' + draggedCard.getAttribute('data-order-id') + '/status';
+                    kanbanForm.submit();
+                });
+            });
+        }
+
+        var palette = document.getElementById('commandPalette');
+        var commandInput = document.getElementById('commandInput');
+        var commandEmpty = document.getElementById('commandEmpty');
+        var commandItems = Array.prototype.slice.call(document.querySelectorAll('[data-command-item]'));
+        var commandActive = 0;
+
+        var visibleCommandItems = function () {
+            return commandItems.filter(function (item) {
+                return !item.hidden;
+            });
+        };
+        var markCommandActive = function (index) {
+            var visible = visibleCommandItems();
+            if (!visible.length) {
+                commandActive = 0;
+                return;
+            }
+            commandActive = Math.max(0, Math.min(index, visible.length - 1));
+            visible.forEach(function (item, i) {
+                item.classList.toggle('active', i === commandActive);
+            });
+            visible[commandActive].scrollIntoView({block: 'nearest'});
+        };
+        var filterCommands = function () {
+            var query = (commandInput.value || '').trim().toLocaleLowerCase('tr-TR');
+            commandItems.forEach(function (item) {
+                var text = (item.textContent + ' ' + (item.getAttribute('data-keywords') || ''))
+                    .toLocaleLowerCase('tr-TR');
+                item.hidden = query.length > 0 && text.indexOf(query) < 0;
+            });
+            if (commandEmpty) {
+                commandEmpty.hidden = visibleCommandItems().length > 0;
+            }
+            markCommandActive(0);
+        };
+        var openPalette = function () {
+            if (!palette) {
+                return;
+            }
+            palette.hidden = false;
+            document.body.classList.add('command-open');
+            commandInput.value = '';
+            filterCommands();
+            commandInput.focus();
+        };
+        var closePalette = function () {
+            if (!palette) {
+                return;
+            }
+            palette.hidden = true;
+            document.body.classList.remove('command-open');
+        };
+        if (palette) {
+            document.querySelectorAll('[data-command-open]').forEach(function (button) {
+                button.addEventListener('click', openPalette);
+            });
+            document.querySelectorAll('[data-command-close]').forEach(function (element) {
+                element.addEventListener('click', closePalette);
+            });
+            commandInput.addEventListener('input', filterCommands);
+            commandInput.addEventListener('keydown', function (event) {
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    markCommandActive(commandActive + 1);
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    markCommandActive(commandActive - 1);
+                } else if (event.key === 'Enter') {
+                    event.preventDefault();
+                    var visible = visibleCommandItems();
+                    if (visible[commandActive]) {
+                        visible[commandActive].click();
+                    }
+                }
+            });
+            commandItems.forEach(function (item) {
+                item.addEventListener('click', function () {
+                    if (item.hasAttribute('data-command-tour')) {
+                        closePalette();
+                        startTour();
+                    } else {
+                        closePalette();
+                    }
+                });
+            });
+            document.addEventListener('keydown', function (event) {
+                if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                    event.preventDefault();
+                    openPalette();
+                }
+                if (event.key === 'Escape') {
+                    closePalette();
+                }
+            });
+        }
+
+        var tourSteps = [
+            {url: '/', selector: '.dashboard-kpis', title: 'Günlük kokpit',
+                text: 'Açık işler, bugünkü tahsilat, alacak ve randevular tek ekranda. Grafikler son 7 günü ve iş durumlarını gösterir.'},
+            {url: '/work-orders/board', selector: '.kanban-board', title: 'Kanban iş panosu',
+                text: 'Araçları sürükleyerek veya tek tıkla İşleme Al, Tamamla ve Teslim Et adımlarını ilerletin.'},
+            {url: '/work-orders/new', selector: '.quick-start-card', title: 'Plaka ile hızlı iş emri',
+                text: 'Plakayı yazın; kayıtlıysa müşteri ve araç otomatik gelir. Kayıtlı değilse müşteri, araç ve iş emri tek adımda oluşur.'},
+            {url: '/appointments/week', selector: '.week-grid', title: 'Haftalık randevu planı',
+                text: 'Haftanın tamamını görün; güne tıklayarak randevu ekleyin veya mevcut randevuları yönetin.'},
+            {url: '/reports/maintenance', selector: '[data-tour="maintenance"]', title: 'Bakım hatırlatmaları',
+                text: '180 gün veya 10.000 km geçen araçları görün; müşteriyi arayıp doğrudan randevu oluşturun.'},
+            {url: '/', selector: null, title: 'Sunum hazır',
+                text: 'Demo hesabıyla tüm ekranları gezebilirsiniz. Sorularınız için hazırım.'}
+        ];
+        var tourLayer = document.getElementById('tourLayer');
+        var tourCounter = document.getElementById('tourCounter');
+        var tourTitle = document.getElementById('tourTitle');
+        var tourText = document.getElementById('tourText');
+        var tourPrev = document.getElementById('tourPrev');
+        var tourNext = document.getElementById('tourNext');
+        var tourIndex = -1;
+
+        var clearTourHighlight = function () {
+            document.querySelectorAll('.tour-highlight').forEach(function (element) {
+                element.classList.remove('tour-highlight');
+            });
+        };
+        var closeTour = function () {
+            if (tourLayer) {
+                tourLayer.hidden = true;
+            }
+            clearTourHighlight();
+            sessionStorage.removeItem('sdTourStep');
+            sessionStorage.removeItem('sdTourResume');
+            tourIndex = -1;
+        };
+        var showTourStep = function (index) {
+            if (index < 0 || index >= tourSteps.length) {
+                closeTour();
+                return;
+            }
+            var step = tourSteps[index];
+            sessionStorage.setItem('sdTourStep', String(index));
+            if (window.location.pathname !== step.url) {
+                sessionStorage.setItem('sdTourResume', '1');
+                window.location.href = step.url;
+                return;
+            }
+            if (!tourLayer) {
+                return;
+            }
+            tourLayer.hidden = false;
+            clearTourHighlight();
+            var target = step.selector ? document.querySelector(step.selector) : null;
+            if (target) {
+                target.classList.add('tour-highlight');
+                target.scrollIntoView({block: 'center', behavior: 'smooth'});
+            }
+            tourIndex = index;
+            tourCounter.textContent = (index + 1) + ' / ' + tourSteps.length;
+            tourTitle.textContent = step.title;
+            tourText.textContent = step.text;
+            tourPrev.style.visibility = index === 0 ? 'hidden' : 'visible';
+            tourNext.textContent = index === tourSteps.length - 1 ? 'Bitir' : 'İleri';
+        };
+        var startTour = function () {
+            sessionStorage.setItem('sdTourStep', '0');
+            showTourStep(0);
+        };
+        document.querySelectorAll('[data-tour-start]').forEach(function (button) {
+            button.addEventListener('click', startTour);
+        });
+        if (tourNext) {
+            tourNext.addEventListener('click', function () {
+                showTourStep(tourIndex + 1);
+            });
+        }
+        if (tourPrev) {
+            tourPrev.addEventListener('click', function () {
+                showTourStep(tourIndex - 1);
+            });
+        }
+        var tourSkip = document.getElementById('tourSkip');
+        if (tourSkip) {
+            tourSkip.addEventListener('click', closeTour);
+        }
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && tourLayer && !tourLayer.hidden) {
+                closeTour();
+            }
+        });
+        var savedTourStep = Number(sessionStorage.getItem('sdTourStep'));
+        var resumeTour = sessionStorage.getItem('sdTourResume') === '1';
+        sessionStorage.removeItem('sdTourResume');
+        if (resumeTour && !Number.isNaN(savedTourStep) && savedTourStep >= 0
+                && savedTourStep < tourSteps.length
+                && window.location.pathname === tourSteps[savedTourStep].url) {
+            showTourStep(savedTourStep);
+        } else {
+            sessionStorage.removeItem('sdTourStep');
+            if (tourLayer) {
+                tourLayer.hidden = true;
+            }
+            clearTourHighlight();
+        }
+
+        var firstInvalid = document.querySelector('.is-invalid');
+        if (firstInvalid) {
+            firstInvalid.focus({preventScroll: false});
+        }
+
+        if (window.bootstrap && window.bootstrap.Tooltip) {
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (element) {
+                new window.bootstrap.Tooltip(element);
+            });
+        }
+
+        document.querySelectorAll('[data-print]').forEach(function (button) {
+            button.addEventListener('click', function () {
+                window.print();
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            var target = event.target;
+            var tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+            var typing = tag === 'input' || tag === 'textarea' || tag === 'select'
+                || (target && target.isContentEditable);
+            if (event.key === '/' && !typing) {
+                var search = document.querySelector('.sd-search input[type="search"]');
+                if (search) {
+                    event.preventDefault();
+                    search.focus();
+                }
+            }
+            if (event.altKey && !event.ctrlKey && !event.metaKey) {
+                var key = event.key.toLowerCase();
+                if (key === 'n') {
+                    var newOrder = document.querySelector('[data-shortcut-new-order]');
+                    if (newOrder) {
+                        event.preventDefault();
+                        newOrder.click();
+                    }
+                }
+                if (key === 'b') {
+                    var board = document.querySelector('[data-shortcut-board]');
+                    if (board) {
+                        event.preventDefault();
+                        board.click();
+                    }
+                }
+            }
+        });
+
+        var recentStorageKey = 'sd.recentOrders';
+        var readRecent = function () {
+            try {
+                var parsed = JSON.parse(window.localStorage.getItem(recentStorageKey) || '[]');
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
+            }
+        };
+        var recentMarker = document.querySelector('[data-recent-order]');
+        if (recentMarker) {
+            var entry = {
+                url: recentMarker.getAttribute('data-url'),
+                no: recentMarker.getAttribute('data-no'),
+                customer: recentMarker.getAttribute('data-customer'),
+                plate: recentMarker.getAttribute('data-plate')
+            };
+            if (entry.url) {
+                var recent = readRecent().filter(function (item) {
+                    return item.url !== entry.url;
+                });
+                recent.unshift(entry);
+                try {
+                    window.localStorage.setItem(recentStorageKey, JSON.stringify(recent.slice(0, 6)));
+                } catch (error) {
+                    // Depolama kapalıysa son işler özelliği sessizce devre dışı kalır.
+                }
+            }
+        }
+        var recentCard = document.getElementById('recentOrdersCard');
+        var recentList = document.getElementById('recentOrdersList');
+        if (recentCard && recentList) {
+            var recentItems = readRecent();
+            if (recentItems.length > 0) {
+                recentCard.hidden = false;
+                recentItems.forEach(function (item) {
+                    var link = document.createElement('a');
+                    link.className = 'list-group-item list-group-item-action px-4 py-3';
+                    link.href = item.url;
+                    var title = document.createElement('div');
+                    title.className = 'fw-semibold';
+                    title.textContent = item.no || 'İş emri';
+                    var meta = document.createElement('div');
+                    meta.className = 'record-meta';
+                    meta.textContent = [item.customer, item.plate].filter(Boolean).join(' · ');
+                    link.appendChild(title);
+                    link.appendChild(meta);
+                    recentList.appendChild(link);
+                });
+            }
+        }
+    });
+})();

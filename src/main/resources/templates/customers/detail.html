@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Müşteri Detayı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('customers')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Müşteri</div>
+                    <h1 class="page-title">
+                        <span th:text="${customer.name}">Müşteri</span>
+                        <span class="sd-badge ms-2"
+                              th:classappend="${customer.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                              th:text="${customer.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        <span class="sd-badge sd-badge-neutral" th:text="${customer.type.label}">Bireysel</span>
+                        <span class="ms-2" th:text="${customer.phone}">Telefon</span>
+                        <span class="ms-2" th:if="${customer.email != null}" th:text="${customer.email}">E-posta</span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/customers}">
+                        <i class="bi bi-arrow-left me-1"></i> Liste
+                    </a>
+                    <a class="btn btn-outline-secondary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                       th:href="@{/customers/{id}/edit(id=${customer.id})}">
+                        <i class="bi bi-pencil me-1"></i> Düzenle
+                    </a>
+                    <a class="btn btn-outline-secondary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                       th:href="@{/vehicles/new(customerId=${customer.id})}">
+                        <i class="bi bi-car-front me-1"></i> Araç Ekle
+                    </a>
+                    <a class="btn btn-primary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                       th:href="@{/work-orders/new(customerId=${customer.id})}">
+                        <i class="bi bi-clipboard-plus me-1"></i> İş Emri Aç
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-grid" th:if="${financialVisible}">
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-journal-text"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(balance)}">0,00 ₺</div>
+                    <div class="stat-label">Cari bakiye</div>
+                    <div class="stat-hint">Borç − alacak</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon red"><i class="bi bi-exclamation-circle"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(openDebtTotal)}">0,00 ₺</div>
+                    <div class="stat-label">Açık borç</div>
+                    <div class="stat-hint">Tahsil edilmemiş borç hareketleri</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon blue"><i class="bi bi-car-front"></i></span>
+                    <div class="stat-value" th:text="${vehicles.size()}">0</div>
+                    <div class="stat-label">Kayıtlı araç</div>
+                    <div class="stat-hint">Bu müşteriye bağlı</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-clock-history"></i></span>
+                    <div class="stat-value" th:text="${workOrders.size()}">0</div>
+                    <div class="stat-label">Son iş emri</div>
+                    <div class="stat-hint">En yeni 10 kayıt</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-4">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Müşteri bilgileri</h2>
+                            <a class="link-quiet" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                               th:href="@{/customers/{id}/edit(id=${customer.id})}">Düzenle</a>
+                        </div>
+                        <div class="sd-card-body">
+                            <dl class="detail-list">
+                                <div>
+                                    <dt>Telefon</dt>
+                                    <dd class="money" th:text="${customer.phone}">0555</dd>
+                                </div>
+                                <div>
+                                    <dt>E-posta</dt>
+                                    <dd th:text="${customer.email == null ? '—' : customer.email}">—</dd>
+                                </div>
+                                <div>
+                                    <dt>Vergi dairesi</dt>
+                                    <dd th:text="${customer.taxOffice == null ? '—' : customer.taxOffice}">—</dd>
+                                </div>
+                                <div>
+                                    <dt>Vergi / TC no</dt>
+                                    <dd class="money" th:text="${customer.taxNumber == null ? '—' : customer.taxNumber}">—</dd>
+                                </div>
+                                <div>
+                                    <dt>Kayıt tarihi</dt>
+                                    <dd th:text="${fmt.dateTime(customer.createdAt)}">01.01.2026</dd>
+                                </div>
+                                <div>
+                                    <dt>Kayıt no</dt>
+                                    <dd class="money" th:text="${'#' + customer.id}">#1</dd>
+                                </div>
+                                <div style="grid-column: 1 / -1;" th:if="${customer.address != null}">
+                                    <dt>Adres</dt>
+                                    <dd th:text="${customer.address}">Adres</dd>
+                                </div>
+                                <div style="grid-column: 1 / -1;" th:if="${customer.note != null}">
+                                    <dt>Açıklama</dt>
+                                    <dd th:text="${customer.note}">Not</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div class="sd-card-footer d-flex flex-wrap gap-2" th:if="${financialVisible}">
+                            <a class="btn btn-navy btn-sm" th:href="@{/accounts/customer/{id}(id=${customer.id})}">
+                                <i class="bi bi-journal-text me-1"></i> Cari Ekstre
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm" th:href="@{/payments/new(customerId=${customer.id})}">
+                                <i class="bi bi-cash-coin me-1"></i> Tahsilat
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm" sec:authorize="hasRole('PATRON')"
+                               th:href="@{/accounts/new-debt(customerId=${customer.id})}">
+                                <i class="bi bi-plus-circle me-1"></i> Borç Ekle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-8">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-car-front me-2"></i>Araçlar</h2>
+                            <a class="link-quiet" th:href="@{/vehicles(customerId=${customer.id})}">Araç listesi</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!vehicles.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>Plaka</th>
+                                        <th>Marka / Model</th>
+                                        <th>Yıl</th>
+                                        <th class="text-end">Kilometre</th>
+                                        <th class="text-end">İşlem</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="vehicle : ${vehicles}">
+                                        <td>
+                                            <a class="fw-semibold" th:href="@{/vehicles/{id}(id=${vehicle.id})}"
+                                               th:text="${vehicle.plate}">34ABC123</a>
+                                        </td>
+                                        <td th:text="${(vehicle.brand == null ? '' : vehicle.brand) + ' ' + (vehicle.model == null ? '' : vehicle.model)}">
+                                            Marka
+                                        </td>
+                                        <td th:text="${vehicle.modelYear == null ? '—' : vehicle.modelYear}">2020</td>
+                                        <td class="text-end money" th:text="${fmt.number(vehicle.currentMileage)} + ' km'">0 km</td>
+                                        <td class="text-end">
+                                            <a class="btn btn-outline-secondary btn-sm"
+                                               sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                               th:href="@{/work-orders/new(customerId=${customer.id},vehicleId=${vehicle.id})}">İş Emri</a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${vehicles.isEmpty()}">
+                            <i class="bi bi-car-front"></i>
+                            <strong>Kayıtlı araç yok</strong>
+                            Bu müşteriye ait araç ekleyerek servis geçmişi oluşturabilirsiniz.
+                        </div>
+                    </div>
+
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-clipboard-check me-2"></i>Son iş emirleri</h2>
+                            <a class="link-quiet" th:href="@{/work-orders(customerId=${customer.id})}">Tümü</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!workOrders.isEmpty()}">
+                            <div class="table-responsive">
+                                <table class="table align-middle">
+                                    <thead>
+                                    <tr>
+                                        <th>İş Emri</th>
+                                        <th>Araç</th>
+                                        <th>Tarih</th>
+                                        <th>Durum</th>
+                                        <th class="text-end">Toplam</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="order : ${workOrders}">
+                                        <td>
+                                            <a class="fw-semibold" th:href="@{/work-orders/{id}(id=${order.id})}"
+                                               th:text="${order.orderNo}">IS-0000</a>
+                                        </td>
+                                        <td th:text="${order.vehicle.plate}">34ABC123</td>
+                                        <td class="record-meta" th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</td>
+                                        <td>
+                                            <span class="sd-badge"
+                                                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                                  th:text="${order.status.label}">Durum</span>
+                                        </td>
+                                        <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${workOrders.isEmpty()}">
+                            <i class="bi bi-clipboard"></i>
+                            <strong>İş emri yok</strong>
+                            Bu müşteri için henüz servis kaydı oluşturulmamış.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

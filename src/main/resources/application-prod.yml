@@ -1,0 +1,26 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  thymeleaf:
+    cache: true
+  flyway:
+    clean-disabled: true
+
+logging:
+  level:
+    root: INFO
+    tr.com.servisdefteri: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+management:
+  endpoint:
+    health:
+      show-details: never

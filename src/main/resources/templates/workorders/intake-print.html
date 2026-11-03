@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Araç Kabul Formu')}"></head>
+<body>
+<div class="print-toolbar no-print">
+    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}/intake(id=${order.id})}">
+        <i class="bi bi-arrow-left me-1"></i> Kabul Formuna Dön
+    </a>
+    <button class="btn btn-navy" type="button" data-print>
+        <i class="bi bi-printer me-1"></i> Yazdır
+    </button>
+    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}/intake.pdf(id=${order.id})}">
+        <i class="bi bi-filetype-pdf me-1"></i> PDF İndir
+    </a>
+</div>
+
+<div class="print-page">
+    <div class="print-header">
+        <div>
+            <img class="print-logo" th:src="@{/images/toyota.png}" alt="Toyota">
+            <h1 th:text="${business.name}">Toyota Plaza Öztoprak</h1>
+            <div class="record-meta" th:text="${business.phone == null ? 'Yetkili Servis ve Bakım' : business.phone}"></div>
+            <div class="record-meta" th:if="${business.address != null}" th:text="${business.address}"></div>
+        </div>
+        <div class="print-meta">
+            <strong>ARAÇ KABUL FORMU</strong><br>
+            <span th:text="${order.orderNo}">IS-0000</span><br>
+            <span th:text="${fmt.dateTime(intake.intakeAt)}">01.01.2026</span><br>
+            <span th:text="${order.status.label}">Bekliyor</span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-6">
+            <div class="form-section-title">Müşteri</div>
+            <strong th:text="${order.customer.name}">Müşteri</strong><br>
+            <span th:text="${order.customer.phone}">Telefon</span><br>
+            <span th:if="${order.customer.address != null}" th:text="${order.customer.address}">Adres</span>
+        </div>
+        <div class="col-6">
+            <div class="form-section-title">Araç</div>
+            <strong th:text="${order.vehicle.plate}">34ABC123</strong><br>
+            <span th:text="${(order.vehicle.brand == null ? '' : order.vehicle.brand) + ' ' + (order.vehicle.model == null ? '' : order.vehicle.model)}">Marka Model</span><br>
+            <span th:if="${order.mileage != null}" th:text="${fmt.number(order.mileage) + ' km'}">0 km</span>
+        </div>
+    </div>
+
+    <table class="print-table">
+        <thead>
+        <tr>
+            <th>Kabul Bilgisi</th>
+            <th>Değer</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Yakıt seviyesi</td>
+            <td th:text="${intake.fuelLevel.label}">1/2</td>
+        </tr>
+        <tr>
+            <td>Kilometre</td>
+            <td th:text="${order.mileage == null ? '—' : fmt.number(order.mileage) + ' km'}">—</td>
+        </tr>
+        <tr th:if="${intake.valuables != null}">
+            <td>Araçta bırakılan eşyalar</td>
+            <td th:text="${intake.valuables}">—</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="mb-4 mt-4" th:if="${intake.damageNotes != null}">
+        <div class="form-section-title">Hasar / mevcut durum notu</div>
+        <div th:text="${intake.damageNotes}">—</div>
+    </div>
+
+    <p class="mt-4">
+        Yukarıda belirtilen araç, kabul sırasındaki mevcut durumuyla servise teslim edilmiştir.
+        Araçta bulunan hasar ve eşyalar bu formda kayıt altına alınmıştır.
+    </p>
+
+    <div class="print-footer">
+        <div>
+            <img th:if="${intake.signatureData != null}" class="signature-image"
+                 th:src="${intake.signatureData}" alt="Müşteri imzası">
+            <div class="signature" th:if="${intake.signatureData == null}">Aracı teslim eden</div>
+            <div class="signature-label" th:if="${intake.signatureData != null}">Aracı teslim eden</div>
+        </div>
+        <div>
+            <div class="signature">Servis teslim alan</div>
+        </div>
+    </div>
+    <p class="record-meta mt-4">
+        Bu form <span th:text="${business.name}">Toyota Plaza Öztoprak</span> tarafından
+        <span th:text="${fmt.dateTime(intake.intakeAt)}">01.01.2026</span> tarihinde düzenlenmiştir.
+    </p>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

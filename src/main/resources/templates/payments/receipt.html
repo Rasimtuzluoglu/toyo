@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tahsilat Makbuzu')}"></head>
+<body>
+<div class="print-toolbar no-print">
+    <a class="btn btn-outline-secondary" th:href="@{/payments/{id}(id=${payment.id})}">
+        <i class="bi bi-arrow-left me-1"></i> Tahsilata Dön
+    </a>
+    <button class="btn btn-navy" type="button" data-print>
+        <i class="bi bi-printer me-1"></i> Yazdır
+    </button>
+    <a class="btn btn-outline-secondary" th:href="@{/payments/{id}/receipt.pdf(id=${payment.id})}">
+        <i class="bi bi-filetype-pdf me-1"></i> PDF İndir
+    </a>
+</div>
+
+<div class="print-page">
+    <div class="print-header">
+        <div>
+            <img class="print-logo" th:src="@{/images/toyota.png}" alt="Toyota">
+            <h1 th:text="${business.name}">Toyota Plaza Öztoprak</h1>
+            <div class="record-meta" th:text="${business.phone == null ? 'Yetkili Servis ve Bakım' : business.phone}">
+                0555 000 00 00
+            </div>
+            <div class="record-meta" th:if="${business.address != null}" th:text="${business.address}">Adres</div>
+            <div class="record-meta" th:if="${business.taxNumber != null}"
+                 th:text="${'VKN: ' + business.taxNumber + (business.taxOffice == null ? '' : ' · ' + business.taxOffice)}">
+                VKN
+            </div>
+        </div>
+        <div class="print-meta">
+            <strong>TAHSİLAT MAKBUZU</strong><br>
+            <span th:text="${payment.receiptNo}">TH-0000</span><br>
+            <span th:text="${fmt.date(payment.paymentDate)}">01.01.2026</span><br>
+            <span class="sd-badge"
+                  th:classappend="${payment.status.name() == 'AKTIF'} ? ' sd-badge-aktif' : ' sd-badge-iptal'"
+                  th:text="${payment.status.label}">Aktif</span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-7">
+            <div class="form-section-title">Müşteri</div>
+            <strong th:text="${payment.customer.name}">Müşteri</strong><br>
+            <span th:text="${payment.customer.phone}">Telefon</span><br>
+            <span th:if="${payment.customer.address != null}" th:text="${payment.customer.address}">Adres</span>
+        </div>
+        <div class="col-5">
+            <div class="form-section-title">Ödeme</div>
+            <div class="detail-value-lg money" th:text="${fmt.money(payment.amount)}">0,00 ₺</div>
+            <div th:text="${payment.method.label}">Nakit</div>
+        </div>
+    </div>
+
+    <div class="mb-4" th:if="${payment.description != null}">
+        <div class="form-section-title">Açıklama</div>
+        <div th:text="${payment.description}">Açıklama</div>
+    </div>
+
+    <table class="print-table" th:if="${!allocations.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Borç Tarihi</th>
+            <th>Açıklama</th>
+            <th class="text-end">Dağıtılan Tutar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="allocation : ${allocations}">
+            <td th:text="${fmt.date(allocation.transaction.transactionDate)}">01.01.2026</td>
+            <td th:text="${allocation.transaction.description}">Borç</td>
+            <td class="text-end" th:text="${fmt.money(allocation.amount)}">0,00 ₺</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="print-footer">
+        <div>
+            <div class="signature">Tahsilatı yapan</div>
+        </div>
+        <div>
+            <div class="signature">Müşteri imzası</div>
+        </div>
+    </div>
+    <p class="record-meta mt-4">
+        Bu makbuz <span th:text="${business.name}">Toyota Plaza Öztoprak</span> tarafından
+        <span th:text="${fmt.dateTime(payment.createdAt)}">01.01.2026</span>
+        tarihinde oluşturulmuştur. İptal edilen tahsilatlar için ters kayıt işlenir.
+    </p>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

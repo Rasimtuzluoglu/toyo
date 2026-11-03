@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Haftalık Randevular')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('appointments')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Servis Planlama</div>
+                    <h1 class="page-title">Haftalık Randevular</h1>
+                    <p class="page-subtitle">
+                        <span th:text="${fmt.date(weekStart)}">01.01.2026</span>
+                        –
+                        <span th:text="${fmt.date(weekEnd)}">07.01.2026</span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments/week(date=${previousWeek})}">
+                        <i class="bi bi-chevron-left me-1"></i> Önceki hafta
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments/week(date=${today})}">Bu hafta</a>
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments/week(date=${nextWeek})}">
+                        Sonraki hafta <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments(date=${today})}">
+                        <i class="bi bi-calendar3 me-1"></i> Günlük
+                    </a>
+                </div>
+            </div>
+
+            <div class="week-scroll">
+                <div class="week-grid">
+                    <section class="week-day" th:each="day : ${days}"
+                             th:classappend="${day.date == today} ? ' week-today'">
+                        <div class="week-day-header">
+                            <div>
+                                <span class="week-day-name" th:text="${fmt.dayName(day.date)}">Pazartesi</span>
+                                <span class="week-day-date" th:text="${fmt.dayMonth(day.date)}">01 Oca</span>
+                            </div>
+                            <a class="week-add" th:href="@{/appointments/new(date=${day.date})}"
+                               sec:authorize="hasAnyRole('PATRON','SERVIS')" aria-label="Bu güne randevu ekle">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        </div>
+                        <div class="week-day-body">
+                            <a class="week-appointment" th:each="appointment : ${day.appointments}"
+                               th:href="@{/appointments(date=${day.date})}">
+                                <span class="week-time" th:text="${fmt.time(appointment.startsAt)}">09:00</span>
+                                <strong th:text="${appointment.customer.name}">Müşteri</strong>
+                                <span class="record-meta" th:text="${appointment.vehicle.plate}">34ABC123</span>
+                                <span class="sd-badge"
+                                      th:classappend="${appointment.status.name() == 'GELDI' ? ' sd-badge-aktif' : (appointment.status.name() == 'IPTAL' ? ' sd-badge-iptal' : ' sd-badge-neutral')}"
+                                      th:text="${appointment.status.label}">Planlandı</span>
+                            </a>
+                            <div class="week-empty" th:if="${day.appointments.isEmpty()}">Randevu yok</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

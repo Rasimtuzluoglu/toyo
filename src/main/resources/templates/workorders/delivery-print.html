@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Teslim Tutanağı')}"></head>
+<body>
+<div class="print-toolbar no-print">
+    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}/delivery(id=${order.id})}">
+        <i class="bi bi-arrow-left me-1"></i> Teslim Tutanağına Dön
+    </a>
+    <button class="btn btn-navy" type="button" data-print>
+        <i class="bi bi-printer me-1"></i> Yazdır
+    </button>
+    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}/delivery.pdf(id=${order.id})}">
+        <i class="bi bi-filetype-pdf me-1"></i> PDF İndir
+    </a>
+</div>
+
+<div class="print-page">
+    <div class="print-header">
+        <div>
+            <img class="print-logo" th:src="@{/images/toyota.png}" alt="Toyota">
+            <h1 th:text="${business.name}">Toyota Plaza Öztoprak</h1>
+            <div class="record-meta" th:text="${business.phone == null ? 'Yetkili Servis ve Bakım' : business.phone}"></div>
+            <div class="record-meta" th:if="${business.address != null}" th:text="${business.address}"></div>
+        </div>
+        <div class="print-meta">
+            <strong>ARAÇ TESLİM TUTANAĞI</strong><br>
+            <span th:text="${order.orderNo}">IS-0000</span><br>
+            <span th:text="${fmt.dateTime(delivery.deliveredAt)}">01.01.2026</span><br>
+            <span th:text="${order.status.label}">Teslim Edildi</span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-6">
+            <div class="form-section-title">Müşteri</div>
+            <strong th:text="${order.customer.name}">Müşteri</strong><br>
+            <span th:text="${order.customer.phone}">Telefon</span>
+        </div>
+        <div class="col-6">
+            <div class="form-section-title">Araç</div>
+            <strong th:text="${order.vehicle.plate}">34ABC123</strong><br>
+            <span th:text="${(order.vehicle.brand == null ? '' : order.vehicle.brand) + ' ' + (order.vehicle.model == null ? '' : order.vehicle.model)}">Marka Model</span><br>
+            <span th:if="${delivery.mileage != null}" th:text="${fmt.number(delivery.mileage) + ' km'}">0 km</span>
+        </div>
+    </div>
+
+    <table class="print-table">
+        <thead>
+        <tr>
+            <th>Teslim Bilgisi</th>
+            <th>Değer</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Teslim alan</td>
+            <td th:text="${delivery.receiverName}">Müşteri</td>
+        </tr>
+        <tr>
+            <td>Teslim tarihi</td>
+            <td th:text="${fmt.dateTime(delivery.deliveredAt)}">01.01.2026</td>
+        </tr>
+        <tr>
+            <td>Kilometre</td>
+            <td th:text="${delivery.mileage == null ? '—' : fmt.number(delivery.mileage) + ' km'}">—</td>
+        </tr>
+        <tr>
+            <td>Yakıt seviyesi</td>
+            <td th:text="${delivery.fuelLevel.label}">1/2</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="mb-4 mt-4" th:if="${order.workDone != null}">
+        <div class="form-section-title">Yapılan işlemler</div>
+        <div th:text="${order.workDone}">—</div>
+    </div>
+    <div class="mb-4" th:if="${delivery.notes != null}">
+        <div class="form-section-title">Teslim notu</div>
+        <div th:text="${delivery.notes}">—</div>
+    </div>
+
+    <table class="print-table">
+        <thead>
+        <tr>
+            <th>Toplam</th>
+            <th class="text-end">Tutar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Genel toplam</td>
+            <td class="text-end" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="mt-4">
+        Aracı yukarıda belirtilen kilometre ve yakıt seviyesiyle, yapılan işlemler tamamlanmış olarak
+        teslim aldım. Teslim sonrası oluşabilecek hasarlardan işletme sorumlu değildir.
+    </p>
+
+    <div class="print-footer">
+        <div>
+            <div class="signature">Aracı teslim eden</div>
+        </div>
+        <div>
+            <img th:if="${delivery.signatureData != null}" class="signature-image"
+                 th:src="${delivery.signatureData}" alt="Müşteri imzası">
+            <div class="signature" th:if="${delivery.signatureData == null}">Aracı teslim alan</div>
+            <div class="signature-label" th:if="${delivery.signatureData != null}">Aracı teslim alan</div>
+        </div>
+    </div>
+    <p class="record-meta mt-4">
+        Bu tutanak <span th:text="${business.name}">Toyota Plaza Öztoprak</span> tarafından
+        <span th:text="${fmt.dateTime(delivery.deliveredAt)}">01.01.2026</span> tarihinde düzenlenmiştir.
+    </p>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

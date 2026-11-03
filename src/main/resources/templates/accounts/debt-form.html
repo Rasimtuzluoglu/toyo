@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manuel Borç')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('accounts')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Cari Hesap</div>
+                    <h1 class="page-title">Manuel Borç Kaydı</h1>
+                    <p class="page-subtitle">İş emri dışında oluşan bir alacağı müşteri cari hesabına borç olarak işleyin.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/accounts}">
+                        <i class="bi bi-arrow-left me-1"></i> Cari Hesaplar
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <form th:action="@{/accounts/new-debt}" method="post" th:object="${debtForm}"
+                          data-submit-once>
+                        <input type="hidden" name="formToken" th:value="${formToken}">
+                        <div class="sd-card">
+                            <div class="sd-card-header">
+                                <h2>Borç bilgileri</h2>
+                            </div>
+                            <div class="sd-card-body">
+                                <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                                <div class="row g-3">
+                                    <div class="col-md-8">
+                                        <label class="form-label" for="customerId">Müşteri <span class="required">*</span></label>
+                                        <select class="form-select" id="customerId" th:field="*{customerId}"
+                                                th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid'">
+                                            <option value="">Müşteri seçin</option>
+                                            <option th:each="c : ${customers}" th:value="${c.id}"
+                                                    th:text="${c.name + (c.active ? '' : ' (pasif)')}"></option>
+                                        </select>
+                                        <div class="invalid-feedback" th:errors="*{customerId}"></div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="transactionDate">Tarih <span class="required">*</span></label>
+                                        <input class="form-control" id="transactionDate" type="date"
+                                               th:field="*{transactionDate}"
+                                               th:classappend="${#fields.hasErrors('transactionDate')} ? 'is-invalid'" required>
+                                        <div class="invalid-feedback" th:errors="*{transactionDate}"></div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="amount">Tutar <span class="required">*</span></label>
+                                        <div class="input-group">
+                                            <input class="form-control" id="amount" type="number" step="0.01" min="0.01"
+                                                   th:field="*{amount}"
+                                                   th:classappend="${#fields.hasErrors('amount')} ? 'is-invalid'" required>
+                                            <span class="input-group-text">₺</span>
+                                        </div>
+                                        <div class="invalid-feedback d-block" th:errors="*{amount}"></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="description">Açıklama <span class="required">*</span></label>
+                                        <input class="form-control" id="description" type="text" th:field="*{description}"
+                                               th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                               maxlength="500" placeholder="Örn. Dışarıdan alınan parça bedeli" required>
+                                        <div class="invalid-feedback" th:errors="*{description}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sd-card-footer d-flex justify-content-end gap-2">
+                                <a class="btn btn-outline-secondary" th:href="@{/accounts}">Vazgeç</a>
+                                <button class="btn btn-primary" type="submit">
+                                    <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                                    <i class="bi bi-plus-circle me-1"></i> Borcu Kaydet
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-lg-4">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-info-circle me-2"></i>Kural hatırlatması</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <ul class="mb-0 ps-3">
+                                <li>Manuel borç kaydı cari bakiyeyi artırır.</li>
+                                <li>Gelecek tarihli kayıt oluşturulamaz.</li>
+                                <li>Kayıtlar silinmez; düzeltme gerektiğinde ters kayıt kullanılır.</li>
+                                <li>Tüm işlemler kullanıcı ve zaman bilgisiyle denetim kaydına yazılır.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

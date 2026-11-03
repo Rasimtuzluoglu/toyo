@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Randevular')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('appointments')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Servis Planlama</div>
+                    <h1 class="page-title">Randevular</h1>
+                    <p class="page-subtitle">Günlük randevuları görüntüleyin ve iş emrine dönüştürün.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments(date=${previousDate})}">
+                        <i class="bi bi-chevron-left me-1"></i> Önceki
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments(date=${today})}">Bugün</a>
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments(date=${nextDate})}">
+                        Sonraki <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments/week(date=${date})}">
+                        <i class="bi bi-calendar-week me-1"></i> Haftalık
+                    </a>
+                    <a class="btn btn-primary" th:href="@{/appointments/new(date=${date})}"
+                       sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                        <i class="bi bi-plus-lg me-1"></i> Yeni Randevu
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header flex-wrap gap-2">
+                    <h2><i class="bi bi-calendar3 me-2"></i><span th:text="${fmt.date(date)}">01.01.2026</span></h2>
+                    <span class="record-meta">
+                        <span th:text="${plannedCount}">0</span> planlandı ·
+                        <span th:text="${arrivedCount}">0</span> geldi
+                    </span>
+                </div>
+
+                <div class="sd-card-body p-0" th:if="${!appointments.isEmpty()}">
+                    <div class="table-responsive d-none d-md-block">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Saat</th>
+                                <th>Müşteri / Araç</th>
+                                <th>Telefon</th>
+                                <th>Durum</th>
+                                <th>Not</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="appointment : ${appointments}">
+                                <td class="fw-semibold" th:text="${fmt.time(appointment.startsAt)}">09:00</td>
+                                <td>
+                                    <div th:text="${appointment.customer.name}">Müşteri</div>
+                                    <div class="record-meta" th:text="${appointment.vehicle.plate}">34ABC123</div>
+                                </td>
+                                <td>
+                                    <a th:href="${'tel:' + appointment.customer.phone}"
+                                       th:text="${appointment.customer.phone}">Telefon</a>
+                                </td>
+                                <td>
+                                    <span class="sd-badge"
+                                          th:classappend="${' sd-badge-' + appointment.status.badgeClass}"
+                                          th:text="${appointment.status.label}">Planlandı</span>
+                                </td>
+                                <td class="record-meta" th:text="${appointment.notes}">—</td>
+                                <td class="text-end">
+                                    <div class="d-flex flex-wrap justify-content-end gap-1">
+                                        <span sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                                            <form class="d-inline" th:if="${appointment.status.name() == 'PLANLANDI'}"
+                                                  th:action="@{/appointments/{id}/arrived(id=${appointment.id})}"
+                                                  method="post" data-submit-once>
+                                                <button class="btn btn-success btn-sm" type="submit">Geldi</button>
+                                            </form>
+                                        </span>
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:if="${appointment.status.name() != 'IPTAL'}"
+                                           sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                           th:href="@{/work-orders/new(customerId=${appointment.customer.id},vehicleId=${appointment.vehicle.id})}">
+                                            İş Emri Aç
+                                        </a>
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                           th:href="@{/appointments/{id}/edit(id=${appointment.id})}">Düzenle</a>
+                                        <form class="d-inline" th:if="${appointment.status.name() != 'IPTAL'}"
+                                              sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                              th:action="@{/appointments/{id}/cancel(id=${appointment.id})}"
+                                              method="post" data-submit-once
+                                              data-confirm="Randevu iptal edilsin mi?">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit">İptal</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-md-none p-3">
+                        <div class="board-mobile-item" th:each="appointment : ${appointments}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div>
+                                    <strong th:text="${fmt.time(appointment.startsAt)}">09:00</strong>
+                                    <span class="mx-1">·</span>
+                                    <span th:text="${appointment.customer.name}">Müşteri</span>
+                                    <div class="record-meta" th:text="${appointment.vehicle.plate}">34ABC123</div>
+                                </div>
+                                <span class="sd-badge"
+                                      th:classappend="${' sd-badge-' + appointment.status.badgeClass}"
+                                      th:text="${appointment.status.label}">Planlandı</span>
+                            </div>
+                            <div class="record-meta mt-2" th:if="${appointment.notes != null}" th:text="${appointment.notes}">—</div>
+                            <div class="d-flex flex-wrap gap-1 mt-2">
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="${'tel:' + appointment.customer.phone}">Ara</a>
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:if="${appointment.status.name() != 'IPTAL'}"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                   th:href="@{/work-orders/new(customerId=${appointment.customer.id},vehicleId=${appointment.vehicle.id})}">
+                                    İş Emri Aç
+                                </a>
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                   th:href="@{/appointments/{id}/edit(id=${appointment.id})}">Düzenle</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state" th:if="${appointments.isEmpty()}">
+                    <i class="bi bi-calendar3"></i>
+                    <strong>Bu gün için randevu yok</strong>
+                    Yeni randevu ekleyerek günlük planı oluşturabilirsiniz.
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

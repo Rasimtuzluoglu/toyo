@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Giriş')}"></head>
+<body>
+<div class="auth-page">
+    <section class="auth-brand">
+        <div class="auth-brand-top">
+            <span class="sd-brand-mark">
+                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+            </span>
+            <div class="sd-brand-text">
+                <strong>Toyota Plaza Öztoprak</strong>
+                <span>Yetkili Servis ve Bakım</span>
+            </div>
+        </div>
+        <div>
+            <h1>Toyota Plaza Öztoprak'ta her kayıt, tek bir defterde.</h1>
+            <p>
+                Müşteri ve araç kayıtları, iş emirleri, cari hesaplar ve tahsilatlar.
+                Dağınık Excel dosyaları yerine işletmenizin güncel durumunu tek ekrandan yönetin.
+            </p>
+            <ul class="auth-features">
+                <li><i class="bi bi-check2-circle"></i> Müşteri, araç ve servis geçmişi</li>
+                <li><i class="bi bi-check2-circle"></i> İş emrinden otomatik cari borç</li>
+                <li><i class="bi bi-check2-circle"></i> Tahsilat, bakiye ve günlük raporlar</li>
+                <li><i class="bi bi-check2-circle"></i> Rol bazlı yetkilendirme ve denetim kaydı</li>
+            </ul>
+        </div>
+        <div class="small" style="color:#8fa6c2;">Yerel ağ kurulumu · Docker ile çalışır · Veriler sizin sunucunuzda</div>
+    </section>
+
+    <section class="auth-form-wrap">
+        <div class="auth-mobile-brand d-lg-none">
+            <span class="sd-brand-mark">
+                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+            </span>
+            <div class="sd-brand-text">
+                <strong>Toyota Plaza Öztoprak</strong>
+                <span>Yetkili Servis ve Bakım</span>
+            </div>
+        </div>
+        <div class="auth-card">
+            <h2>Oturum açın</h2>
+            <p class="lead">Devam etmek için kullanıcı bilgilerinizi girin.</p>
+
+            <div class="alert alert-danger" th:if="${param.error}" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>
+                Kullanıcı adı veya parola hatalı. Lütfen tekrar deneyin.
+            </div>
+            <div class="alert alert-success" th:if="${param.logout}" role="status">
+                Güvenli biçimde çıkış yaptınız.
+            </div>
+            <div class="alert alert-success" th:if="${successMessage}" role="status"
+                 th:text="${successMessage}"></div>
+
+            <form th:action="@{/login}" method="post" data-submit-once>
+                <div class="mb-3">
+                    <label class="form-label" for="username">Kullanıcı adı</label>
+                    <input class="form-control" id="username" name="username" type="text"
+                           autocomplete="username" required autofocus maxlength="50">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="password">Parola</label>
+                    <div class="input-group">
+                        <input class="form-control" id="password" name="password" type="password"
+                               autocomplete="current-password" required>
+                        <button class="btn btn-outline-secondary" type="button"
+                                data-password-toggle="password" aria-label="Parolayı göster">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                    Giriş yap
+                </button>
+            </form>
+            <div class="auth-footer">
+                İlk kurulum henüz yapılmadıysa <strong>/setup</strong> adresinden işletme sahibi
+                (patron) hesabı oluşturulur.
+            </div>
+        </div>
+    </section>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

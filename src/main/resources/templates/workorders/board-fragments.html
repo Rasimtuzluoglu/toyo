@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<div th:fragment="orderCard(order, ageLabel)" class="kanban-card" draggable="true"
+     th:attr="data-order-id=${order.id},data-status=${order.status.name()}">
+    <div class="kanban-card-top">
+        <a class="kanban-plate" th:href="@{/work-orders/{id}(id=${order.id})}"
+           th:text="${order.vehicle.plate}">34ABC123</a>
+        <span class="sd-badge"
+              th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+              th:text="${order.status.label}">Bekliyor</span>
+    </div>
+    <a class="kanban-order" th:href="@{/work-orders/{id}(id=${order.id})}"
+       th:text="${order.orderNo}">IS-0000</a>
+    <div class="kanban-customer" th:text="${order.customer.name}">Müşteri</div>
+    <div class="kanban-meta">
+        <span th:text="${ageLabel}">Bugün açıldı</span>
+        <strong class="money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</strong>
+    </div>
+    <div class="kanban-actions">
+        <span sec:authorize="hasAnyRole('PATRON','SERVIS')" class="d-inline-flex flex-wrap gap-1">
+            <form th:each="next : ${order.status.allowedTransitions()}"
+                  th:if="${next.name() != 'IPTAL'}"
+                  th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
+                  th:attr="data-confirm=${'Bu iş emri ' + next.label + ' durumuna alınacak. Devam edilsin mi?'}"
+                  data-submit-once class="d-inline">
+                <input type="hidden" name="status" th:value="${next.name()}">
+                <input type="hidden" name="returnTo" value="board">
+                <button class="btn btn-sm" type="submit"
+                        th:classappend="${next.name() == 'TAMAMLANDI' ? 'btn-primary' : (next.name() == 'TESLIM_EDILDI' ? 'btn-success' : 'btn-navy')}">
+                    <i class="bi me-1"
+                       th:classappend="${next.name() == 'TAMAMLANDI' ? 'bi-check2-circle' : (next.name() == 'TESLIM_EDILDI' ? 'bi-box-seam' : 'bi-play-circle')}"></i>
+                    <span th:text="${next.actionLabel}">İşleme Al</span>
+                </button>
+            </form>
+        </span>
+        <a class="btn btn-outline-secondary btn-sm" th:href="@{/work-orders/{id}(id=${order.id})}">Detay</a>
+    </div>
+</div>
+
+<div th:fragment="finishedCard(order)" class="kanban-card" draggable="true"
+     th:attr="data-order-id=${order.id},data-status=${order.status.name()}">
+    <div class="kanban-card-top">
+        <a class="kanban-plate" th:href="@{/work-orders/{id}(id=${order.id})}"
+           th:text="${order.vehicle.plate}">34ABC123</a>
+        <span class="sd-badge"
+              th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+              th:text="${order.status.label}">Tamamlandı</span>
+    </div>
+    <a class="kanban-order" th:href="@{/work-orders/{id}(id=${order.id})}"
+       th:text="${order.orderNo}">IS-0000</a>
+    <div class="kanban-customer" th:text="${order.customer.name}">Müşteri</div>
+    <div class="kanban-meta">
+        <span th:text="${fmt.dateTime(order.deliveredAt != null ? order.deliveredAt : order.closedAt)}">01.01.2026</span>
+        <strong class="money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</strong>
+    </div>
+    <div class="kanban-actions">
+        <span sec:authorize="hasAnyRole('PATRON','SERVIS')" class="d-inline-flex flex-wrap gap-1">
+            <form th:each="next : ${order.status.allowedTransitions()}"
+                  th:if="${next.name() != 'IPTAL'}"
+                  th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
+                  th:attr="data-confirm=${'Bu iş emri ' + next.label + ' durumuna alınacak. Devam edilsin mi?'}"
+                  data-submit-once class="d-inline">
+                <input type="hidden" name="status" th:value="${next.name()}">
+                <input type="hidden" name="returnTo" value="board">
+                <button class="btn btn-sm btn-success" type="submit">
+                    <i class="bi bi-box-seam me-1"></i>
+                    <span th:text="${next.actionLabel}">Teslim Et</span>
+                </button>
+            </form>
+        </span>
+        <a class="btn btn-outline-secondary btn-sm" th:href="@{/work-orders/{id}(id=${order.id})}">Detay</a>
+    </div>
+</div>
+
+</body>
+</html>

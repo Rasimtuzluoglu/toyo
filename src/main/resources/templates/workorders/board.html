@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Günlük İşler')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('board')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Servis Operasyonu</div>
+                    <h1 class="page-title">Günlük İşler</h1>
+                    <p class="page-subtitle">
+                        Bitmemiş işler her gün burada görünmeye devam eder; tamamlanan veya teslim edilen işler
+                        ertesi gün listeden kalkar.
+                    </p>
+                </div>
+                <div class="page-actions" sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments}">
+                        <i class="bi bi-calendar3 me-1"></i> Randevular
+                    </a>
+                    <a class="btn btn-primary" th:href="@{/work-orders/new}">
+                        <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-hourglass-split"></i></span>
+                    <div class="stat-value" th:text="${openRows.size()}">0</div>
+                    <div class="stat-label">Devam eden iş</div>
+                    <div class="stat-hint">Bekleyen ve işlemdeki iş emirleri</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-check2-circle"></i></span>
+                    <div class="stat-value" th:text="${finishedToday.size()}">0</div>
+                    <div class="stat-label">Bugün biten iş</div>
+                    <div class="stat-hint">Tamamlanan veya teslim edilen</div>
+                </div>
+            </div>
+
+            <div class="kanban-board">
+                <section class="kanban-column" aria-label="Bekleyen işler" data-drop-status="BEKLIYOR">
+                    <div class="kanban-column-header">
+                        <h2><span class="status-dot dot-bekliyor"></span>Bekliyor</h2>
+                        <span class="kanban-count" th:text="${waitingRows.size()}">0</span>
+                    </div>
+                    <div class="kanban-list">
+                        <th:block th:each="row : ${waitingRows}">
+                            <div th:replace="~{workorders/board-fragments :: orderCard(${row.order}, ${row.ageLabel})}"></div>
+                        </th:block>
+                        <div class="kanban-empty" th:if="${waitingRows.isEmpty()}">Bekleyen iş yok.</div>
+                    </div>
+                </section>
+
+                <section class="kanban-column" aria-label="İşlemdeki işler" data-drop-status="ISLEMDE">
+                    <div class="kanban-column-header">
+                        <h2><span class="status-dot dot-islemde"></span>İşlemde</h2>
+                        <span class="kanban-count" th:text="${inProgressRows.size()}">0</span>
+                    </div>
+                    <div class="kanban-list">
+                        <th:block th:each="row : ${inProgressRows}">
+                            <div th:replace="~{workorders/board-fragments :: orderCard(${row.order}, ${row.ageLabel})}"></div>
+                        </th:block>
+                        <div class="kanban-empty" th:if="${inProgressRows.isEmpty()}">İşlemde araç yok.</div>
+                    </div>
+                </section>
+
+                <section class="kanban-column" aria-label="Bugün tamamlanan işler" data-drop-status="TAMAMLANDI">
+                    <div class="kanban-column-header">
+                        <h2><span class="status-dot dot-tamamlandi"></span>Tamamlandı</h2>
+                        <span class="kanban-count" th:text="${completedRows.size()}">0</span>
+                    </div>
+                    <div class="kanban-list">
+                        <th:block th:each="order : ${completedRows}">
+                            <div th:replace="~{workorders/board-fragments :: finishedCard(${order})}"></div>
+                        </th:block>
+                        <div class="kanban-empty" th:if="${completedRows.isEmpty()}">Tamamlanan iş yok.</div>
+                    </div>
+                </section>
+
+                <section class="kanban-column" aria-label="Bugün teslim edilen işler" data-drop-status="TESLIM_EDILDI">
+                    <div class="kanban-column-header">
+                        <h2><span class="status-dot dot-teslim_edildi"></span>Teslim Edildi</h2>
+                        <span class="kanban-count" th:text="${deliveredRows.size()}">0</span>
+                    </div>
+                    <div class="kanban-list">
+                        <th:block th:each="order : ${deliveredRows}">
+                            <div th:replace="~{workorders/board-fragments :: finishedCard(${order})}"></div>
+                        </th:block>
+                        <div class="kanban-empty" th:if="${deliveredRows.isEmpty()}">Teslim edilen iş yok.</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+
+<form id="kanbanMoveForm" method="post" th:action="@{/work-orders/0/status}" class="d-none">
+    <input type="hidden" name="status" id="kanbanMoveStatus">
+    <input type="hidden" name="returnTo" value="board">
+</form>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Müşteri Kaydı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('customers')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Müşteri Kaydı</div>
+                    <h1 class="page-title" th:text="${customer == null ? 'Yeni Müşteri' : 'Müşteri Düzenle'}">Yeni Müşteri</h1>
+                    <p class="page-subtitle">Telefon numarası ve isim aynıysa mükerrer kayıt oluşturulamaz.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary"
+                       th:href="${customer == null} ? @{/customers} : @{/customers/{id}(id=${customer.id})}">
+                        <i class="bi bi-arrow-left me-1"></i> Geri
+                    </a>
+                </div>
+            </div>
+
+            <form method="post" th:object="${customerForm}"
+                  th:action="${customer == null} ? @{/customers} : @{/customers/{id}(id=${customer.id})}"
+                  data-submit-once>
+                <input type="hidden" name="formToken" th:if="${customer == null}" th:value="${formToken}">
+                <div th:replace="~{fragments/layout :: globalErrors}"></div>
+
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Temel bilgiler</h2>
+                        <span class="record-meta"><span class="text-danger">*</span> zorunlu alan</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="type">Müşteri türü <span class="required">*</span></label>
+                                <select class="form-select" id="type" th:field="*{type}"
+                                        th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
+                                    <option th:each="t : ${types}" th:value="${t.name()}" th:text="${t.label}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{type}"></div>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label" for="name">Ad / firma unvanı <span class="required">*</span></label>
+                                <input class="form-control" id="name" type="text" th:field="*{name}"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" maxlength="200" required>
+                                <div class="invalid-feedback" th:errors="*{name}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="phone">Telefon <span class="required">*</span></label>
+                                <input class="form-control" id="phone" type="tel" th:field="*{phone}"
+                                       th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"
+                                       placeholder="0532 000 00 00" maxlength="30" required>
+                                <div class="invalid-feedback" th:errors="*{phone}"></div>
+                                <div class="form-text">Boşluk ve tire kullanabilirsiniz; numara normalize edilir.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="email">E-posta</label>
+                                <input class="form-control" id="email" type="email" th:field="*{email}"
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" maxlength="150">
+                                <div class="invalid-feedback" th:errors="*{email}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="active">Durum</label>
+                                <div th:if="${customer == null or currentUser.role.name() == 'PATRON'}">
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" id="active" type="checkbox" th:field="*{active}">
+                                        <label class="form-check-label" for="active">Aktif müşteri</label>
+                                    </div>
+                                </div>
+                                <div th:unless="${customer == null or currentUser.role.name() == 'PATRON'}">
+                                    <input type="hidden" th:field="*{active}">
+                                    <div class="form-control-plaintext">
+                                        <span class="sd-badge"
+                                              th:classappend="${customer.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                              th:text="${customer.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                        <span class="form-text d-block">Durumu yalnızca işletme sahibi (patron) değiştirebilir.</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="taxOffice">Vergi dairesi</label>
+                                <input class="form-control" id="taxOffice" type="text" th:field="*{taxOffice}"
+                                       th:classappend="${#fields.hasErrors('taxOffice')} ? 'is-invalid'" maxlength="100">
+                                <div class="invalid-feedback" th:errors="*{taxOffice}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="taxNumber">Vergi / TC kimlik no</label>
+                                <input class="form-control" id="taxNumber" type="text" th:field="*{taxNumber}"
+                                       th:classappend="${#fields.hasErrors('taxNumber')} ? 'is-invalid'" maxlength="20">
+                                <div class="invalid-feedback" th:errors="*{taxNumber}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="address">Adres</label>
+                                <textarea class="form-control" id="address" rows="2" th:field="*{address}"
+                                          th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'" maxlength="500"></textarea>
+                                <div class="invalid-feedback" th:errors="*{address}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="note">Açıklama</label>
+                                <textarea class="form-control" id="note" rows="3" th:field="*{note}"
+                                          th:classappend="${#fields.hasErrors('note')} ? 'is-invalid'" maxlength="1000"></textarea>
+                                <div class="invalid-feedback" th:errors="*{note}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary"
+                           th:href="${customer == null} ? @{/customers} : @{/customers/{id}(id=${customer.id})}">Vazgeç</a>
+                        <button class="btn btn-primary" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2 me-1"></i>
+                            <span th:text="${customer == null ? 'Müşteriyi Kaydet' : 'Değişiklikleri Kaydet'}">Kaydet</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

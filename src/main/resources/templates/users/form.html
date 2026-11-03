@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Yeni Kullanıcı')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('users')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Yönetim</div>
+                    <h1 class="page-title">Yeni Kullanıcı</h1>
+                    <p class="page-subtitle">Parola en az 10 karakter olmalı; büyük harf, küçük harf ve rakam içermelidir.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/users}">
+                        <i class="bi bi-arrow-left me-1"></i> Kullanıcılar
+                    </a>
+                </div>
+            </div>
+
+            <form th:action="@{/users}" method="post" th:object="${userForm}" data-submit-once>
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Kullanıcı bilgileri</h2>
+                    </div>
+                    <div class="sd-card-body">
+                        <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="fullName">Ad soyad <span class="required">*</span></label>
+                                <input class="form-control" id="fullName" type="text" th:field="*{fullName}"
+                                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'" maxlength="100" required>
+                                <div class="invalid-feedback" th:errors="*{fullName}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="username">Kullanıcı adı <span class="required">*</span></label>
+                                <input class="form-control" id="username" type="text" th:field="*{username}"
+                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                                       autocomplete="off" maxlength="50" required>
+                                <div class="invalid-feedback" th:errors="*{username}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="role">Rol <span class="required">*</span></label>
+                                <select class="form-select" id="role" th:field="*{role}"
+                                        th:classappend="${#fields.hasErrors('role')} ? 'is-invalid'">
+                                    <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${r.label}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{role}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="password">Parola <span class="required">*</span></label>
+                                <input class="form-control" id="password" type="password" th:field="*{password}"
+                                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                       autocomplete="new-password" required>
+                                <div class="invalid-feedback" th:errors="*{password}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="confirmPassword">Parola tekrarı <span class="required">*</span></label>
+                                <input class="form-control" id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                                       th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                                       autocomplete="new-password" required>
+                                <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary" th:href="@{/users}">Vazgeç</a>
+                        <button class="btn btn-primary" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2 me-1"></i> Kullanıcıyı Kaydet
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

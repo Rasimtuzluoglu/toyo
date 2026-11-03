@@ -1,0 +1,82 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: servisdefteri-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-servisdefteri}
+      POSTGRES_USER: ${POSTGRES_USER:-servisdefteri}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD .env dosyasinda tanimlanmalidir}
+      TZ: Europe/Istanbul
+      PGTZ: Europe/Istanbul
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Veritabani portu bilerek yayinlanmaz. Yerel gelistirme icin compose.dev.yml kullanin.
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: servisdefteri:1.0.0
+    container_name: servisdefteri-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 18080
+      SESSION_TIMEOUT: ${SESSION_TIMEOUT:-2h}
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-servisdefteri}
+      DB_USERNAME: ${POSTGRES_USER:-servisdefteri}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD .env dosyasinda tanimlanmalidir}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-servisdefteri}
+      INITIAL_ADMIN_USERNAME: ${INITIAL_ADMIN_USERNAME:-}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD:-}
+      INITIAL_ADMIN_FULL_NAME: ${INITIAL_ADMIN_FULL_NAME:-Isletme Sahibi}
+      BACKUP_ENABLED: ${BACKUP_ENABLED:-true}
+      BACKUP_DIR: /app/backups
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      BACKUP_CRON: ${BACKUP_CRON:-0 0 2 * * *}
+      THYMELEAF_CACHE: "true"
+      TZ: Europe/Istanbul
+    ports:
+      - "${APP_BIND_ADDRESS:-0.0.0.0}:${APP_PORT:-18080}:18080"
+    volumes:
+      - backups:/app/backups
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pgdata:
+    name: servisdefteri-pgdata
+  backups:
+    name: servisdefteri-backups
+
+networks:
+  internal:
+    driver: bridge

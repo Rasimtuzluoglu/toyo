@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Randevu')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('appointments')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Servis Planlama</div>
+                    <h1 class="page-title" th:text="${editing ? 'Randevuyu Düzenle' : 'Yeni Randevu'}">Yeni Randevu</h1>
+                    <p class="page-subtitle">Müşteri ve aracı seçin, tarih-saat ve notu girin.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/appointments}">
+                        <i class="bi bi-arrow-left me-1"></i> Randevulara Dön
+                    </a>
+                </div>
+            </div>
+
+            <form method="post"
+                  th:action="${editing} ? @{/appointments/{id}(id=${appointment.id})} : @{/appointments}"
+                  th:object="${appointmentForm}" data-submit-once>
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Randevu bilgileri</h2>
+                        <span class="record-meta"><span class="text-danger">*</span> zorunlu alan</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="customerSelect">Müşteri <span class="required">*</span></label>
+                                <select class="form-select" id="customerSelect" th:field="*{customerId}"
+                                        th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid'">
+                                    <option value="">Müşteri seçin</option>
+                                    <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{customerId}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="vehicleSelect">Araç <span class="required">*</span></label>
+                                <select class="form-select" id="vehicleSelect" th:field="*{vehicleId}"
+                                        th:classappend="${#fields.hasErrors('vehicleId')} ? 'is-invalid'">
+                                    <option value="" data-empty>Önce müşteri seçin</option>
+                                    <option th:each="v : ${vehicles}" th:value="${v.id}"
+                                            th:attr="data-customer=${v.customer.id}"
+                                            th:text="${v.plate + ' · ' + (v.brand == null ? '' : v.brand) + ' ' + (v.model == null ? '' : v.model)}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{vehicleId}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="startsAt">Tarih ve saat <span class="required">*</span></label>
+                                <input class="form-control" id="startsAt" type="datetime-local" th:field="*{startsAt}"
+                                       th:classappend="${#fields.hasErrors('startsAt')} ? 'is-invalid'" required>
+                                <div class="invalid-feedback" th:errors="*{startsAt}"></div>
+                            </div>
+                            <div class="col-md-6" th:if="${editing}">
+                                <label class="form-label" for="appointmentStatus">Durum</label>
+                                <select class="form-select" id="appointmentStatus" th:field="*{status}">
+                                    <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.label}"></option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="appointmentNotes">Not</label>
+                                <textarea class="form-control" id="appointmentNotes" rows="3" th:field="*{notes}"
+                                          maxlength="1000" placeholder="Randevu nedeni, müşteri talebi vb."></textarea>
+                                <div class="invalid-feedback d-block" th:errors="*{notes}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary" th:href="@{/appointments}">Vazgeç</a>
+                        <button class="btn btn-primary" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2 me-1"></i>
+                            <span th:text="${editing ? 'Değişiklikleri Kaydet' : 'Randevuyu Kaydet'}">Randevuyu Kaydet</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

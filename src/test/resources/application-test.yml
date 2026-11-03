@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    clean-disabled: true
+  thymeleaf:
+    cache: false
+
+app:
+  initial-admin:
+    username: ""
+    password: ""
+    full-name: ""
+  backup:
+    enabled: false
+    directory: ${java.io.tmpdir}/servisdefteri-test-backups
+
+logging:
+  level:
+    root: WARN
+    tr.com.servisdefteri: INFO

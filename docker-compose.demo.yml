@@ -1,0 +1,64 @@
+services:
+  demo-db:
+    image: postgres:16-alpine
+    container_name: servisdefteri-demo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: servisdefteri_demo
+      POSTGRES_USER: servisdefteri
+      POSTGRES_PASSWORD: demo-local-password
+      TZ: Europe/Istanbul
+      PGTZ: Europe/Istanbul
+    volumes:
+      - demo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U servisdefteri -d servisdefteri_demo"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - demo-internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  demo-app:
+    image: servisdefteri:1.0.0
+    container_name: servisdefteri-demo-app
+    restart: unless-stopped
+    depends_on:
+      demo-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      APP_DEMO_ENABLED: "true"
+      SERVER_PORT: 18080
+      DB_URL: jdbc:postgresql://demo-db:5432/servisdefteri_demo
+      DB_USERNAME: servisdefteri
+      DB_PASSWORD: demo-local-password
+      DB_HOST: demo-db
+      DB_PORT: 5432
+      DB_NAME: servisdefteri_demo
+      BACKUP_ENABLED: "false"
+      THYMELEAF_CACHE: "false"
+      TZ: Europe/Istanbul
+    ports:
+      - "18081:18080"
+    networks:
+      - demo-internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  demo-pgdata:
+    name: servisdefteri-demo-pgdata
+
+networks:
+  demo-internal:
+    driver: bridge

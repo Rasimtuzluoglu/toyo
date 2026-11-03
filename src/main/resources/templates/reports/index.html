@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Raporlar')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Analiz</div>
+                    <h1 class="page-title">Raporlar</h1>
+                    <p class="page-subtitle">Raporlar gerçek veritabanı kayıtlarından, seçilen tarih aralığında üretilir.</p>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-cash-coin"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(monthCollections)}">0,00 ₺</div>
+                    <div class="stat-label">Bu ay tahsilat</div>
+                    <div class="stat-hint" th:text="${fmt.date(start) + ' - ' + fmt.date(end)}">Dönem</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-clipboard-check"></i></span>
+                    <div class="stat-value" th:text="${openWorkOrders}">0</div>
+                    <div class="stat-label">Açık iş emri</div>
+                    <div class="stat-hint">Bekleyen + işlemde</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/collections}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
+                            <h2 class="h6 fw-bold mb-1">Günlük ve dönemsel tahsilat</h2>
+                            <p class="record-meta mb-0">Tarih ve ödeme yöntemine göre tahsilat dökümü, Excel ve CSV dışa aktarım.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/balances}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon red"><i class="bi bi-wallet2"></i></span>
+                            <h2 class="h6 fw-bold mb-1">Müşteri bazında bakiye</h2>
+                            <p class="record-meta mb-0">Borçlu, alacaklı ve dengede olan müşteri bakiyeleri.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/ledger}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon navy"><i class="bi bi-journal-text"></i></span>
+                            <h2 class="h6 fw-bold mb-1">Cari hareket dökümü</h2>
+                            <p class="record-meta mb-0">Müşteri seçerek tarih aralığında tüm borç ve alacak hareketleri.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/aging}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon amber"><i class="bi bi-hourglass-split"></i></span>
+                            <h2 class="h6 fw-bold mb-1">Cari yaşlandırma</h2>
+                            <p class="record-meta mb-0">Açık borçların 0-30, 31-60 ve 61+ gün dağılımı.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/maintenance}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon red"><i class="bi bi-bell"></i></span>
+                            <h2 class="h6 fw-bold mb-1">Bakım hatırlatmaları</h2>
+                            <p class="record-meta mb-0">180 gün veya 10.000 km geçen, aranacak müşteriler.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/work-orders}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon amber"><i class="bi bi-clipboard-data"></i></span>
+                            <h2 class="h6 fw-bold mb-1">İş emri durum raporu</h2>
+                            <p class="record-meta mb-0">Durum bazında iş emri adetleri, tutarlar ve iş emri listesi.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/service-parts}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon blue"><i class="bi bi-tools"></i></span>
+                            <h2 class="h6 fw-bold mb-1">Hizmet ve parça tutarları</h2>
+                            <p class="record-meta mb-0">Dönem içindeki işçilik ve parça kalemlerinin toplamları.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <a class="sd-card d-block h-100 text-reset" th:href="@{/reports/vehicle-history}">
+                        <div class="sd-card-body">
+                            <span class="stat-icon navy"><i class="bi bi-car-front"></i></span>
+                            <h2 class="h6 fw-bold mb-1">Araç servis geçmişi</h2>
+                            <p class="record-meta mb-0">Araç seçerek geçmiş iş emirleri ve son servis tarihi.</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

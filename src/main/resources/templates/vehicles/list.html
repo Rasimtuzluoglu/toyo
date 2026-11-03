@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Araçlar')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('vehicles')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Servis Filosu</div>
+                    <h1 class="page-title">Araçlar</h1>
+                    <p class="page-subtitle">Plaka, marka veya müşteri adına göre araçları bulun.</p>
+                </div>
+                <div class="page-actions">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download me-1"></i> Dışa Aktar
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/vehicles/export.xlsx(q=${q},active=${active},customerId=${customerId})}">
+                                    <i class="bi bi-file-earmark-excel me-2 text-success"></i> Excel (.xlsx)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item"
+                                   th:href="@{/vehicles/export.csv(q=${q},active=${active},customerId=${customerId})}">
+                                    <i class="bi bi-filetype-csv me-2"></i> CSV
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <a class="btn btn-primary" th:href="@{/vehicles/new}"
+                       sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                        <i class="bi bi-plus-lg me-1"></i> Yeni Araç
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form class="filter-bar" method="get" th:action="@{/vehicles}">
+                        <div>
+                            <label class="form-label" for="q">Ara</label>
+                            <input class="form-control" id="q" name="q" type="search" th:value="${q}"
+                                   placeholder="Plaka, marka, model veya müşteri">
+                        </div>
+                        <div>
+                            <label class="form-label" for="customerId">Müşteri</label>
+                            <select class="form-select" id="customerId" name="customerId">
+                                <option value="">Tümü</option>
+                                <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}"
+                                        th:selected="${customerId != null and customerId == c.id}"></option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label" for="active">Durum</label>
+                            <select class="form-select" id="active" name="active">
+                                <option value="" th:selected="${active == ''}">Tümü</option>
+                                <option value="true" th:selected="${active == 'true'}">Aktif</option>
+                                <option value="false" th:selected="${active == 'false'}">Pasif</option>
+                            </select>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-search me-1"></i> Filtrele
+                            </button>
+                            <a class="btn btn-outline-secondary" th:href="@{/vehicles}">Temizle</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2>Araç listesi</h2>
+                    <span class="record-meta" th:text="${vehicles.totalElements} + ' kayıt'">0 kayıt</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!vehicles.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Plaka</th>
+                                <th>Araç</th>
+                                <th>Müşteri</th>
+                                <th>Yıl</th>
+                                <th class="text-end">Kilometre</th>
+                                <th>Durum</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="vehicle : ${vehicles.content}">
+                                <td>
+                                    <a class="fw-semibold" th:href="@{/vehicles/{id}(id=${vehicle.id})}"
+                                       th:text="${vehicle.plate}">34ABC123</a>
+                                </td>
+                                <td th:text="${(vehicle.brand == null ? '' : vehicle.brand) + ' ' + (vehicle.model == null ? '' : vehicle.model)}">
+                                    Marka Model
+                                </td>
+                                <td>
+                                    <a th:href="@{/customers/{id}(id=${vehicle.customer.id})}"
+                                       th:text="${vehicle.customer.name}">Müşteri</a>
+                                </td>
+                                <td th:text="${vehicle.modelYear == null ? '—' : vehicle.modelYear}">2020</td>
+                                <td class="text-end money" th:text="${fmt.number(vehicle.currentMileage) + ' km'}">0 km</td>
+                                <td>
+                                    <span class="sd-badge"
+                                          th:classappend="${vehicle.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                          th:text="${vehicle.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="action-row justify-content-end">
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/vehicles/{id}(id=${vehicle.id})}">Detay</a>
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                           th:href="@{/work-orders/new(customerId=${vehicle.customer.id},vehicleId=${vehicle.id})}">İş Emri</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${vehicles.isEmpty()}">
+                    <i class="bi bi-car-front"></i>
+                    <strong>Araç bulunamadı</strong>
+                    Filtreleri değiştirin veya yeni bir araç kaydı oluşturun.
+                </div>
+                <div class="sd-card-footer d-flex justify-content-between align-items-center"
+                     th:if="${vehicles.totalPages > 1}">
+                    <span class="record-meta"
+                          th:text="${'Sayfa ' + (vehicles.number + 1) + ' / ' + vehicles.totalPages}">Sayfa 1 / 1</span>
+                    <nav aria-label="Araç sayfaları">
+                        <ul class="pagination pagination-sm">
+                            <li class="page-item" th:classappend="${vehicles.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/vehicles(page=${vehicles.number - 1},q=${q},active=${active},customerId=${customerId})}">Önceki</a>
+                            </li>
+                            <li class="page-item" th:classappend="${vehicles.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/vehicles(page=${vehicles.number + 1},q=${q},active=${active},customerId=${customerId})}">Sonraki</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

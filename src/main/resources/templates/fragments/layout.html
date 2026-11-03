@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#12253d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Toyota Plaza">
+    <title th:text="${title} + ' · Toyota Plaza Öztoprak'">Toyota Plaza Öztoprak</title>
+    <link rel="icon" type="image/png" th:href="@{/images/toyota.png}">
+    <link rel="apple-touch-icon" th:href="@{/images/toyota.png}">
+    <link rel="manifest" th:href="@{/manifest.json}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v=1.0.0)}">
+</head>
+<body>
+
+<aside class="sd-sidebar" th:fragment="sidebar(active)" aria-label="Ana menü">
+    <a class="sd-brand" th:href="@{/}">
+        <span class="sd-brand-mark">
+            <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+        </span>
+        <span class="sd-brand-text">
+            <strong>Toyota Plaza Öztoprak</strong>
+            <span>Yetkili Servis ve Bakım</span>
+        </span>
+    </a>
+
+    <nav class="sd-nav">
+        <div class="sd-nav-label">İşletme</div>
+        <a class="sd-nav-link" th:classappend="${active == 'dashboard'} ? ' active'" th:href="@{/}">
+            <i class="bi bi-grid-1x2" aria-hidden="true"></i> Ana Panel
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'board'} ? ' active'"
+           th:href="@{/work-orders/board}" data-shortcut-board aria-keyshortcuts="Alt+B">
+            <i class="bi bi-calendar2-check" aria-hidden="true"></i> Günlük İşler
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'appointments'} ? ' active'"
+           th:href="@{/appointments}">
+            <i class="bi bi-calendar3" aria-hidden="true"></i> Randevular
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'customers'} ? ' active'" th:href="@{/customers}">
+            <i class="bi bi-people" aria-hidden="true"></i> Müşteriler
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'vehicles'} ? ' active'" th:href="@{/vehicles}">
+            <i class="bi bi-car-front" aria-hidden="true"></i> Araçlar
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'workorders'} ? ' active'" th:href="@{/work-orders}">
+            <i class="bi bi-clipboard-check" aria-hidden="true"></i> İş Emirleri
+        </a>
+
+        <div class="sd-nav-label" sec:authorize="hasAnyRole('PATRON','MUHASEBE')">Finans</div>
+        <a class="sd-nav-link" th:classappend="${active == 'accounts'} ? ' active'" th:href="@{/accounts}"
+           sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+            <i class="bi bi-journal-text" aria-hidden="true"></i> Cari Hesaplar
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'payments'} ? ' active'" th:href="@{/payments}"
+           sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+            <i class="bi bi-cash-coin" aria-hidden="true"></i> Tahsilatlar
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'reports'} ? ' active'" th:href="@{/reports}"
+           sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+            <i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Raporlar
+        </a>
+
+        <div class="sd-nav-label" sec:authorize="hasRole('PATRON')">Yönetim</div>
+        <a class="sd-nav-link" th:classappend="${active == 'users'} ? ' active'" th:href="@{/users}"
+           sec:authorize="hasRole('PATRON')">
+            <i class="bi bi-person-gear" aria-hidden="true"></i> Kullanıcılar
+        </a>
+        <a class="sd-nav-link" th:classappend="${active == 'settings'} ? ' active'" th:href="@{/settings}"
+           sec:authorize="hasRole('PATRON')">
+            <i class="bi bi-sliders" aria-hidden="true"></i> Ayarlar
+        </a>
+    </nav>
+
+    <div class="sd-sidebar-footer">
+        <strong>v1.0.0</strong>
+        Yerel ağ · Türkçe arayüz
+    </div>
+</aside>
+
+<div class="sd-sidebar-overlay" data-sidebar-overlay></div>
+
+<header class="sd-topbar" th:fragment="topbar">
+    <button type="button" class="sd-menu-toggle" data-sidebar-toggle aria-label="Menüyü aç">
+        <i class="bi bi-list" aria-hidden="true"></i>
+    </button>
+    <form class="sd-search" th:action="@{/search}" method="get" role="search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input type="search" name="q" placeholder="Müşteri, plaka veya iş emri ara…"
+               aria-label="Genel arama" minlength="2">
+    </form>
+    <div class="sd-topbar-actions">
+        <button class="btn btn-outline-secondary btn-sm d-none d-md-inline-flex" type="button"
+                data-command-open aria-label="Hızlı komut" title="Hızlı komut (Ctrl+K)">
+            <i class="bi bi-command" aria-hidden="true"></i>
+        </button>
+        <button class="btn btn-outline-secondary btn-sm d-none d-md-inline-flex" type="button"
+                data-tour-start aria-label="Sunum turunu başlat" title="Sunum turu">
+            <i class="bi bi-play-circle" aria-hidden="true"></i>
+        </button>
+        <a class="btn btn-primary btn-sm d-none d-sm-inline-flex" th:href="@{/work-orders/new}"
+           sec:authorize="hasAnyRole('PATRON','SERVIS')"
+           data-shortcut-new-order aria-keyshortcuts="Alt+N">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Yeni İş Emri
+        </a>
+        <div class="dropdown">
+            <button class="sd-user dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                <span class="sd-avatar"
+                      th:text="${currentUser == null ? '?' : #strings.toUpperCase(#strings.substring(currentUser.fullName, 0, 1))}">A</span>
+                <span class="sd-user-meta">
+                    <strong th:text="${currentUser == null ? 'Kullanıcı' : currentUser.fullName}">Kullanıcı</strong>
+                    <span th:text="${currentUser == null ? '' : currentUser.role.label}">Rol</span>
+                </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li><span class="dropdown-item-text small text-muted"
+                          th:text="${currentUser == null ? '' : '@' + currentUser.username}">@kullanici</span></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item" th:href="@{/profile/password}">
+                        <i class="bi bi-shield-lock me-2"></i>Parola Değiştir
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li sec:authorize="hasRole('PATRON')">
+                    <a class="dropdown-item" th:href="@{/users}"><i class="bi bi-person-gear me-2"></i>Kullanıcılar</a>
+                </li>
+                <li sec:authorize="hasRole('PATRON')">
+                    <a class="dropdown-item" th:href="@{/settings}"><i class="bi bi-sliders me-2"></i>Ayarlar</a>
+                </li>
+                <li sec:authorize="hasRole('PATRON')">
+                    <a class="dropdown-item" th:href="@{/settings/audit}"><i class="bi bi-shield-check me-2"></i>Denetim Kaydı</a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<div th:fragment="alerts">
+    <div class="alert alert-success d-flex align-items-start gap-2" th:if="${successMessage}" role="status">
+        <i class="bi bi-check-circle-fill mt-1" aria-hidden="true"></i>
+        <div th:text="${successMessage}"></div>
+    </div>
+    <div class="alert alert-danger d-flex align-items-start gap-2" th:if="${errorMessage}" role="alert">
+        <i class="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
+        <div th:text="${errorMessage}"></div>
+    </div>
+</div>
+
+<div th:fragment="globalErrors" th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">
+    <div th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+</div>
+
+<footer class="sd-footer" th:fragment="footer">
+    <span>Toyota Plaza Öztoprak · Servis ve cari hesap yönetimi</span>
+    <span class="sd-footer-right">
+        <span>Para birimi: TRY · Saat dilimi: Europe/Istanbul</span>
+        <span th:replace="~{fragments/layout :: poweredBy}"></span>
+    </span>
+</footer>
+
+<div class="date-presets" th:fragment="datePresets">
+    <span class="record-meta">Hızlı seçim:</span>
+    <div class="btn-group btn-group-sm" role="group" aria-label="Tarih aralığı ön ayarları">
+        <button type="button" class="btn btn-outline-secondary" data-date-preset="today">Bugün</button>
+        <button type="button" class="btn btn-outline-secondary" data-date-preset="week">Bu Hafta</button>
+        <button type="button" class="btn btn-outline-secondary" data-date-preset="month">Bu Ay</button>
+        <button type="button" class="btn btn-outline-secondary" data-date-preset="last-month">Geçen Ay</button>
+    </div>
+</div>
+
+<span class="sd-powered" th:fragment="poweredBy">
+    powered by
+    <a href="https://www.linkedin.com/in/rasimtuzluoglu311/"
+       target="_blank" rel="noopener noreferrer">RasimTuzluoğlu</a>
+</span>
+
+<div th:fragment="scripts">
+    <div id="commandPalette" class="command-palette" hidden>
+        <div class="command-backdrop" data-command-close></div>
+        <div class="command-dialog" role="dialog" aria-modal="true" aria-label="Hızlı komutlar">
+            <div class="command-search">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input id="commandInput" type="search" autocomplete="off"
+                       placeholder="Sayfa veya işlem ara… (ör. yeni iş emri)">
+            </div>
+            <div class="command-results" id="commandResults">
+                <a class="command-item" data-command-item data-keywords="ana panel dashboard kokpit" th:href="@{/}">
+                    <i class="bi bi-grid-1x2"></i><span>Ana Panel</span><kbd>G</kbd>
+                </a>
+                <a class="command-item" data-command-item data-keywords="günlük işler pano kanban board" th:href="@{/work-orders/board}">
+                    <i class="bi bi-calendar2-check"></i><span>Günlük İşler</span><kbd>B</kbd>
+                </a>
+                <a class="command-item" data-command-item data-keywords="randevu takvim appointment" th:href="@{/appointments}">
+                    <i class="bi bi-calendar3"></i><span>Randevular</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="müşteri customer" th:href="@{/customers}">
+                    <i class="bi bi-people"></i><span>Müşteriler</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="araç vehicle" th:href="@{/vehicles}">
+                    <i class="bi bi-car-front"></i><span>Araçlar</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="iş emri work order" th:href="@{/work-orders}">
+                    <i class="bi bi-clipboard-check"></i><span>İş Emirleri</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="cari hesap ekstre" th:href="@{/accounts}"
+                   sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+                    <i class="bi bi-journal-text"></i><span>Cari Hesaplar</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="tahsilat ödeme payment" th:href="@{/payments}"
+                   sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+                    <i class="bi bi-cash-coin"></i><span>Tahsilatlar</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="rapor report" th:href="@{/reports}"
+                   sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+                    <i class="bi bi-graph-up-arrow"></i><span>Raporlar</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="ayarlar settings" th:href="@{/settings}"
+                   sec:authorize="hasRole('PATRON')">
+                    <i class="bi bi-sliders"></i><span>Ayarlar</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="yeni iş emri aç" th:href="@{/work-orders/new}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                    <i class="bi bi-plus-circle"></i><span>Yeni iş emri</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="yeni müşteri ekle" th:href="@{/customers/new}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                    <i class="bi bi-person-plus"></i><span>Yeni müşteri</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="yeni araç ekle" th:href="@{/vehicles/new}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                    <i class="bi bi-car-front"></i><span>Yeni araç</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="yeni tahsilat ödeme" th:href="@{/payments/new}"
+                   sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+                    <i class="bi bi-cash-coin"></i><span>Yeni tahsilat</span>
+                </a>
+                <a class="command-item" data-command-item data-keywords="yeni randevu" th:href="@{/appointments/new}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                    <i class="bi bi-calendar-plus"></i><span>Yeni randevu</span>
+                </a>
+                <button type="button" class="command-item" data-command-item data-command-tour>
+                    <i class="bi bi-play-circle"></i><span>Sunum turunu başlat</span>
+                </button>
+                <div class="command-empty" id="commandEmpty" hidden>Sonuç bulunamadı.</div>
+            </div>
+            <div class="command-footer">↑↓ gez · Enter aç · Esc kapat</div>
+        </div>
+    </div>
+
+    <div id="tourLayer" class="tour-layer" hidden>
+        <div class="tour-tooltip" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+            <div class="tour-counter" id="tourCounter"></div>
+            <h2 id="tourTitle"></h2>
+            <p id="tourText"></p>
+            <div class="tour-actions">
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="tourPrev">Geri</button>
+                <button class="btn btn-primary btn-sm" type="button" id="tourNext">İleri</button>
+                <button class="btn btn-link btn-sm text-muted" type="button" id="tourSkip">Atla</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/app.js(v=1.0.0)}"></script>
+</div>
+
+</body>
+</html>

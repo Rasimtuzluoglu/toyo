@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tahsilat Raporu')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Rapor</div>
+                    <h1 class="page-title">Tahsilat Raporu</h1>
+                    <p class="page-subtitle">Yalnızca aktif tahsilatlar dikkate alınır; iptaller dönem toplamına girmez.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/reports}">
+                        <i class="bi bi-arrow-left me-1"></i> Raporlar
+                    </a>
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/reports/collections.csv(start=${start},end=${end})}">
+                        <i class="bi bi-filetype-csv me-1"></i> CSV
+                    </a>
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/reports/collections.xlsx(start=${start},end=${end})}">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form class="filter-bar" method="get" th:action="@{/reports/collections}">
+                        <div>
+                            <label class="form-label" for="start">Başlangıç</label>
+                            <input class="form-control" id="start" name="start" type="date" th:value="${start}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="end">Bitiş</label>
+                            <input class="form-control" id="end" name="end" type="date" th:value="${end}">
+                        </div>
+                        <div th:replace="~{fragments/layout :: datePresets}"></div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-funnel me-1"></i> Uygula
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(total)}">0,00 ₺</div>
+                    <div class="stat-label">Dönem toplam tahsilat</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-calendar3"></i></span>
+                    <div class="stat-value" style="font-size:1.15rem;"
+                         th:text="${fmt.date(start) + ' - ' + fmt.date(end)}">Dönem</div>
+                    <div class="stat-label">Rapor dönemi</div>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2>Gün ve yöntem bazında tahsilat</h2>
+                    <span class="record-meta" th:text="${rows.size()} + ' satır'">0 satır</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!rows.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Ödeme Yöntemi</th>
+                                <th class="text-end">İşlem Adedi</th>
+                                <th class="text-end">Tutar</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="row : ${rows}">
+                                <td th:text="${fmt.date(row.date)}">01.01.2026</td>
+                                <td><span class="sd-badge sd-badge-neutral" th:text="${row.method.label}">Nakit</span></td>
+                                <td class="text-end money" th:text="${row.count}">0</td>
+                                <td class="text-end money fw-semibold" th:text="${fmt.money(row.total)}">0,00 ₺</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr class="table-light">
+                                <th colspan="3" class="text-end">Genel Toplam</th>
+                                <th class="text-end money" th:text="${fmt.money(total)}">0,00 ₺</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${rows.isEmpty()}">
+                    <i class="bi bi-cash-coin"></i>
+                    <strong>Tahsilat yok</strong>
+                    Seçilen dönemde aktif tahsilat kaydı bulunmuyor.
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

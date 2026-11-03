@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Kullanıcı Düzenle')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('users')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Yönetim</div>
+                    <h1 class="page-title">Kullanıcı Düzenle</h1>
+                    <p class="page-subtitle">
+                        <span th:text="${user.fullName}">Kullanıcı</span>
+                        <span th:text="'· @' + user.username"></span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/users}">
+                        <i class="bi bi-arrow-left me-1"></i> Kullanıcılar
+                    </a>
+                </div>
+            </div>
+
+            <form th:action="@{/users/{id}(id=${user.id})}" method="post" th:object="${userForm}"
+                  data-submit-once>
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Hesap bilgileri</h2>
+                    </div>
+                    <div class="sd-card-body">
+                        <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="fullName">Ad soyad <span class="required">*</span></label>
+                                <input class="form-control" id="fullName" type="text" th:field="*{fullName}"
+                                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'" maxlength="100" required>
+                                <div class="invalid-feedback" th:errors="*{fullName}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="username">Kullanıcı adı</label>
+                                <input class="form-control" id="username" type="text" th:value="${user.username}" disabled>
+                                <div class="form-text">Kullanıcı adı değiştirilemez.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="role">Rol <span class="required">*</span></label>
+                                <select class="form-select" id="role" th:field="*{role}"
+                                        th:classappend="${#fields.hasErrors('role')} ? 'is-invalid'">
+                                    <option th:each="r : ${roles}" th:value="${r.name()}" th:text="${r.label}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{role}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Durum</label>
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" id="enabled" type="checkbox" th:field="*{enabled}">
+                                    <label class="form-check-label" for="enabled">Hesap aktif</label>
+                                </div>
+                                <div class="form-text">Pasif kullanıcı oturum açamaz.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary" th:href="@{/users}">Vazgeç</a>
+                        <button class="btn btn-primary" type="submit">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                            <i class="bi bi-check2 me-1"></i> Değişiklikleri Kaydet
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

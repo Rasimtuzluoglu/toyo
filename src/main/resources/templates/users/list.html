@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Kullanıcılar')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('users')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Yönetim</div>
+                    <h1 class="page-title">Kullanıcılar</h1>
+                    <p class="page-subtitle">Roller sunucu tarafında uygulanır. Kullanıcılar silinmez, pasife alınır.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-primary" th:href="@{/users/new}">
+                        <i class="bi bi-person-plus me-1"></i> Yeni Kullanıcı
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2>Kullanıcı listesi</h2>
+                    <span class="record-meta" th:text="${users.size()} + ' kullanıcı'">0 kullanıcı</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!users.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Kullanıcı</th>
+                                <th>Kullanıcı adı</th>
+                                <th>Rol</th>
+                                <th>Durum</th>
+                                <th>Son giriş</th>
+                                <th>Kayıt</th>
+                                <th class="text-end">İşlem</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${users}">
+                                <td>
+                                    <span class="table-avatar"
+                                          th:text="${#strings.toUpperCase(#strings.substring(user.fullName, 0, 1))}">A</span>
+                                    <span class="fw-semibold" th:text="${user.fullName}">Ad Soyad</span>
+                                </td>
+                                <td class="money" th:text="${'@' + user.username}">@kullanici</td>
+                                <td>
+                                    <span class="sd-badge sd-badge-neutral" th:text="${user.role.label}">Rol</span>
+                                </td>
+                                <td>
+                                    <span class="sd-badge"
+                                          th:classappend="${user.enabled} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                          th:text="${user.enabled ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                </td>
+                                <td class="record-meta"
+                                    th:text="${user.lastLoginAt == null ? 'Hiç giriş yapmadı' : fmt.dateTime(user.lastLoginAt)}">—</td>
+                                <td class="record-meta" th:text="${fmt.dateTime(user.createdAt)}">01.01.2026</td>
+                                <td class="text-end">
+                                    <div class="action-row justify-content-end">
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/users/{id}/edit(id=${user.id})}">Düzenle</a>
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/users/{id}/password(id=${user.id})}">Parola</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${users.isEmpty()}">
+                    <i class="bi bi-person-gear"></i>
+                    <strong>Kullanıcı yok</strong>
+                    Yeni bir kullanıcı oluşturun.
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2><i class="bi bi-shield-check me-2"></i>Rol yetkileri</h2>
+                </div>
+                <div class="sd-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <strong>İşletme Sahibi (PATRON)</strong>
+                            <p class="record-meta mb-0">
+                                Tüm işlemleri görür: operasyon, finans, raporlar, kullanıcılar, ayarlar ve yedekleme.
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Muhasebe (MUHASEBE)</strong>
+                            <p class="record-meta mb-0">
+                                Tahsilat, cari hesap ve raporları yönetir; müşteri ve araç kayıtlarını görüntüler.
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Servis (SERVIS)</strong>
+                            <p class="record-meta mb-0">
+                                Müşteri, araç, iş emri ve günlük işleri yönetir; finans ekranlarına erişemez.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Hizmet ve Parça Raporu')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('reports')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Rapor</div>
+                    <h1 class="page-title">Hizmet ve Parça Tutarları</h1>
+                    <p class="page-subtitle">İptal edilen iş emirleri hariç, dönem içindeki kalem toplamları.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/reports}">
+                        <i class="bi bi-arrow-left me-1"></i> Raporlar
+                    </a>
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/reports/service-parts.csv(start=${start},end=${end})}">
+                        <i class="bi bi-filetype-csv me-1"></i> CSV
+                    </a>
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/reports/service-parts.xlsx(start=${start},end=${end})}">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form class="filter-bar" method="get" th:action="@{/reports/service-parts}">
+                        <div>
+                            <label class="form-label" for="start">Başlangıç</label>
+                            <input class="form-control" id="start" name="start" type="date" th:value="${start}">
+                        </div>
+                        <div>
+                            <label class="form-label" for="end">Bitiş</label>
+                            <input class="form-control" id="end" name="end" type="date" th:value="${end}">
+                        </div>
+                        <div th:replace="~{fragments/layout :: datePresets}"></div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-funnel me-1"></i> Uygula
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <span class="stat-icon blue"><i class="bi bi-tools"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(total)}">0,00 ₺</div>
+                    <div class="stat-label">Kalem toplamı</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-clipboard-check"></i></span>
+                    <div class="stat-value" th:text="${fmt.money(workOrderTotal)}">0,00 ₺</div>
+                    <div class="stat-label">İş emri genel toplamı</div>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2>Kalem tipi bazında toplamlar</h2>
+                    <span class="record-meta" th:text="${fmt.date(start) + ' - ' + fmt.date(end)}">Dönem</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!rows.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                            <tr>
+                                <th>Kalem Tipi</th>
+                                <th class="text-end">Toplam</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="row : ${rows}">
+                                <td>
+                                    <span class="sd-badge sd-badge-neutral" th:text="${row.type.label}">Hizmet</span>
+                                </td>
+                                <td class="text-end money fw-semibold" th:text="${fmt.money(row.total)}">0,00 ₺</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr class="table-light">
+                                <th class="text-end">Genel Toplam</th>
+                                <th class="text-end money" th:text="${fmt.money(total)}">0,00 ₺</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${rows.isEmpty()}">
+                    <i class="bi bi-tools"></i>
+                    <strong>Kalem yok</strong>
+                    Seçilen dönemde hizmet veya parça kalemi bulunmuyor.
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
