@@ -39,6 +39,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -149,6 +150,66 @@ class UsabilityIT extends BusinessTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("kayıtlı değil")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Hızlı İş Emri Oluştur")));
+    }
+
+    @Test
+    void quickPageOffersPlateLookupAndServiceShortcuts() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+
+        mockMvc.perform(get("/work-orders/quick")
+                        .param("plate", "34 LKP 001")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-quick-plate")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-quick-service")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Periyodik Bakım")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Kaydet ve Tamamla")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("34 LKP 001")));
+    }
+
+    @Test
+    void vehicleLookupReturnsRegisteredVehicleAndCustomer() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer customer = createCustomer("Plaka Sorgu Müşteri", "0555 333 44 55");
+        createVehicle(customer, "34 LKP 001");
+
+        mockMvc.perform(get("/vehicles/lookup")
+                        .param("plate", "34 lkp 001")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$.found").value(true))
+                .andExpect(jsonPath("$.plate").value("34LKP001"))
+                .andExpect(jsonPath("$.customerName").value("Plaka Sorgu Müşteri"))
+                .andExpect(jsonPath("$.mileage").value(1000));
+    }
+
+    @Test
+    void vehicleLookupReturnsNotFoundForUnknownPlate() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+
+        mockMvc.perform(get("/vehicles/lookup")
+                        .param("plate", "99 XYZ 999")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.found").value(false));
+    }
+
+    @Test
+    void quickSuccessBannerShowsNextActions() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Hızlı Banner Müşteri", "0555 909 90 90");
+        Vehicle vehicle = createVehicle(customer, "34 BNR 001");
+        WorkOrder order = createCompletedOrder(customer, vehicle, "1200.00");
+
+        mockMvc.perform(get("/work-orders/{id}", order.getId())
+                        .flashAttr("quickCreated", true)
+                        .flashAttr("quickCompleted", true)
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Yeni Hızlı İş")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tahsilat Al")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Teslim Tutanağı")));
     }
 
     @Test
@@ -355,6 +416,10 @@ class UsabilityIT extends BusinessTestSupport {
             mockMvc.perform(get("/branding/logo"))
                     .andExpect(status().isOk())
                     .andExpect(content().contentType("image/png"));
+            mockMvc.perform(get("/branding/theme.css"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith("text/css"))
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("--sd-accent:#0055aa")));
         } finally {
             BusinessSettingsForm reset = new BusinessSettingsForm();
             reset.setName(original.getName());

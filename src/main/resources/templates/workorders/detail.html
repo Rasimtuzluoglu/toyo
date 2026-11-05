@@ -47,6 +47,37 @@
                 </div>
             </div>
 
+            <div class="quick-success" th:if="${quickCreated}">
+                <span class="quick-success-icon"><i class="bi bi-check2-circle"></i></span>
+                <div class="quick-success-text">
+                    <strong th:text="${quickCompleted ? 'İş emri tamamlandı' : 'İş emri oluşturuldu'}">
+                        İş emri oluşturuldu
+                    </strong>
+                    <span class="record-meta"
+                          th:text="${order.orderNo + ' · ' + order.vehicle.plate}">IS-0000 · 34ABC123</span>
+                </div>
+                <div class="quick-success-actions">
+                    <a class="btn btn-primary btn-sm" th:href="@{/work-orders/quick}">
+                        <i class="bi bi-lightning-charge me-1"></i> Yeni Hızlı İş
+                    </a>
+                    <a class="btn btn-outline-success btn-sm"
+                       sec:authorize="hasAnyRole('PATRON','MUHASEBE')"
+                       th:if="${order.totalAmount.signum() > 0}"
+                       th:href="@{/payments/new(customerId=${order.customer.id})}">
+                        <i class="bi bi-cash-coin me-1"></i> Tahsilat Al
+                    </a>
+                    <a class="btn btn-outline-secondary btn-sm"
+                       th:if="${order.status.completed and order.status.name() != 'TESLIM_EDILDI'}"
+                       th:href="@{/work-orders/{id}/delivery(id=${order.id})}">
+                        <i class="bi bi-box-seam me-1"></i> Teslim Tutanağı
+                    </a>
+                    <a class="btn btn-outline-secondary btn-sm"
+                       th:href="@{/work-orders/{id}/print(id=${order.id})}">
+                        <i class="bi bi-printer me-1"></i> Yazdır
+                    </a>
+                </div>
+            </div>
+
             <div class="sd-card">
                 <div class="sd-card-body">
                     <div class="summary-strip">

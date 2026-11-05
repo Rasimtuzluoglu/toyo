@@ -13,14 +13,8 @@
     <link rel="manifest" th:href="@{/manifest.json}">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.css}">
-    <link rel="stylesheet" th:href="@{/css/app.css(v=1.0.0)}">
-    <style th:inline="css">
-        :root {
-            --sd-accent: [[${brand != null ? brand.primaryColor : '#eb0a1e'}]];
-            --sd-accent-dark: [[${brand != null ? brand.primaryColorDark : '#c00718'}]];
-            --sd-gold: [[${brand != null ? brand.primaryColor : '#eb0a1e'}]];
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/app.css(v=1.0.1)}">
+    <link rel="stylesheet" th:href="@{/branding/theme.css}">
 </head>
 <body>
 

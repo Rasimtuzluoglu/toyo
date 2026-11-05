@@ -206,6 +206,8 @@ public class WorkOrderController {
                     quickForm.isCompleteNow()
                             ? "İş emri oluşturuldu ve tamamlandı."
                             : "İş emri hızlı kayıtla oluşturuldu.");
+            redirectAttributes.addFlashAttribute("quickCreated", true);
+            redirectAttributes.addFlashAttribute("quickCompleted", quickForm.isCompleteNow());
             return "redirect:/work-orders/" + order.getId();
         } catch (BusinessRuleException ex) {
             bindingResult.reject("quick.failed", ex.getMessage());
@@ -215,8 +217,13 @@ public class WorkOrderController {
 
     @GetMapping("/quick")
     @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
-    public String quickForm(HttpSession session, Model model) {
-        model.addAttribute("quickForm", new QuickWorkOrderForm());
+    public String quickForm(@RequestParam(required = false) String plate,
+                            HttpSession session, Model model) {
+        QuickWorkOrderForm quickForm = new QuickWorkOrderForm();
+        if (plate != null && !plate.isBlank()) {
+            quickForm.setPlate(plate.trim());
+        }
+        model.addAttribute("quickForm", quickForm);
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/quick";

@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,10 +18,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.DownloadUtil;
 import tr.com.servisdefteri.common.FormTokenService;
+import tr.com.servisdefteri.common.PlateNormalizer;
 import tr.com.servisdefteri.customer.Customer;
 import tr.com.servisdefteri.customer.CustomerService;
 import tr.com.servisdefteri.export.ExportService;
@@ -67,6 +70,27 @@ public class VehicleController {
         model.addAttribute("customers", customerService.activeCustomers());
         model.addAttribute("activeMenu", "vehicles");
         return "vehicles/list";
+    }
+
+    @GetMapping(value = "/lookup", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public VehicleLookup lookup(@RequestParam(required = false) String plate) {
+        if (plate == null || plate.isBlank() || !PlateNormalizer.isValid(plate)) {
+            return new VehicleLookup(false, null, plate == null ? "" : plate.trim(),
+                    null, null, null, null, null);
+        }
+        Vehicle vehicle = vehicleService.findByPlate(plate);
+        if (vehicle == null) {
+            return new VehicleLookup(false, null, PlateNormalizer.normalize(plate),
+                    null, null, null, null, null);
+        }
+        return new VehicleLookup(true, vehicle.getId(), vehicle.getPlate(),
+                vehicle.getCustomer().getId(), vehicle.getCustomer().getName(),
+                vehicle.getBrand(), vehicle.getModel(), vehicle.getCurrentMileage());
+    }
+
+    public record VehicleLookup(boolean found, Long vehicleId, String plate, Long customerId,
+                                String customerName, String brand, String model, Integer mileage) {
     }
 
     @GetMapping("/export.csv")

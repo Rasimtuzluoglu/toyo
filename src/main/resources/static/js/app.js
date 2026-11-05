@@ -729,5 +729,129 @@
                 });
             }
         }
+
+        var quickPlate = document.querySelector('[data-quick-plate]');
+        if (quickPlate) {
+            var quickLookupUrl = quickPlate.getAttribute('data-lookup-url');
+            var quickStatus = document.querySelector('[data-quick-status]');
+            var quickMatch = document.querySelector('[data-quick-match]');
+            var quickNewCustomer = document.querySelector('[data-quick-new-customer]');
+            var quickMileageInput = document.getElementById('quickMileage');
+            var quickTimer = null;
+            var lastPlate = '';
+
+            var setQuickStatus = function (message) {
+                if (quickStatus) {
+                    quickStatus.textContent = message || '';
+                }
+            };
+            var showQuickNewCustomer = function (show) {
+                if (quickNewCustomer) {
+                    quickNewCustomer.hidden = !show;
+                }
+            };
+            var showQuickMatch = function (data) {
+                if (!quickMatch) {
+                    return;
+                }
+                quickMatch.hidden = !data;
+                if (!data) {
+                    return;
+                }
+                var setText = function (selector, value) {
+                    var node = quickMatch.querySelector(selector);
+                    if (node) {
+                        node.textContent = value || '';
+                    }
+                };
+                setText('[data-match-plate]', data.plate);
+                setText('[data-match-customer]', data.customerName);
+                setText('[data-match-vehicle]', [data.brand, data.model].filter(Boolean).join(' '));
+                var mileage = quickMatch.querySelector('[data-match-mileage]');
+                if (mileage) {
+                    var mileageValue = Number(data.mileage);
+                    if (mileageValue > 0) {
+                        mileage.textContent = mileageValue.toLocaleString('tr-TR') + ' km';
+                        mileage.hidden = false;
+                    } else {
+                        mileage.hidden = true;
+                    }
+                }
+            };
+            var lookupQuickPlate = function () {
+                var plate = quickPlate.value.trim();
+                if (!plate) {
+                    lastPlate = '';
+                    showQuickMatch(false);
+                    showQuickNewCustomer(false);
+                    setQuickStatus('');
+                    return;
+                }
+                setQuickStatus('Aranıyor…');
+                fetch(quickLookupUrl + '?plate=' + encodeURIComponent(plate), {
+                    headers: { Accept: 'application/json' },
+                    credentials: 'same-origin'
+                }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('lookup failed');
+                    }
+                    return response.json();
+                }).then(function (data) {
+                    lastPlate = plate;
+                    if (data.found) {
+                        showQuickMatch(data);
+                        showQuickNewCustomer(false);
+                        setQuickStatus('Kayıtlı araç bulundu; müşteri bilgileri otomatik gelir.');
+                        if (quickMileageInput && !quickMileageInput.value) {
+                            var lastMileage = Number(data.mileage);
+                            quickMileageInput.placeholder = lastMileage > 0
+                                ? 'Son: ' + lastMileage.toLocaleString('tr-TR')
+                                : '0';
+                        }
+                    } else {
+                        showQuickMatch(false);
+                        showQuickNewCustomer(true);
+                        setQuickStatus('Bu plaka kayıtlı değil; yeni müşteri bilgilerini girin.');
+                        if (quickMileageInput) {
+                            quickMileageInput.placeholder = '0';
+                        }
+                    }
+                }).catch(function () {
+                    showQuickMatch(false);
+                    showQuickNewCustomer(true);
+                    setQuickStatus('Plaka sorgulanamadı; bilgileri elle girebilirsiniz.');
+                });
+            };
+
+            showQuickNewCustomer(false);
+            if (quickPlate.value.trim()) {
+                lookupQuickPlate();
+            }
+            quickPlate.addEventListener('input', function () {
+                lastPlate = '';
+                showQuickMatch(false);
+                setQuickStatus('');
+                if (quickTimer) {
+                    clearTimeout(quickTimer);
+                }
+                quickTimer = setTimeout(lookupQuickPlate, 400);
+            });
+            quickPlate.addEventListener('blur', function () {
+                if (quickPlate.value.trim() && quickPlate.value.trim() !== lastPlate) {
+                    lookupQuickPlate();
+                }
+            });
+
+            document.querySelectorAll('[data-quick-service]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var input = document.getElementById('quickServiceDescription');
+                    if (!input) {
+                        return;
+                    }
+                    input.value = button.getAttribute('data-quick-service');
+                    input.focus();
+                });
+            });
+        }
     });
 })();

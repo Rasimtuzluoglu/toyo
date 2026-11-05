@@ -113,13 +113,14 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 
 **İş Emirleri → Hızlı İş Emri** ekranı, detaylı formu doldurmadan işi bitirmek içindir:
 
-1. İş emri numarasını girin (boş bırakılırsa otomatik üretilir).
-2. Plakayı girin. Kayıtlı plakada müşteri/araç otomatik kullanılır.
-3. Yeni plakada müşteri adı ve telefonu girin.
-4. İsterseniz yapılan işlemi ve tutarı yazın.
-5. **Kaydet** veya **Kaydet ve Tamamla** deyin.
+1. Plakayı yazın. Kayıtlı plakada müşteri ve araç kartı otomatik gelir; yeni müşteri alanları gizlenir.
+2. Yeni plakada ad soyad ve telefon alanları açılır; bu iki alan zorunludur.
+3. Hazır işlem düğmelerinden birini seçin veya yapılan işlemi yazın; tutarı girin.
+4. **Kaydet** veya **Kaydet ve Tamamla** deyin.
 
-**Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Böylece işlem birkaç tıkla tamamlanır.
+İş emri numarası varsayılan olarak otomatik üretilir. Kendi numaranızı kullanacaksanız **Gelişmiş: iş emri numarası** bölümünü açın.
+
+**Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Kayıt sonrası ekranda **Tahsilat Al**, **Teslim Tutanağı**, **Yeni Hızlı İş** ve **Yazdır** düğmeleri görünür.
 
 ### Manuel iş emri numarası
 

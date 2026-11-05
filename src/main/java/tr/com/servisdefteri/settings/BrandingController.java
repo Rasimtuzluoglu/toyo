@@ -17,6 +17,19 @@ public class BrandingController {
         this.businessSettingsService = businessSettingsService;
     }
 
+    @GetMapping(value = "/branding/theme.css", produces = "text/css")
+    public ResponseEntity<String> theme() {
+        BusinessSettings settings = businessSettingsService.get();
+        String primary = settings.getPrimaryColor() == null ? "#eb0a1e" : settings.getPrimaryColor();
+        String dark = settings.getPrimaryColorDark();
+        String css = ":root{--sd-accent:" + primary + ";--sd-accent-dark:" + dark
+                + ";--sd-gold:" + primary + ";}";
+        return ResponseEntity.ok()
+                .contentType(MediaType.valueOf("text/css"))
+                .cacheControl(CacheControl.noCache())
+                .body(css);
+    }
+
     @GetMapping("/branding/logo")
     public ResponseEntity<byte[]> logo() {
         BusinessSettings settings = businessSettingsService.get();
