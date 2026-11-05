@@ -39,11 +39,16 @@
                         <input class="form-control" type="search" name="q" th:value="${q}"
                                data-kanban-search placeholder="Plaka, müşteri veya iş emri"
                                aria-label="Panoda ara">
+                        <input type="hidden" name="age" th:value="${age}">
                         <button class="btn btn-outline-secondary" type="submit">Ara</button>
                         <a class="btn btn-outline-secondary" th:if="${q != null and !q.isEmpty()}"
-                           th:href="@{/work-orders/board}">Temizle</a>
+                           th:href="@{/work-orders/board(age=${age})}">Temizle</a>
                     </div>
                 </form>
+                <button type="button" class="btn btn-outline-secondary btn-sm board-density"
+                        data-kanban-density aria-pressed="true" title="Kompakt / normal kart görünümü">
+                    <i class="bi bi-arrows-angle-contract me-1" aria-hidden="true"></i> Kompakt
+                </button>
                 <div class="kanban-tabs d-md-none" role="tablist" aria-label="İş durumları">
                     <button type="button" role="tab" class="kanban-tab" data-kanban-tab="BEKLIYOR"
                             th:classappend="${inProgressRows.isEmpty()} ? ' is-active'"
@@ -66,6 +71,17 @@
                 </div>
             </div>
 
+            <div class="board-filters" role="group" aria-label="İş yaşı filtresi">
+                <a class="board-filter" th:classappend="${age == null or age.isEmpty()} ? ' is-active'"
+                   th:href="@{/work-orders/board(q=${q})}">Tümü</a>
+                <a class="board-filter" th:classappend="${age == 'today'} ? ' is-active'"
+                   th:href="@{/work-orders/board(q=${q}, age='today')}">Bugün</a>
+                <a class="board-filter" th:classappend="${age == 'yesterday'} ? ' is-active'"
+                   th:href="@{/work-orders/board(q=${q}, age='yesterday')}">Dünden</a>
+                <a class="board-filter" th:classappend="${age == 'old'} ? ' is-active'"
+                   th:href="@{/work-orders/board(q=${q}, age='old')}">2+ gün</a>
+            </div>
+
             <div class="stat-grid">
                 <div class="stat-card">
                     <span class="stat-icon amber"><i class="bi bi-hourglass-split"></i></span>
@@ -81,11 +97,17 @@
                 </div>
             </div>
 
-            <div class="kanban-board">
+            <div class="kanban-board kanban-compact">
                 <section class="kanban-column" aria-label="Bekleyen işler" data-drop-status="BEKLIYOR">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-bekliyor"></span>Bekliyor</h2>
-                        <span class="kanban-count" th:text="${waitingRows.size()}">0</span>
+                        <div class="kanban-header-actions">
+                            <span class="kanban-count" th:text="${waitingRows.size()}">0</span>
+                            <button type="button" class="kanban-collapse" data-kanban-collapse="BEKLIYOR"
+                                    aria-expanded="true" aria-label="Bekleyen işleri daralt">
+                                <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="kanban-list">
                         <th:block th:each="row : ${waitingRows}">
@@ -98,7 +120,13 @@
                 <section class="kanban-column" aria-label="İşlemdeki işler" data-drop-status="ISLEMDE">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-islemde"></span>İşlemde</h2>
-                        <span class="kanban-count" th:text="${inProgressRows.size()}">0</span>
+                        <div class="kanban-header-actions">
+                            <span class="kanban-count" th:text="${inProgressRows.size()}">0</span>
+                            <button type="button" class="kanban-collapse" data-kanban-collapse="ISLEMDE"
+                                    aria-expanded="true" aria-label="İşlemdeki işleri daralt">
+                                <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="kanban-list">
                         <th:block th:each="row : ${inProgressRows}">
@@ -111,7 +139,13 @@
                 <section class="kanban-column" aria-label="Bugün tamamlanan işler" data-drop-status="TAMAMLANDI">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-tamamlandi"></span>Tamamlandı</h2>
-                        <span class="kanban-count" th:text="${completedRows.size()}">0</span>
+                        <div class="kanban-header-actions">
+                            <span class="kanban-count" th:text="${completedRows.size()}">0</span>
+                            <button type="button" class="kanban-collapse" data-kanban-collapse="TAMAMLANDI"
+                                    aria-expanded="true" aria-label="Tamamlanan işleri daralt">
+                                <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="kanban-list">
                         <th:block th:each="order : ${completedRows}">
@@ -124,7 +158,13 @@
                 <section class="kanban-column" aria-label="Bugün teslim edilen işler" data-drop-status="TESLIM_EDILDI">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-teslim_edildi"></span>Teslim Edildi</h2>
-                        <span class="kanban-count" th:text="${deliveredRows.size()}">0</span>
+                        <div class="kanban-header-actions">
+                            <span class="kanban-count" th:text="${deliveredRows.size()}">0</span>
+                            <button type="button" class="kanban-collapse" data-kanban-collapse="TESLIM_EDILDI"
+                                    aria-expanded="true" aria-label="Teslim edilen işleri daralt">
+                                <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="kanban-list">
                         <th:block th:each="order : ${deliveredRows}">

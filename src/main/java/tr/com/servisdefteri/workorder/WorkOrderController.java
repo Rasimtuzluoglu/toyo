@@ -150,16 +150,21 @@ public class WorkOrderController {
     }
 
     @GetMapping("/board")
-    public String board(@RequestParam(required = false) String q, Model model) {
+    public String board(@RequestParam(required = false) String q,
+                        @RequestParam(required = false) String age,
+                        Model model) {
         String needle = SearchNormalizer.normalize(q);
+        String ageFilter = normalizeBoardAge(age);
         List<WorkOrderBoardRow> openRows = workOrderService.boardOpenRows().stream()
                 .filter(row -> matchesBoardSearch(row.order(), needle))
+                .filter(row -> matchesBoardAge(row, ageFilter))
                 .toList();
         List<WorkOrder> finishedToday = workOrderService.finishedToday().stream()
                 .filter(order -> matchesBoardSearch(order, needle))
                 .toList();
         model.addAttribute("openRows", openRows);
         model.addAttribute("q", q == null ? "" : q.trim());
+        model.addAttribute("age", ageFilter);
         model.addAttribute("waitingRows", openRows.stream()
                 .filter(row -> row.order().getStatus() == WorkOrderStatus.BEKLIYOR).toList());
         model.addAttribute("inProgressRows", openRows.stream()
@@ -382,6 +387,26 @@ public class WorkOrderController {
         } catch (IllegalArgumentException ex) {
             throw new BusinessRuleException("Geçersiz ödeme yöntemi.");
         }
+    }
+
+    private String normalizeBoardAge(String value) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+        String normalized = value.trim().toLowerCase(Locale.ROOT);
+        return switch (normalized) {
+            case "today", "yesterday", "old" -> normalized;
+            default -> "";
+        };
+    }
+
+    private boolean matchesBoardAge(WorkOrderBoardRow row, String filter) {
+        return switch (filter) {
+            case "today" -> row.daysOpen() == 0;
+            case "yesterday" -> row.daysOpen() == 1;
+            case "old" -> row.daysOpen() >= 2;
+            default -> true;
+        };
     }
 
     private boolean matchesBoardSearch(WorkOrder order, String needle) {

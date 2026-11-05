@@ -232,7 +232,36 @@ class UsabilityIT extends BusinessTestSupport {
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("34PNB002"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-tab")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-search")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-search")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-density")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-collapse")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("2+ gün")));
+    }
+
+    @Test
+    void boardAgeFilterSeparatesOldAndTodayOrders() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer todayCustomer = createCustomer("Bugün Pano Müşteri", "0555 194 94 94");
+        Vehicle todayVehicle = createVehicle(todayCustomer, "34 TDO 001");
+        createOpenOrder(todayCustomer, todayVehicle);
+
+        Customer oldCustomer = createCustomer("Eski Pano Müşteri", "0555 195 95 95");
+        Vehicle oldVehicle = createVehicle(oldCustomer, "34 OLD 001");
+        tr.com.servisdefteri.workorder.WorkOrderForm oldForm =
+                new tr.com.servisdefteri.workorder.WorkOrderForm();
+        oldForm.setCustomerId(oldCustomer.getId());
+        oldForm.setVehicleId(oldVehicle.getId());
+        oldForm.setOpenedAt(LocalDateTime.now().minusDays(3));
+        oldForm.setComplaint("Eski açık iş");
+        workOrderService.create(oldForm);
+
+        mockMvc.perform(get("/work-orders/board")
+                        .param("age", "old")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("34OLD001")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("34TDO001"))));
     }
 
     @Test

@@ -462,6 +462,74 @@
             }
         }
 
+        var kanbanBoard = document.querySelector('.kanban-board');
+        var densityButton = document.querySelector('[data-kanban-density]');
+        if (kanbanBoard && densityButton) {
+            var densityKey = 'sd.kanbanDensity';
+            var applyDensity = function (compact) {
+                kanbanBoard.classList.toggle('kanban-compact', compact);
+                densityButton.setAttribute('aria-pressed', compact ? 'true' : 'false');
+            };
+            var storedDensity = null;
+            try {
+                storedDensity = window.localStorage.getItem(densityKey);
+            } catch (error) {
+                storedDensity = null;
+            }
+            applyDensity(storedDensity !== 'normal');
+            densityButton.addEventListener('click', function () {
+                var compact = !kanbanBoard.classList.contains('kanban-compact');
+                applyDensity(compact);
+                try {
+                    window.localStorage.setItem(densityKey, compact ? 'compact' : 'normal');
+                } catch (error) {
+                    // Depolama kapalıysa tercih yalnızca bu oturumda geçerli olur.
+                }
+            });
+        }
+
+        var collapseButtons = Array.prototype.slice.call(
+            document.querySelectorAll('[data-kanban-collapse]'));
+        if (collapseButtons.length) {
+            var collapseKey = 'sd.kanbanCollapsed';
+            var collapseState = {};
+            try {
+                collapseState = JSON.parse(window.localStorage.getItem(collapseKey) || '{}') || {};
+            } catch (error) {
+                collapseState = {};
+            }
+            var defaultCollapsed = window.matchMedia('(min-width: 768px)').matches
+                ? { TAMAMLANDI: true, TESLIM_EDILDI: true }
+                : {};
+            var applyCollapse = function (button, collapsed) {
+                var status = button.getAttribute('data-kanban-collapse');
+                var column = document.querySelector(
+                    '.kanban-column[data-drop-status="' + status + '"]');
+                if (!column) {
+                    return;
+                }
+                column.classList.toggle('is-collapsed', collapsed);
+                button.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            };
+            collapseButtons.forEach(function (button) {
+                var status = button.getAttribute('data-kanban-collapse');
+                var collapsed = Object.prototype.hasOwnProperty.call(collapseState, status)
+                    ? Boolean(collapseState[status])
+                    : Boolean(defaultCollapsed[status]);
+                applyCollapse(button, collapsed);
+                button.addEventListener('click', function () {
+                    collapsed = !collapsed;
+                    collapseState[status] = collapsed;
+                    applyCollapse(button, collapsed);
+                    try {
+                        window.localStorage.setItem(collapseKey, JSON.stringify(collapseState));
+                    } catch (error) {
+                        // Depolama kapalıysa tercih yalnızca bu oturumda geçerli olur.
+                    }
+                });
+            });
+        }
+
         if (window.scrollY > 0 && window.scrollY < 120) {
             window.scrollTo(0, 0);
         }
