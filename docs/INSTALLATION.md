@@ -105,6 +105,7 @@ Bu betik ajanı Startup klasörüne ekler ve hemen başlatır. Ajan her 10 saniy
 
 - **Manuel güncelleme:** Ayarlar → **Kontrol Et** → **Güncelle ve Yeniden Başlat**. Uygulama 1-3 dakika erişilemez olabilir ve oturumlar kapanır.
 - **Otomatik güncelleme:** Ajanı `UPDATE_AUTO=true` ortam değişkeniyle başlatırsanız 5 dakikada bir GitHub kontrol edilir ve yeni commit otomatik uygulanır. Canlı kullanımda mesai saatleri dışında tercih edin.
+- Her güncellemeden önce `/app/backups/pre-update-YYYYMMDD-HHmmss.dump` yedeği otomatik alınır. Yedek alınamazsa güncelleme **durdurulur**.
 - Ajan, yalnızca hızlı ileri alma (`git pull --ff-only`) yapar. Yerel değişiklik varsa güncelleme **hata** olarak durur; önce commit/stash yapılmalıdır.
 - GitHub deposu özel ise `APP_UPDATE_GITHUB_TOKEN` ortam değişkenini tanımlayın.
 - Güncelleme günlükleri: `updates/update.log` ve `updates/agent.log`.

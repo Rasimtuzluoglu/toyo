@@ -85,6 +85,14 @@ try {
 
     $newCommit = (git rev-parse --short HEAD).Trim()
     $env:GIT_COMMIT = $newCommit
+
+    $backupName = "pre-update-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".dump"
+    Write-Log "Güncelleme öncesi veritabanı yedeği alınıyor: $backupName"
+    docker compose exec -T app sh -lc "PGPASSWORD=`$DB_PASSWORD pg_dump -h `$DB_HOST -p `$DB_PORT -U `$DB_USERNAME -Fc -f /app/backups/$backupName `$DB_NAME" *>> $logFile
+    if ($LASTEXITCODE -ne 0) {
+        throw "Güncelleme öncesi yedek alınamadı; güncelleme durduruldu."
+    }
+
     Write-Status "running" "Docker imajı yeniden oluşturuluyor ($newCommit)..." $newCommit $startedAt
     Write-Log "Docker imajı yeniden oluşturuluyor: $newCommit"
 

@@ -96,7 +96,8 @@
                                 <i class="bi bi-arrow-repeat me-1"></i> Kontrol Et
                             </button>
                         </form>
-                        <form th:action="@{/settings/update/apply}" method="post" data-submit-once>
+                        <form th:action="@{/settings/update/apply}" method="post" data-submit-once
+                              data-confirm="Uygulama güncellenecek ve yeniden başlatılacak. Devam edilsin mi?">
                             <input type="hidden" name="formToken" th:value="${formToken}">
                             <button class="btn btn-primary" type="submit"
                                     th:disabled="${!updateInfo.enabled or !updateInfo.agentOnline}">
