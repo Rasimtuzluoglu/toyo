@@ -75,59 +75,6 @@
                 <div class="col-xl-7">
                     <div class="sd-card h-100">
                         <div class="sd-card-header">
-                            <h2><i class="bi bi-graph-up-arrow me-2 text-danger"></i>Son 7 gün tahsilat</h2>
-                            <span class="record-meta">Günlük toplam</span>
-                        </div>
-                        <div class="sd-card-body">
-                            <div class="chart-bars" role="img" aria-label="Son yedi günün tahsilat grafiği">
-                                <div class="chart-bar-item" th:each="day : ${view.weeklyCollections}">
-                                    <div class="chart-track">
-                                        <div class="chart-fill"
-                                             th:style="|height:${day.percent == 0 ? 3 : day.percent}%|"
-                                             th:title="${fmt.money(day.amount)}"></div>
-                                    </div>
-                                    <span class="chart-label" th:text="${fmt.dayMonth(day.date)}">01 Oca</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-5">
-                    <div class="sd-card h-100">
-                        <div class="sd-card-header">
-                            <h2><i class="bi bi-pie-chart me-2 text-danger"></i>İş emri durumları</h2>
-                            <span class="record-meta" th:text="${view.totalWorkOrders} + ' kayıt'">0 kayıt</span>
-                        </div>
-                        <div class="sd-card-body">
-                            <div th:if="${view.totalWorkOrders == 0}" class="text-muted-soft">
-                                Henüz iş emri kaydı yok.
-                            </div>
-                            <div class="status-list" th:if="${view.totalWorkOrders > 0}">
-                                <div class="status-row" th:each="status : ${view.workOrderStatuses}">
-                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                        <span>
-                                            <span class="status-dot"
-                                                  th:classappend="${' dot-' + #strings.toLowerCase(status.status.name())}"></span>
-                                            <span th:text="${status.status.label}">Bekliyor</span>
-                                        </span>
-                                        <strong th:text="${status.count}">0</strong>
-                                    </div>
-                                    <div class="status-track">
-                                        <div class="status-fill"
-                                             th:classappend="${' fill-' + #strings.toLowerCase(status.status.name())}"
-                                             th:style="|width:${status.count * 100.0 / view.totalWorkOrders}%|"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-xl-7">
-                    <div class="sd-card h-100">
-                        <div class="sd-card-header">
                             <h2><i class="bi bi-calendar3 me-2 text-danger"></i>Bugünkü randevular</h2>
                             <a class="link-quiet" th:href="@{/appointments}">Günlük plan</a>
                         </div>
@@ -183,6 +130,59 @@
                             <i class="bi bi-box-seam"></i>
                             <strong>Teslimata hazır araç yok</strong>
                             Tamamlanan işler burada listelenir.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-graph-up-arrow me-2 text-danger"></i>Son 7 gün tahsilat</h2>
+                            <span class="record-meta">Günlük toplam</span>
+                        </div>
+                        <div class="sd-card-body">
+                            <div class="chart-bars" role="img" aria-label="Son yedi günün tahsilat grafiği">
+                                <div class="chart-bar-item" th:each="day : ${view.weeklyCollections}">
+                                    <div class="chart-track">
+                                        <div class="chart-fill"
+                                             th:style="|height:${day.percent == 0 ? 3 : day.percent}%|"
+                                             th:title="${fmt.money(day.amount)}"></div>
+                                    </div>
+                                    <span class="chart-label" th:text="${fmt.dayMonth(day.date)}">01 Oca</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-pie-chart me-2 text-danger"></i>İş emri durumları</h2>
+                            <span class="record-meta" th:text="${view.totalWorkOrders} + ' kayıt'">0 kayıt</span>
+                        </div>
+                        <div class="sd-card-body">
+                            <div th:if="${view.totalWorkOrders == 0}" class="text-muted-soft">
+                                Henüz iş emri kaydı yok.
+                            </div>
+                            <div class="status-list" th:if="${view.totalWorkOrders > 0}">
+                                <div class="status-row" th:each="status : ${view.workOrderStatuses}">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>
+                                            <span class="status-dot"
+                                                  th:classappend="${' dot-' + #strings.toLowerCase(status.status.name())}"></span>
+                                            <span th:text="${status.status.label}">Bekliyor</span>
+                                        </span>
+                                        <strong th:text="${status.count}">0</strong>
+                                    </div>
+                                    <div class="status-track">
+                                        <div class="status-fill"
+                                             th:classappend="${' fill-' + #strings.toLowerCase(status.status.name())}"
+                                             th:style="|width:${status.count * 100.0 / view.totalWorkOrders}%|"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

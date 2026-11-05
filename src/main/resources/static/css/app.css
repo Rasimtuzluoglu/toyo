@@ -613,6 +613,49 @@ a:hover {
 }
 
 /* ---------- Kanban ---------- */
+.board-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.board-search {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.kanban-tabs {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.kanban-tab {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border: 1px solid var(--sd-border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--sd-text);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.kanban-tab span {
+    margin-left: 2px;
+    opacity: 0.65;
+}
+
+.kanban-tab.is-active {
+    border-color: var(--sd-navy);
+    background: var(--sd-navy);
+    color: #fff;
+}
+
 .kanban-board {
     display: grid;
     grid-template-columns: repeat(4, minmax(250px, 1fr));
@@ -629,6 +672,10 @@ a:hover {
     background: #f3f3f4;
     border: 1px solid var(--sd-border);
     border-radius: var(--sd-radius);
+}
+
+.kanban-column[hidden] {
+    display: none;
 }
 
 .kanban-column-header {
@@ -2483,6 +2530,37 @@ body.command-open {
 
     .quick-success-actions .btn {
         flex: 1 1 auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .page-actions > .btn {
+        flex: 1 1 calc(50% - 4px);
+        min-width: 0;
+    }
+
+    .page-actions > form {
+        flex: 1 1 100%;
+    }
+
+    .page-actions > .btn-primary {
+        flex: 1 1 100%;
+    }
+
+    .page-actions .btn {
+        min-height: 44px;
+    }
+
+    .today-item .btn {
+        min-height: 38px;
+    }
+
+    .board-search {
+        flex-basis: 100%;
+    }
+
+    .quick-success-actions .btn {
+        min-height: 44px;
     }
 }
 

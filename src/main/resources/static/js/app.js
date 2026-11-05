@@ -425,6 +425,47 @@
             });
         }
 
+        var kanbanTabs = Array.prototype.slice.call(document.querySelectorAll('[data-kanban-tab]'));
+        if (kanbanTabs.length) {
+            var boardMedia = window.matchMedia('(max-width: 767.98px)');
+            var boardColumns = Array.prototype.slice.call(
+                document.querySelectorAll('.kanban-column[data-drop-status]'));
+            var activeKanbanTab = document.querySelector('.kanban-tab.is-active') || kanbanTabs[0];
+            var applyKanbanFilter = function () {
+                if (!boardMedia.matches) {
+                    boardColumns.forEach(function (column) {
+                        column.hidden = false;
+                    });
+                    return;
+                }
+                var status = activeKanbanTab
+                    ? activeKanbanTab.getAttribute('data-kanban-tab') : null;
+                boardColumns.forEach(function (column) {
+                    column.hidden = column.getAttribute('data-drop-status') !== status;
+                });
+            };
+            kanbanTabs.forEach(function (tab) {
+                tab.addEventListener('click', function () {
+                    activeKanbanTab = tab;
+                    kanbanTabs.forEach(function (other) {
+                        other.classList.toggle('is-active', other === tab);
+                        other.setAttribute('aria-selected', other === tab ? 'true' : 'false');
+                    });
+                    applyKanbanFilter();
+                });
+            });
+            applyKanbanFilter();
+            if (boardMedia.addEventListener) {
+                boardMedia.addEventListener('change', applyKanbanFilter);
+            } else if (boardMedia.addListener) {
+                boardMedia.addListener(applyKanbanFilter);
+            }
+        }
+
+        if (window.scrollY > 0 && window.scrollY < 120) {
+            window.scrollTo(0, 0);
+        }
+
         var palette = document.getElementById('commandPalette');
         var commandInput = document.getElementById('commandInput');
         var commandEmpty = document.getElementById('commandEmpty');

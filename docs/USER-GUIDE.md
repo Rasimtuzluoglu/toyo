@@ -41,7 +41,9 @@ SERVIS rolünde finansal kartlar gösterilmez.
 - İş tamamlandığında veya teslim edildiğinde “bitti” sayılır; iki durum da ertesi gün panodan kalkar.
 - Satırdaki **İşleme Al / Tamamla / Teslim Et** düğmeleriyle detaya girmeden durum ilerletilebilir.
 - Kartlar sürüklenerek de bir sonraki aşamaya taşınabilir; tablette düğmeler kullanılabilir.
-- Tablet ve telefonda işler kart görünümünde listelenir.
+- Üstteki arama alanıyla **plaka, müşteri adı veya iş emri numarası** ile pano filtrelenir.
+- Telefonda pano **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmelerine ayrılır; aynı anda tek sütun görünür.
+- Tablet ve masaüstünde tüm sütunlar birlikte görünür.
 
 ## Randevular
 
@@ -50,7 +52,7 @@ SERVIS rolünde finansal kartlar gösterilmez.
 - PATRON ve SERVIS yeni randevu oluşturabilir, düzenleyebilir, “Geldi” veya “İptal” olarak işaretleyebilir.
 - Randevu için müşteri, araç, tarih-saat ve not girilir.
 - Aynı araç için aynı saatte ikinci aktif randevu açılamaz.
-- Satırdaki **İş Emri Aç** düğmesi müşteri ve araç seçili olarak yeni iş emri formunu açar.
+- Satırdaki **İş Emri Aç** düğmesi randevuyu otomatik **Geldi** yapar ve plakası ön dolu **Hızlı İş Emri** ekranını açar; müşteri/araç bilgileri otomatik gelir.
 - Liste tablet ve telefonda kart görünümüne döner.
 - **Haftalık** düğmesiyle 7 günlük takvim görünümüne geçilir; gün başlığındaki **+** ile o güne randevu eklenir.
 

@@ -178,6 +178,16 @@ public class AppointmentController {
         return "redirect:/appointments?date=" + appointment.getStartsAt().toLocalDate();
     }
 
+    /**
+     * Randevuyu geldi olarak işaretler ve plakası ön dolu hızlı iş emri ekranını açar.
+     */
+    @PostMapping("/{id}/start")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String startWorkOrder(@PathVariable Long id) {
+        appointmentService.markArrived(id);
+        return "redirect:/work-orders/quick?plate=" + appointmentService.vehiclePlate(id);
+    }
+
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
     public String cancel(@PathVariable Long id, RedirectAttributes redirectAttributes) {

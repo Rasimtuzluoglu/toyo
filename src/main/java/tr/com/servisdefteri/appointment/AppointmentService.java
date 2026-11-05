@@ -115,6 +115,11 @@ public class AppointmentService {
         return saved;
     }
 
+    @Transactional(readOnly = true)
+    public String vehiclePlate(Long appointmentId) {
+        return findById(appointmentId).getVehicle().getPlate();
+    }
+
     @Transactional
     public Appointment cancel(Long id) {
         Appointment appointment = findById(id);

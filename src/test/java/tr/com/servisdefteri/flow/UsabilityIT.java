@@ -215,6 +215,50 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void boardSearchFiltersCardsAndOffersMobileTabs() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer first = createCustomer("Pano Müşteri A", "0555 191 91 91");
+        Vehicle firstVehicle = createVehicle(first, "34 PNA 001");
+        createOpenOrder(first, firstVehicle);
+        Customer second = createCustomer("Pano Müşteri B", "0555 192 92 92");
+        Vehicle secondVehicle = createVehicle(second, "34 PNB 002");
+        createOpenOrder(second, secondVehicle);
+
+        mockMvc.perform(get("/work-orders/board")
+                        .param("q", "PNA")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("34PNA001")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("34PNB002"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-tab")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-search")));
+    }
+
+    @Test
+    void appointmentStartMarksArrivedAndOpensQuickWorkOrder() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer customer = createCustomer("Randevu Akış Müşteri", "0555 193 93 93");
+        Vehicle vehicle = createVehicle(customer, "34 APT 001");
+
+        AppointmentForm appointmentForm = new AppointmentForm();
+        appointmentForm.setCustomerId(customer.getId());
+        appointmentForm.setVehicleId(vehicle.getId());
+        appointmentForm.setStartsAt(LocalDateTime.now().plusDays(1).withHour(10).withMinute(0)
+                .withSecond(0).withNano(0));
+        Appointment appointment = appointmentService.create(appointmentForm);
+
+        mockMvc.perform(post("/appointments/{id}/start", appointment.getId())
+                        .with(user(principal(servis)))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/work-orders/quick?plate=34APT001"));
+
+        assertThat(appointmentService.findById(appointment.getId()).getStatus())
+                .isEqualTo(AppointmentStatus.GELDI);
+    }
+
+    @Test
     void workOrderAndReceiptPdfsAreDownloadable() throws Exception {
         User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
         Customer customer = createCustomer("PDF Müşteri", "0555 444 55 66");

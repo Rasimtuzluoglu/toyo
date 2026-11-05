@@ -11,8 +11,8 @@ Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş em
 - Araç kayıtları, mükerrer plaka kontrolü, sahiplik geçmişi, servis geçmişi
 - İş emirleri, durum akışı, işçilik/parça kalemleri, sunucu tarafı tutar hesabı
 - Günlük iş panosu: bitmemiş işler her gün devreder; biten işler ertesi gün listeden kalkar
-- Kanban panosunda sürükle-bırak veya tek tıkla durum ilerletme
-- Haftalık randevu takvimi; randevudan tek tıkla iş emri açma
+- Kanban panosunda sürükle-bırak veya tek tıkla durum ilerletme; plaka/müşteri araması ve telefonda sekmeli görünüm
+- Haftalık randevu takvimi; randevuyu “Geldi” yapıp plakası ön dolu hızlı iş emrini tek akışta açma
 - Araç kabul ve teslim tutanağında tablet/masaüstü dijital imza
 - Bakım hatırlatmaları: 180 gün veya 10.000 km geçen araçlar
 - Ctrl+K komut paleti ve 6 adımlık sunum turu

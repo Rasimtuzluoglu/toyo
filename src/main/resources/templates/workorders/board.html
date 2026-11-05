@@ -23,12 +23,46 @@
                     <a class="btn btn-outline-secondary" th:href="@{/appointments}">
                         <i class="bi bi-calendar3 me-1"></i> Randevular
                     </a>
-                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/quick}">
+                    <a class="btn btn-primary" th:href="@{/work-orders/quick}">
                         <i class="bi bi-lightning-charge me-1"></i> Hızlı İş Emri
                     </a>
-                    <a class="btn btn-primary" th:href="@{/work-orders/new}">
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/new}">
                         <i class="bi bi-plus-lg me-1"></i> Detaylı İş Emri
                     </a>
+                </div>
+            </div>
+
+            <div class="board-tools">
+                <form class="board-search" method="get" th:action="@{/work-orders/board}" role="search">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+                        <input class="form-control" type="search" name="q" th:value="${q}"
+                               data-kanban-search placeholder="Plaka, müşteri veya iş emri"
+                               aria-label="Panoda ara">
+                        <button class="btn btn-outline-secondary" type="submit">Ara</button>
+                        <a class="btn btn-outline-secondary" th:if="${q != null and !q.isEmpty()}"
+                           th:href="@{/work-orders/board}">Temizle</a>
+                    </div>
+                </form>
+                <div class="kanban-tabs d-md-none" role="tablist" aria-label="İş durumları">
+                    <button type="button" role="tab" class="kanban-tab" data-kanban-tab="BEKLIYOR"
+                            th:classappend="${inProgressRows.isEmpty()} ? ' is-active'"
+                            th:attr="aria-selected=${inProgressRows.isEmpty()}">
+                        Bekliyor <span th:text="${waitingRows.size()}">0</span>
+                    </button>
+                    <button type="button" role="tab" class="kanban-tab" data-kanban-tab="ISLEMDE"
+                            th:classappend="${!inProgressRows.isEmpty()} ? ' is-active'"
+                            th:attr="aria-selected=${!inProgressRows.isEmpty()}">
+                        İşlemde <span th:text="${inProgressRows.size()}">0</span>
+                    </button>
+                    <button type="button" role="tab" class="kanban-tab" data-kanban-tab="TAMAMLANDI"
+                            aria-selected="false">
+                        Tamamlandı <span th:text="${completedRows.size()}">0</span>
+                    </button>
+                    <button type="button" role="tab" class="kanban-tab" data-kanban-tab="TESLIM_EDILDI"
+                            aria-selected="false">
+                        Teslim Edildi <span th:text="${deliveredRows.size()}">0</span>
+                    </button>
                 </div>
             </div>
 

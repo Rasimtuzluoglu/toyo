@@ -20,6 +20,7 @@ import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.CsvUtil;
 import tr.com.servisdefteri.common.DownloadUtil;
 import tr.com.servisdefteri.common.FormTokenService;
+import tr.com.servisdefteri.common.SearchNormalizer;
 import tr.com.servisdefteri.customer.CustomerService;
 import tr.com.servisdefteri.account.AccountService;
 import tr.com.servisdefteri.export.ExportService;
@@ -149,10 +150,16 @@ public class WorkOrderController {
     }
 
     @GetMapping("/board")
-    public String board(Model model) {
-        List<WorkOrderBoardRow> openRows = workOrderService.boardOpenRows();
-        List<WorkOrder> finishedToday = workOrderService.finishedToday();
+    public String board(@RequestParam(required = false) String q, Model model) {
+        String needle = SearchNormalizer.normalize(q);
+        List<WorkOrderBoardRow> openRows = workOrderService.boardOpenRows().stream()
+                .filter(row -> matchesBoardSearch(row.order(), needle))
+                .toList();
+        List<WorkOrder> finishedToday = workOrderService.finishedToday().stream()
+                .filter(order -> matchesBoardSearch(order, needle))
+                .toList();
         model.addAttribute("openRows", openRows);
+        model.addAttribute("q", q == null ? "" : q.trim());
         model.addAttribute("waitingRows", openRows.stream()
                 .filter(row -> row.order().getStatus() == WorkOrderStatus.BEKLIYOR).toList());
         model.addAttribute("inProgressRows", openRows.stream()
@@ -375,6 +382,16 @@ public class WorkOrderController {
         } catch (IllegalArgumentException ex) {
             throw new BusinessRuleException("Geçersiz ödeme yöntemi.");
         }
+    }
+
+    private boolean matchesBoardSearch(WorkOrder order, String needle) {
+        if (needle == null || needle.isEmpty()) {
+            return true;
+        }
+        return SearchNormalizer.normalize(order.getOrderNo()).contains(needle)
+                || SearchNormalizer.normalize(order.getVehicle().getPlate()).contains(needle)
+                || SearchNormalizer.normalize(order.getCustomer().getName()).contains(needle)
+                || SearchNormalizer.normalize(order.getCustomer().getPhone()).contains(needle);
     }
 
     private String statusRedirect(Long id, String returnTo) {
