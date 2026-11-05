@@ -25,12 +25,17 @@ function Write-Utf8($path, $text) {
 }
 
 function Write-Status($state, $message, $commit, $startedAt) {
+    $finishedAt = if ($state -eq "running" -or $state -eq "queued") {
+        $null
+    } else {
+        (Get-Date).ToString("o")
+    }
     $payload = [ordered]@{
         state      = $state
         message    = $message
         commit     = $commit
         startedAt  = $startedAt
-        finishedAt = (Get-Date).ToString("o")
+        finishedAt = $finishedAt
     }
     Write-Utf8 $statusFile ($payload | ConvertTo-Json -Compress)
 }

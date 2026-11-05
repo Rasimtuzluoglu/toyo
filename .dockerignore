@@ -4,6 +4,7 @@ target/
 .vscode/
 .env
 backups/
+updates/
 *.log
 docs/
 README.md
