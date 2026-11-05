@@ -160,6 +160,21 @@
         <i class="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
         <div th:text="${errorMessage}"></div>
     </div>
+    <div class="undo-toast" th:if="${undoOrderId != null}" data-undo-toast role="status">
+        <span class="undo-toast-text">
+            <i class="bi bi-check2-circle" aria-hidden="true"></i>
+            İş emri tamamlandı.
+        </span>
+        <form th:action="@{/work-orders/{id}/undo-complete(id=${undoOrderId})}" method="post">
+            <input type="hidden" name="returnTo"
+                   th:value="${undoReturnTo != null ? undoReturnTo : 'detail'}">
+            <button class="btn btn-sm btn-light" type="submit">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Geri Al
+            </button>
+        </form>
+        <button type="button" class="undo-toast-close" data-undo-close
+                aria-label="Bildirimi kapat">&times;</button>
+    </div>
 </div>
 
 <div th:fragment="globalErrors" th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">

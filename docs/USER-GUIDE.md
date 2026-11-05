@@ -146,10 +146,13 @@ Detaylı iş emri formunda **İş emri no** alanı manuel doldurulabilir. Boş b
 
 ### Hızlı durum işlemleri
 
-İş emri detayında, mevcut duruma uygun **İşleme Al**, **Tamamla**, **Teslim Et** ve **İptal Et** düğmeleri gösterilir. Düğmeler sunucudaki geçiş kurallarını atlamaz; onaydan sonra işlem uygulanır. “Tamamla” işlemi tutar varsa cari borcu otomatik oluşturur.
+İş emri detayında ve günlük panoda mevcut duruma uygun **İşleme Al**, **Tamamla**, **Teslim Et** ve **İptal Et** düğmeleri gösterilir. Rutin geçişler tek tıkla yapılır; ayrı onay penceresi yoktur. “Tamamla” işlemi tutar varsa cari borcu otomatik oluşturur.
 
+- Tamamlamadan sonra ekranın sağ altında **Geri Al** bildirimi çıkar. Son **10 dakika** içinde tamamlama geri alınabilir; borç varsa ters kayıt oluşturulur, kayıt silinmez.
+- **PATRON/MUHASEBE** “Tamamla” yanındaki seçenekten **Cari / Nakit / Kart** seçebilir. Nakit veya kart seçilirse tahsilat aynı işlemde kaydedilir.
+- **Teslim Et** tek tıktır; imza gerekmiyorsa doğrudan teslim edilir, teslim tutanağı istenirse sonradan kaydedilir.
 - **İşleme Al / Tamamla / Teslim Et:** PATRON ve SERVIS.
-- **İptal Et:** PATRON ve MUHASEBE.
+- **İptal Et:** PATRON ve MUHASEBE. İptalde onay penceresi vardır.
 - MUHASEBE iş emrini görüntüleyebilir ve iptal edebilir; yeni iş emri açamaz, kalem ekleyemez veya durumu ilerletemez.
 
 ### Durumlar
@@ -195,6 +198,7 @@ Bekliyor → İşlemde → Tamamlandı → Teslim Edildi
 **İş emri detayı → Teslim tutanağı**
 
 - Yalnızca iş emri `Tamamlandı` veya `Teslim Edildi` durumundayken kaydedilir.
+- Üst bölümde **iş emri tutarı** ve **müşteri kalan bakiyesi** görünür; bakiye varsa **Tahsilat Al** bağlantısı çıkar.
 - Teslim alan kişi, kilometre, yakıt seviyesi ve not girilir.
 - Tutanakta yapılan işlemler, genel toplam ve imza alanları yer alır.
 - **Yazdır** veya **PDF** ile müşteri imzası alınır.

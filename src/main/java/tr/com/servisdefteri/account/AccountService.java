@@ -190,8 +190,7 @@ public class AccountService {
         customerRepository.findByIdForUpdate(workOrder.getCustomer().getId())
                 .orElseThrow(() -> NotFoundException.of("Müşteri", workOrder.getCustomer().getId()));
 
-        if (transactionRepository.existsByWorkOrderIdAndTypeAndReversalOfIdIsNull(
-                workOrder.getId(), TransactionType.BORC)) {
+        if (activeWorkOrderDebt(workOrder.getId()) != null) {
             return;
         }
 
@@ -211,18 +210,30 @@ public class AccountService {
                 "İş emri borçlandırıldı: " + workOrder.getOrderNo() + ", tutar=" + saved.getAmount());
     }
 
+    @Transactional(readOnly = true)
+    public Long workOrderDebtTransactionId(Long workOrderId) {
+        AccountTransaction debt = activeWorkOrderDebt(workOrderId);
+        return debt == null ? null : debt.getId();
+    }
+
+    private AccountTransaction activeWorkOrderDebt(Long workOrderId) {
+        List<AccountTransaction> debts = transactionRepository
+                .findActiveWorkOrderDebts(workOrderId, TransactionType.BORC);
+        return debts.isEmpty() ? null : debts.get(0);
+    }
+
     /**
      * Iptal edilen is emrinin borcunu silmez; denetlenebilir ters kayit olusturur.
      */
     @Transactional
     public void reverseWorkOrderDebt(WorkOrder workOrder) {
-        AccountTransaction original = transactionRepository
-                .findFirstByWorkOrderIdAndTypeAndReversalOfIdIsNull(workOrder.getId(), TransactionType.BORC)
-                .orElse(null);
+        reverseWorkOrderDebt(workOrder, "İş emri iptali ters kaydı: ");
+    }
+
+    @Transactional
+    public void reverseWorkOrderDebt(WorkOrder workOrder, String descriptionPrefix) {
+        AccountTransaction original = activeWorkOrderDebt(workOrder.getId());
         if (original == null) {
-            return;
-        }
-        if (transactionRepository.findFirstByReversalOfId(original.getId()).isPresent()) {
             return;
         }
         BigDecimal allocated = allocationRepository.activeAllocatedAmount(original.getId(), PaymentStatus.AKTIF);
@@ -239,12 +250,14 @@ public class AccountService {
         reversal.setType(TransactionType.ALACAK);
         reversal.setAmount(original.getAmount());
         reversal.setTransactionDate(LocalDate.now(clock));
-        reversal.setDescription("İş emri iptali ters kaydı: " + workOrder.getOrderNo());
+        reversal.setDescription(descriptionPrefix + workOrder.getOrderNo());
         reversal.setWorkOrder(workOrder);
         reversal.setReversalOfId(original.getId());
         reversal.setCreatedBy(currentUserService.idOrNull());
         reversal.setCreatedAt(LocalDateTime.now(clock));
         AccountTransaction saved = transactionRepository.save(reversal);
+        original.setActiveDebit(false);
+        transactionRepository.save(original);
         auditService.record(AuditAction.WORK_ORDER_DEBT_REVERSED, "İşEmri", workOrder.getId(),
                 "İş emri borcu ters kayıtla kapatıldı: " + workOrder.getOrderNo()
                         + ", tutar=" + saved.getAmount());

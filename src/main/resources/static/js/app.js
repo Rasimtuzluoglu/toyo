@@ -418,9 +418,6 @@
                     if (targets.indexOf(target) < 0) {
                         return;
                     }
-                    if (!window.confirm('İş emri yeni duruma alınacak. Devam edilsin mi?')) {
-                        return;
-                    }
                     document.getElementById('kanbanMoveStatus').value = target;
                     kanbanForm.action = '/work-orders/' + draggedCard.getAttribute('data-order-id') + '/status';
                     kanbanForm.submit();
@@ -729,6 +726,20 @@
                 });
             }
         }
+
+        document.querySelectorAll('[data-undo-toast]').forEach(function (toast) {
+            var removeToast = function () {
+                toast.remove();
+            };
+            var hideTimer = setTimeout(removeToast, 30000);
+            var closeButton = toast.querySelector('[data-undo-close]');
+            if (closeButton) {
+                closeButton.addEventListener('click', function () {
+                    clearTimeout(hideTimer);
+                    removeToast();
+                });
+            }
+        });
 
         var quickPlate = document.querySelector('[data-quick-plate]');
         if (quickPlate) {

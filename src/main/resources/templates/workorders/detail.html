@@ -66,10 +66,20 @@
                        th:href="@{/payments/new(customerId=${order.customer.id})}">
                         <i class="bi bi-cash-coin me-1"></i> Tahsilat Al
                     </a>
+                    <form sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                          th:if="${order.status.name() == 'TAMAMLANDI'}"
+                          th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
+                          data-submit-once class="d-inline">
+                        <input type="hidden" name="status" value="TESLIM_EDILDI">
+                        <input type="hidden" name="returnTo" value="detail">
+                        <button class="btn btn-success btn-sm" type="submit">
+                            <i class="bi bi-box-seam me-1"></i> Teslim Et
+                        </button>
+                    </form>
                     <a class="btn btn-outline-secondary btn-sm"
                        th:if="${order.status.completed and order.status.name() != 'TESLIM_EDILDI'}"
                        th:href="@{/work-orders/{id}/delivery(id=${order.id})}">
-                        <i class="bi bi-box-seam me-1"></i> Teslim Tutanağı
+                        <i class="bi bi-clipboard-check me-1"></i> Teslim Tutanağı
                     </a>
                     <a class="btn btn-outline-secondary btn-sm"
                        th:href="@{/work-orders/{id}/print(id=${order.id})}">
@@ -338,9 +348,17 @@
                                       th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
                                       th:attr="data-confirm=${s.name() == 'IPTAL'
                                           ? 'İş emri iptal edilsin mi? Borç varsa ters kayıt oluşturulacak.'
-                                          : 'Bu iş emri ' + s.label + ' durumuna alınacak. Devam edilsin mi?'}"
+                                          : null}"
                                       data-submit-once>
                                     <input type="hidden" name="status" th:value="${s.name()}">
+                                    <select th:if="${s.name() == 'TAMAMLANDI'}"
+                                            sec:authorize="hasAnyRole('PATRON','MUHASEBE')"
+                                            name="paymentMethod" class="form-select form-select-sm mb-2"
+                                            aria-label="Tahsilat yöntemi">
+                                        <option value="">Cariye işle (tahsilat yok)</option>
+                                        <option value="NAKIT">Nakit tahsil et</option>
+                                        <option value="KART">Kart ile tahsil et</option>
+                                    </select>
                                     <button class="btn w-100 text-start" type="submit"
                                             th:classappend="${s.name() == 'IPTAL' ? 'btn-outline-danger' : (s.name() == 'TAMAMLANDI' ? 'btn-primary' : 'btn-navy')}">
                                         <i class="bi me-1"

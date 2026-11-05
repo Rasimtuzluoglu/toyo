@@ -161,14 +161,22 @@
                         </div>
                         <div class="sd-card-body p-0" th:if="${!view.readyForDelivery.isEmpty()}">
                             <div class="today-list">
-                                <a class="today-item" th:each="order : ${view.readyForDelivery}"
-                                   th:href="@{/work-orders/{id}(id=${order.id})}">
-                                    <span class="today-main">
+                                <div class="today-item" th:each="order : ${view.readyForDelivery}">
+                                    <a class="today-main" th:href="@{/work-orders/{id}(id=${order.id})}">
                                         <strong th:text="${order.orderNo}">IS-0000</strong>
                                         <span th:text="${order.customer.name + ' · ' + order.vehicle.plate}">Müşteri</span>
-                                    </span>
+                                    </a>
                                     <span class="money fw-semibold" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</span>
-                                </a>
+                                    <form sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                          th:action="@{/work-orders/{id}/status(id=${order.id})}"
+                                          method="post" data-submit-once class="d-inline">
+                                        <input type="hidden" name="status" value="TESLIM_EDILDI">
+                                        <input type="hidden" name="returnTo" value="dashboard">
+                                        <button class="btn btn-success btn-sm" type="submit">
+                                            <i class="bi bi-box-seam me-1"></i> Teslim Et
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                         <div class="empty-state" th:if="${view.readyForDelivery.isEmpty()}">

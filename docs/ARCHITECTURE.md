@@ -66,16 +66,19 @@ Bakiye = Σ(BORÇ) − Σ(ALACAK)
 
 İki katman birlikte kullanılır:
 
-1. `AccountService.postWorkOrderDebt` iş emri için mevcut `BORC` hareketini kontrol eder.
+1. `AccountService.postWorkOrderDebt` iş emri için mevcut **aktif** `BORC` hareketini kontrol eder.
 2. PostgreSQL kısmi benzersiz indeks:
 
    ```sql
-   CREATE UNIQUE INDEX uk_account_tx_work_order_debit
+   CREATE UNIQUE INDEX uk_account_tx_work_order_active_debit
      ON account_transactions (work_order_id)
-     WHERE work_order_id IS NOT NULL AND type = 'BORC' AND reversal_of_id IS NULL;
+     WHERE work_order_id IS NOT NULL
+       AND type = 'BORC'
+       AND reversal_of_id IS NULL
+       AND active_debit;
    ```
 
-Bu indeks, eşzamanlı iki isteğin aynı iş emrini borçlandırmasını veritabanı seviyesinde de engeller.
+Bu indeks, eşzamanlı iki isteğin aynı iş emrini borçlandırmasını veritabanı seviyesinde de engeller. Tamamlama geri alındığında eski borç `active_debit = FALSE` yapılır ve ters kayıt oluşturulur; iş emri yeniden tamamlanırsa yeni bir aktif borç hareketi açılabilir.
 
 ### Eşzamanlılık
 

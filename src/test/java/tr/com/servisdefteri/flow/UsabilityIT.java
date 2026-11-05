@@ -12,6 +12,7 @@ import tr.com.servisdefteri.appointment.AppointmentStatus;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.customer.Customer;
 import tr.com.servisdefteri.payment.Payment;
+import tr.com.servisdefteri.payment.PaymentMethod;
 import tr.com.servisdefteri.security.Role;
 import tr.com.servisdefteri.security.User;
 import tr.com.servisdefteri.report.ReportService;
@@ -31,6 +32,7 @@ import tr.com.servisdefteri.workorder.WorkOrder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -370,6 +372,98 @@ class UsabilityIT extends BusinessTestSupport {
         assertThat(order.isDebited()).isTrue();
         assertThat(order.getTotalAmount()).isEqualByComparingTo("2400.00");
         assertThat(accountService.balance(order.getCustomer().getId())).isEqualByComparingTo("2400.00");
+    }
+
+    @Test
+    void completeWithPaymentCreatesPaymentAndClosesBalance() {
+        Customer customer = createCustomer("Tek Adım Müşteri", "0555 141 41 41");
+        Vehicle vehicle = createVehicle(customer, "34 TEK 001");
+        WorkOrder order = createWorkOrderWithItem(customer, vehicle, "1200.00");
+
+        runAsSystemPatron(() -> {
+            workOrderService.changeStatus(order.getId(), tr.com.servisdefteri.workorder.WorkOrderStatus.ISLEMDE);
+            workOrderService.completeWithPayment(order.getId(), PaymentMethod.NAKIT);
+        });
+
+        WorkOrder completed = workOrderService.findById(order.getId());
+        assertThat(completed.getStatus().name()).isEqualTo("TAMAMLANDI");
+        assertThat(completed.isDebited()).isTrue();
+        assertThat(accountService.balance(customer.getId())).isEqualByComparingTo("0.00");
+
+        List<Payment> payments = paymentService.byCustomer(customer.getId());
+        assertThat(payments).hasSize(1);
+        assertThat(payments.get(0).getMethod()).isEqualTo(PaymentMethod.NAKIT);
+        assertThat(payments.get(0).getAmount()).isEqualByComparingTo("1200.00");
+    }
+
+    @Test
+    void undoCompletionReversesDebtAndRestoresStatus() {
+        Customer customer = createCustomer("Geri Al Müşteri", "0555 151 51 51");
+        Vehicle vehicle = createVehicle(customer, "34 GRD 001");
+        WorkOrder order = createCompletedOrder(customer, vehicle, "800.00");
+        assertThat(accountService.balance(customer.getId())).isEqualByComparingTo("800.00");
+
+        runAsSystemPatron(() -> workOrderService.undoCompletion(order.getId()));
+
+        WorkOrder restored = workOrderService.findById(order.getId());
+        assertThat(restored.getStatus().name()).isEqualTo("ISLEMDE");
+        assertThat(restored.isDebited()).isFalse();
+        assertThat(restored.getClosedAt()).isNull();
+        assertThat(accountService.balance(customer.getId())).isEqualByComparingTo("0.00");
+    }
+
+    @Test
+    void reCompletingAfterUndoCreatesFreshDebtAndPayment() {
+        Customer customer = createCustomer("Tekrar Tamamla Müşteri", "0555 181 81 81");
+        Vehicle vehicle = createVehicle(customer, "34 TKR 001");
+        WorkOrder order = createCompletedOrder(customer, vehicle, "600.00");
+
+        runAsSystemPatron(() -> workOrderService.undoCompletion(order.getId()));
+        runAsSystemPatron(() -> workOrderService.completeWithPayment(order.getId(), PaymentMethod.NAKIT));
+
+        WorkOrder completed = workOrderService.findById(order.getId());
+        assertThat(completed.getStatus().name()).isEqualTo("TAMAMLANDI");
+        assertThat(accountService.balance(customer.getId())).isEqualByComparingTo("0.00");
+        assertThat(paymentService.byCustomer(customer.getId())).hasSize(1);
+    }
+
+    @Test
+    void servisUserCannotCollectPaymentWhileCompleting() {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer customer = createCustomer("Yetki Müşteri", "0555 161 61 61");
+        Vehicle vehicle = createVehicle(customer, "34 YET 001");
+        WorkOrder order = createWorkOrderWithItem(customer, vehicle, "500.00");
+
+        authenticate(servis);
+        try {
+            assertThatThrownBy(() -> workOrderService.completeWithPayment(order.getId(), PaymentMethod.NAKIT))
+                    .isInstanceOf(BusinessRuleException.class)
+                    .hasMessageContaining("yetkisi");
+        } finally {
+            clearAuthentication();
+        }
+
+        assertThat(workOrderService.findById(order.getId()).getStatus().name()).isEqualTo("BEKLIYOR");
+    }
+
+    @Test
+    void completingFromBoardOffersUndoToast() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer customer = createCustomer("Undo Müşteri", "0555 171 71 71");
+        Vehicle vehicle = createVehicle(customer, "34 UND 001");
+        WorkOrder order = createOpenOrder(customer, vehicle);
+        runAsSystemPatron(() -> workOrderService.changeStatus(order.getId(),
+                tr.com.servisdefteri.workorder.WorkOrderStatus.ISLEMDE));
+
+        mockMvc.perform(post("/work-orders/{id}/status", order.getId())
+                        .param("status", "TAMAMLANDI")
+                        .param("returnTo", "board")
+                        .with(user(principal(servis)))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/work-orders/board"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash()
+                        .attribute("undoOrderId", order.getId()));
     }
 
     @Test

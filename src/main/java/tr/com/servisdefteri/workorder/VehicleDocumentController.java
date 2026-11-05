@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import tr.com.servisdefteri.account.AccountService;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.DownloadUtil;
 import tr.com.servisdefteri.pdf.PdfService;
@@ -25,15 +26,18 @@ public class VehicleDocumentController {
     private final VehicleDocumentService documentService;
     private final BusinessSettingsService businessSettingsService;
     private final PdfService pdfService;
+    private final AccountService accountService;
 
     public VehicleDocumentController(WorkOrderService workOrderService,
                                      VehicleDocumentService documentService,
                                      BusinessSettingsService businessSettingsService,
-                                     PdfService pdfService) {
+                                     PdfService pdfService,
+                                     AccountService accountService) {
         this.workOrderService = workOrderService;
         this.documentService = documentService;
         this.businessSettingsService = businessSettingsService;
         this.pdfService = pdfService;
+        this.accountService = accountService;
     }
 
     @GetMapping("/intake")
@@ -103,6 +107,7 @@ public class VehicleDocumentController {
         model.addAttribute("delivery", delivery);
         model.addAttribute("deliveryForm", documentService.toForm(delivery, order));
         model.addAttribute("fuelLevels", FuelLevel.values());
+        model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/delivery";
     }
@@ -162,9 +167,11 @@ public class VehicleDocumentController {
     }
 
     private void populateDeliveryModel(Long orderId, Model model) {
-        model.addAttribute("order", workOrderService.findById(orderId));
+        WorkOrder order = workOrderService.findById(orderId);
+        model.addAttribute("order", order);
         model.addAttribute("delivery", documentService.findDelivery(orderId));
         model.addAttribute("fuelLevels", FuelLevel.values());
+        model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
         model.addAttribute("activeMenu", "workorders");
     }
 }

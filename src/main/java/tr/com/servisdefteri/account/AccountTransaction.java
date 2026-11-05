@@ -61,6 +61,9 @@ public class AccountTransaction {
     @Column(name = "reversal_of_id")
     private Long reversalOfId;
 
+    @Column(name = "active_debit", nullable = false)
+    private boolean activeDebit = true;
+
     @Column(name = "created_by")
     private Long createdBy;
 

@@ -15,8 +15,8 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     @Test
     void allMigrationsAreAppliedAndExpectedTablesExist() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("14");
-        assertThat(flyway.info().applied()).hasSize(14);
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
+        assertThat(flyway.info().applied()).hasSize(15);
 
         Long tables = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.tables
@@ -34,8 +34,15 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     void criticalConstraintsAndIndexesExist() {
         Long uniqueDebitIndex = jdbcTemplate.queryForObject(
                 "select count(*) from pg_indexes where schemaname = 'public' "
-                        + "and indexname = 'uk_account_tx_work_order_debit'", Long.class);
+                        + "and indexname = 'uk_account_tx_work_order_active_debit'", Long.class);
         assertThat(uniqueDebitIndex).isEqualTo(1L);
+
+        Long activeDebitColumn = jdbcTemplate.queryForObject("""
+                select count(*) from information_schema.columns
+                where table_schema = 'public' and table_name = 'account_transactions'
+                  and column_name = 'active_debit'
+                """, Long.class);
+        assertThat(activeDebitColumn).isEqualTo(1L);
 
         Long plateUnique = jdbcTemplate.queryForObject(
                 "select count(*) from pg_indexes where schemaname = 'public' "

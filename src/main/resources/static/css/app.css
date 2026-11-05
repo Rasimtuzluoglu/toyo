@@ -2195,6 +2195,81 @@ body.command-open {
     }
 }
 
+/* ---------- Geri al bildirimi ---------- */
+.undo-toast {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: calc(100% - 24px);
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--sd-navy);
+    color: #fff;
+    box-shadow: 0 12px 30px rgba(17, 18, 20, 0.3);
+    animation: sd-toast-in 0.2s ease-out;
+}
+
+.undo-toast-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.undo-toast-close {
+    border: 0;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.25rem;
+    line-height: 1;
+    padding: 0 2px;
+}
+
+.undo-toast-close:hover {
+    color: #fff;
+}
+
+@keyframes sd-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.today-main {
+    text-decoration: none;
+}
+
+.kanban-payment {
+    display: inline-block;
+    width: 82px;
+    margin-right: 4px;
+    padding: 3px 6px;
+    font-size: 0.72rem;
+}
+
+@media (max-width: 575.98px) {
+    .undo-toast {
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        justify-content: space-between;
+    }
+
+    .today-item {
+        flex-wrap: wrap;
+    }
+}
+
 /* ---------- Hızlı iş emri ---------- */
 .quick-plate {
     padding-bottom: 4px;

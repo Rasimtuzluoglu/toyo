@@ -23,6 +23,8 @@ import tr.com.servisdefteri.common.FormTokenService;
 import tr.com.servisdefteri.customer.CustomerService;
 import tr.com.servisdefteri.account.AccountService;
 import tr.com.servisdefteri.export.ExportService;
+import tr.com.servisdefteri.payment.Payment;
+import tr.com.servisdefteri.payment.PaymentMethod;
 import tr.com.servisdefteri.pdf.PdfService;
 import tr.com.servisdefteri.security.AppUserPrincipal;
 import tr.com.servisdefteri.security.Role;
@@ -208,6 +210,10 @@ public class WorkOrderController {
                             : "İş emri hızlı kayıtla oluşturuldu.");
             redirectAttributes.addFlashAttribute("quickCreated", true);
             redirectAttributes.addFlashAttribute("quickCompleted", quickForm.isCompleteNow());
+            if (quickForm.isCompleteNow()) {
+                redirectAttributes.addFlashAttribute("undoOrderId", order.getId());
+                redirectAttributes.addFlashAttribute("undoReturnTo", "detail");
+            }
             return "redirect:/work-orders/" + order.getId();
         } catch (BusinessRuleException ex) {
             bindingResult.reject("quick.failed", ex.getMessage());
@@ -313,20 +319,72 @@ public class WorkOrderController {
     @PostMapping("/{id}/status")
     public String changeStatus(@PathVariable Long id,
                                @RequestParam(required = false) String status,
+                               @RequestParam(required = false) String paymentMethod,
                                @RequestParam(defaultValue = "detail") String returnTo,
-                               @AuthenticationPrincipal AppUserPrincipal principal,
                                RedirectAttributes redirectAttributes) {
         try {
             WorkOrderStatus target = parseStatus(status);
             if (target == null) {
                 throw new BusinessRuleException("Geçerli bir durum seçilmelidir.");
             }
-            workOrderService.changeStatus(id, target);
-            redirectAttributes.addFlashAttribute("successMessage", "İş emri durumu güncellendi.");
+            PaymentMethod method = parsePaymentMethod(paymentMethod);
+            if (target == WorkOrderStatus.TAMAMLANDI && method != null) {
+                Payment payment = workOrderService.completeWithPayment(id, method);
+                if (payment == null) {
+                    redirectAttributes.addFlashAttribute("successMessage", "İş emri tamamlandı.");
+                    redirectAttributes.addFlashAttribute("undoOrderId", id);
+                    redirectAttributes.addFlashAttribute("undoReturnTo", returnTo);
+                } else {
+                    redirectAttributes.addFlashAttribute("successMessage",
+                            "İş emri tamamlandı ve " + method.getLabel() + " tahsilatı alındı.");
+                }
+            } else {
+                workOrderService.changeStatus(id, target);
+                redirectAttributes.addFlashAttribute("successMessage", "İş emri durumu güncellendi.");
+                if (target == WorkOrderStatus.TAMAMLANDI) {
+                    redirectAttributes.addFlashAttribute("undoOrderId", id);
+                    redirectAttributes.addFlashAttribute("undoReturnTo", returnTo);
+                }
+            }
         } catch (BusinessRuleException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "board".equals(returnTo) ? "redirect:/work-orders/board" : "redirect:/work-orders/" + id;
+        return statusRedirect(id, returnTo);
+    }
+
+    @PostMapping("/{id}/undo-complete")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String undoComplete(@PathVariable Long id,
+                               @RequestParam(defaultValue = "detail") String returnTo,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            workOrderService.undoCompletion(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Tamamlama geri alındı.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return statusRedirect(id, returnTo);
+    }
+
+    private PaymentMethod parsePaymentMethod(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return PaymentMethod.valueOf(value.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new BusinessRuleException("Geçersiz ödeme yöntemi.");
+        }
+    }
+
+    private String statusRedirect(Long id, String returnTo) {
+        if ("board".equals(returnTo)) {
+            return "redirect:/work-orders/board";
+        }
+        if ("dashboard".equals(returnTo)) {
+            return "redirect:/";
+        }
+        return "redirect:/work-orders/" + id;
     }
 
     @PostMapping("/{id}/items")

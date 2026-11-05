@@ -17,7 +17,8 @@ Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş em
 - Bakım hatırlatmaları: 180 gün veya 10.000 km geçen araçlar
 - Ctrl+K komut paleti ve 6 adımlık sunum turu
 - Plaka ile hızlı iş emri: kayıtlı plaka müşteri ve araçla eşleşir; kayıtsız plakada müşteri + araç + iş emri tek adımda oluşur
-- Tek ekranda hızlı iş emri: manuel iş emri no, işlem/tutar ve “Kaydet ve Tamamla”
+- Tek ekranda hızlı iş emri: plaka yazınca otomatik eşleşme, hazır işlem düğmeleri ve “Kaydet ve Tamamla”
+- Tamamla + tahsilat (Cari/Nakit/Kart), tek tık teslim ve 10 dakikalık “Geri Al”
 - Manuel veya otomatik iş emri numarası; mükerrer numara engeli
 - Hazır işçilik/parça kalem şablonları ve son baktığınız işlere hızlı erişim
 - Araç kabul formu (yakıt, hasar notu, eşyalar), teslim tutanağı ve ıslak imza çıktısı

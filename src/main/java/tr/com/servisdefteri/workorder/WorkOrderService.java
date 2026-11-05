@@ -14,6 +14,9 @@ import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.NotFoundException;
 import tr.com.servisdefteri.customer.Customer;
 import tr.com.servisdefteri.customer.CustomerRepository;
+import tr.com.servisdefteri.payment.Payment;
+import tr.com.servisdefteri.payment.PaymentMethod;
+import tr.com.servisdefteri.payment.PaymentService;
 import tr.com.servisdefteri.security.CurrentUserService;
 import tr.com.servisdefteri.security.User;
 import tr.com.servisdefteri.security.UserRepository;
@@ -37,12 +40,14 @@ public class WorkOrderService {
             List.of(WorkOrderStatus.BEKLIYOR, WorkOrderStatus.ISLEMDE);
     private static final List<WorkOrderStatus> FINISHED_STATUSES =
             List.of(WorkOrderStatus.TAMAMLANDI, WorkOrderStatus.TESLIM_EDILDI);
+    private static final int UNDO_WINDOW_MINUTES = 10;
 
     private final WorkOrderRepository workOrderRepository;
     private final CustomerRepository customerRepository;
     private final VehicleRepository vehicleRepository;
     private final UserRepository userRepository;
     private final AccountService accountService;
+    private final PaymentService paymentService;
     private final AuditService auditService;
     private final CurrentUserService currentUserService;
     private final Clock clock;
@@ -52,6 +57,7 @@ public class WorkOrderService {
                             VehicleRepository vehicleRepository,
                             UserRepository userRepository,
                             AccountService accountService,
+                            PaymentService paymentService,
                             AuditService auditService,
                             CurrentUserService currentUserService,
                             Clock clock) {
@@ -60,6 +66,7 @@ public class WorkOrderService {
         this.vehicleRepository = vehicleRepository;
         this.userRepository = userRepository;
         this.accountService = accountService;
+        this.paymentService = paymentService;
         this.auditService = auditService;
         this.currentUserService = currentUserService;
         this.clock = clock;
@@ -316,6 +323,53 @@ public class WorkOrderService {
         WorkOrder saved = workOrderRepository.save(order);
         auditService.record(AuditAction.WORK_ORDER_STATUS_CHANGED, "İşEmri", saved.getId(),
                 "Durum değişti: " + previous + " -> " + target);
+        return saved;
+    }
+
+    /**
+     * İş emrini tamamlar ve aynı işlemde tahsilatı kaydeder.
+     * Tahsilat başarısız olursa durum ve borç kaydı da geri alınır.
+     */
+    @Transactional
+    public Payment completeWithPayment(Long orderId, PaymentMethod method) {
+        if (!currentUserService.canManageFinances()) {
+            throw new BusinessRuleException("Tahsilat için işletme sahibi veya muhasebe yetkisi gerekir.");
+        }
+        WorkOrder order = changeStatus(orderId, WorkOrderStatus.TAMAMLANDI);
+        return paymentService.collectForWorkOrder(order, method);
+    }
+
+    /**
+     * Son 10 dakika içinde tamamlanan iş emrini işlemde durumuna geri alır.
+     * Borç varsa silinmez; ters kayıt oluşturulur.
+     */
+    @Transactional
+    public WorkOrder undoCompletion(Long orderId) {
+        WorkOrder order = workOrderRepository.findByIdForUpdate(orderId)
+                .orElseThrow(() -> NotFoundException.of("İş emri", orderId));
+        if (!currentUserService.canOperateWorkOrders()) {
+            throw new BusinessRuleException(
+                    "Tamamlamayı geri almayı yalnızca işletme sahibi veya servis kullanıcısı yapabilir.");
+        }
+        if (order.getStatus() != WorkOrderStatus.TAMAMLANDI) {
+            throw new BusinessRuleException("Yalnızca tamamlanmış iş emri geri alınabilir.");
+        }
+        LocalDateTime now = LocalDateTime.now(clock);
+        if (order.getClosedAt() == null
+                || order.getClosedAt().isBefore(now.minusMinutes(UNDO_WINDOW_MINUTES))) {
+            throw new BusinessRuleException("Tamamlama geri alma süresi ("
+                    + UNDO_WINDOW_MINUTES + " dakika) doldu.");
+        }
+        if (order.isDebited() && order.getTotalAmount() != null
+                && order.getTotalAmount().signum() > 0) {
+            accountService.reverseWorkOrderDebt(order, "Tamamlama geri alındı: ");
+        }
+        order.setDebited(false);
+        order.setClosedAt(null);
+        order.setStatus(WorkOrderStatus.ISLEMDE);
+        WorkOrder saved = workOrderRepository.save(order);
+        auditService.record(AuditAction.WORK_ORDER_STATUS_CHANGED, "İşEmri", saved.getId(),
+                "Tamamlama geri alındı: TAMAMLANDI -> ISLEMDE");
         return saved;
     }
 

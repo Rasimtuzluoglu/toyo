@@ -67,10 +67,19 @@ public interface AccountTransactionRepository extends JpaRepository<AccountTrans
             """)
     List<Object[]> reversalTotalsByCustomer(@Param("customerId") Long customerId);
 
-    boolean existsByWorkOrderIdAndTypeAndReversalOfIdIsNull(Long workOrderId, TransactionType type);
-
-    Optional<AccountTransaction> findFirstByWorkOrderIdAndTypeAndReversalOfIdIsNull(Long workOrderId,
-                                                                                    TransactionType type);
+    @Query("""
+            select t from AccountTransaction t
+            where t.workOrder.id = :workOrderId
+              and t.type = :type
+              and t.reversalOfId is null
+              and t.activeDebit = true
+              and not exists (
+                  select r.id from AccountTransaction r where r.reversalOfId = t.id
+              )
+            order by t.id desc
+            """)
+    List<AccountTransaction> findActiveWorkOrderDebts(@Param("workOrderId") Long workOrderId,
+                                                      @Param("type") TransactionType type);
 
     Optional<AccountTransaction> findFirstByReversalOfId(Long reversalOfId);
 

@@ -147,11 +147,13 @@ Makbuz numarası `payment_receipt_seq` sequence'ından üretilir. İptal, satır
 | `work_order_id` | BIGINT | FK, NULL |
 | `payment_id` | BIGINT | FK, NULL |
 | `reversal_of_id` | BIGINT | Self FK, NULL |
+| `active_debit` | BOOLEAN | NOT NULL, varsayılan TRUE |
 | `created_by`, `created_at` | | |
 
 Kurallar:
 
-- Bir iş emri için en fazla bir orijinal `BORC` hareketi (kısmi benzersiz indeks).
+- Bir iş emri için aynı anda en fazla bir **aktif** orijinal `BORC` hareketi (kısmi benzersiz indeks).
+- Tamamlama geri alındığında eski borç ters kayıtla kapatılır ve `active_debit = FALSE` yapılır; yeniden tamamlanırsa yeni borç hareketi açılabilir.
 - Bir tahsilat için en fazla bir orijinal `ALACAK` hareketi (kısmi benzersiz indeks).
 - Ters kayıtlar `reversal_of_id` ile orijinal harekete bağlanır ve silinmez.
 
@@ -217,7 +219,7 @@ Sequence değerleri transaction rollback'inde geri alınmaz; bu nedenle numarala
 - `uk_vehicles_vin` (kısmi, boş olmayan VIN)
 - `idx_customers_name_lower`, `idx_customers_phone_normalized`
 - `idx_work_orders_customer`, `idx_work_orders_vehicle`, `idx_work_orders_status`, `idx_work_orders_opened_at`
-- `uk_account_tx_work_order_debit` (kısmi benzersiz)
+- `uk_account_tx_work_order_active_debit` (kısmi benzersiz)
 - `uk_account_tx_payment_credit` (kısmi benzersiz)
 - `idx_account_transactions_customer`, `idx_account_transactions_date`
 - `idx_payments_customer`, `idx_payments_date`, `idx_payments_status`
@@ -241,6 +243,7 @@ Sequence değerleri transaction rollback'inde geri alınmaz; bu nedenle numarala
 | V12 | `V12__backup_directory.sql` | Seçilebilir yedek klasörü ve yedek dosyası yolu |
 | V13 | `V13__digital_signatures.sql` | Araç kabul ve teslim tutanağına dijital imza |
 | V14 | `V14__branding_settings.sql` | White-label slogan, ana renk ve logo |
+| V15 | `V15__work_order_debit_reactivation.sql` | Tamamlama geri alınınca yeniden borçlandırma |
 
 Uygulama açılışında Flyway doğrular ve eksik migration'ları sırayla uygular. `flyway_schema_history` tablosu şema sürümünü tutar.
 

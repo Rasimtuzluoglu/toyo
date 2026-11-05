@@ -24,10 +24,17 @@
             <form th:each="next : ${order.status.allowedTransitions()}"
                   th:if="${next.name() != 'IPTAL'}"
                   th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
-                  th:attr="data-confirm=${'Bu iş emri ' + next.label + ' durumuna alınacak. Devam edilsin mi?'}"
                   data-submit-once class="d-inline">
                 <input type="hidden" name="status" th:value="${next.name()}">
                 <input type="hidden" name="returnTo" value="board">
+                <select th:if="${next.name() == 'TAMAMLANDI'}"
+                        sec:authorize="hasAnyRole('PATRON','MUHASEBE')"
+                        name="paymentMethod" class="form-select form-select-sm kanban-payment"
+                        aria-label="Tahsilat yöntemi">
+                    <option value="">Cari</option>
+                    <option value="NAKIT">Nakit</option>
+                    <option value="KART">Kart</option>
+                </select>
                 <button class="btn btn-sm" type="submit"
                         th:classappend="${next.name() == 'TAMAMLANDI' ? 'btn-primary' : (next.name() == 'TESLIM_EDILDI' ? 'btn-success' : 'btn-navy')}">
                     <i class="bi me-1"
@@ -61,7 +68,6 @@
             <form th:each="next : ${order.status.allowedTransitions()}"
                   th:if="${next.name() != 'IPTAL'}"
                   th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
-                  th:attr="data-confirm=${'Bu iş emri ' + next.label + ' durumuna alınacak. Devam edilsin mi?'}"
                   data-submit-once class="d-inline">
                 <input type="hidden" name="status" th:value="${next.name()}">
                 <input type="hidden" name="returnTo" value="board">

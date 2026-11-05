@@ -17,6 +17,7 @@ import tr.com.servisdefteri.common.NotFoundException;
 import tr.com.servisdefteri.customer.Customer;
 import tr.com.servisdefteri.customer.CustomerRepository;
 import tr.com.servisdefteri.security.CurrentUserService;
+import tr.com.servisdefteri.workorder.WorkOrder;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -83,6 +84,30 @@ public class PaymentService {
                 org.springframework.data.domain.Pageable.unpaged(
                         Sort.by(Sort.Direction.DESC, "paymentDate")
                                 .and(Sort.by(Sort.Direction.DESC, "id")))).getContent();
+    }
+
+    /**
+     * İş emri tamamlanırken tek adımda tahsilat oluşturur ve borcun tamamını bu tahsilata dağıtır.
+     */
+    @Transactional
+    public Payment collectForWorkOrder(WorkOrder workOrder, PaymentMethod method) {
+        if (workOrder.getTotalAmount() == null || workOrder.getTotalAmount().signum() <= 0) {
+            return null;
+        }
+        PaymentForm form = new PaymentForm();
+        form.setCustomerId(workOrder.getCustomer().getId());
+        form.setAmount(workOrder.getTotalAmount());
+        form.setPaymentDate(LocalDate.now(clock));
+        form.setMethod(method == null ? PaymentMethod.NAKIT : method);
+        form.setDescription("İş emri " + workOrder.getOrderNo() + " tahsilatı");
+        Long debtId = accountService.workOrderDebtTransactionId(workOrder.getId());
+        if (debtId != null) {
+            AllocationForm allocation = new AllocationForm();
+            allocation.setTransactionId(debtId);
+            allocation.setAmount(workOrder.getTotalAmount());
+            form.getAllocations().add(allocation);
+        }
+        return create(form);
     }
 
     @Transactional
