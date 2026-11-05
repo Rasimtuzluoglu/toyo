@@ -30,10 +30,10 @@ tahsilat, randevu ve belge süreçlerini tek bir yerel ağ uygulamasında toplar
 ## Teknik Yapı
 
 - Java 21, Spring Boot 3.5, Thymeleaf, PostgreSQL 16
-- Flyway migration (V14), Spring Security, Bean Validation
+- Flyway migration (V16), Spring Security, Bean Validation
 - Apache POI (Excel), OpenPDF (PDF), Noto Sans (Türkçe karakter)
 - Docker / Docker Compose, yerel ağda çalışır
-- 66 otomatik test (Testcontainers ile gerçek PostgreSQL)
+- 86 otomatik test (Testcontainers ile gerçek PostgreSQL)
 - Modüler monolit; katmanlı servis/repository yapısı
 - White-label: işletme adı, slogan, ana renk ve logo ayarlanabilir
 
