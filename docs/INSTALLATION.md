@@ -211,6 +211,22 @@ mvn test
 
 Testler üretim veritabanınıza dokunmaz; ayrı container kullanır.
 
+### Yerel CI
+
+GitHub Actions kotasından bağımsız olarak test + Docker build:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\ci-local.ps1
+```
+
+İsteğe bağlı pre-push hook:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-ci-hook.ps1
+```
+
+Hook, testler veya Docker build başarısızsa push'u durdurur. Log: `logs/ci-local.log`.
+
 ## 7. Sağlık Kontrolü
 
 ```bash

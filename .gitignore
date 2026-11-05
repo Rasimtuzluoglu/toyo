@@ -19,6 +19,7 @@ out/
 backups/
 updates/*
 !updates/.gitkeep
+logs/
 *.dump
 *.sql.gz
 

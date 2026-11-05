@@ -247,6 +247,21 @@ Testler gerçek PostgreSQL 16 üzerinde Testcontainers ile çalışır; Docker e
 
 Son çalıştırma sonucu: **86 test, 0 hata** (`mvn clean package`). Ayrıntılı rapor `target/surefire-reports/` altındadır.
 
+### Yerel CI (GitHub Actions'a alternatif)
+
+```powershell
+# Testler + Docker imajı
+powershell -ExecutionPolicy Bypass -File .\scripts\ci-local.ps1
+
+# İsteğe bağlı: her push öncesi otomatik çalışsın
+powershell -ExecutionPolicy Bypass -File .\scripts\install-ci-hook.ps1
+```
+
+- Testler için Docker Desktop açık olmalıdır.
+- Log: `logs/ci-local.log`.
+- Pre-push hook, test veya Docker build başarısızsa push'u durdurur.
+- Kaldırmak için `.git/hooks/pre-push` dosyasını silin.
+
 ## Proje Yapısı
 
 ```text
