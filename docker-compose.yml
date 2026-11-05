@@ -55,12 +55,18 @@ services:
       BACKUP_DIR: /app/backups
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       BACKUP_CRON: ${BACKUP_CRON:-0 0 2 * * *}
+      APP_UPDATE_ENABLED: ${APP_UPDATE_ENABLED:-true}
+      APP_UPDATE_DIR: /app/updates
+      APP_UPDATE_REPO: ${APP_UPDATE_REPO:-Rasimtuzluoglu/toyo}
+      APP_UPDATE_GITHUB_TOKEN: ${APP_UPDATE_GITHUB_TOKEN:-}
+      APP_BUILD_COMMIT: ${GIT_COMMIT:-unknown}
       THYMELEAF_CACHE: "true"
       TZ: Europe/Istanbul
     ports:
       - "${APP_BIND_ADDRESS:-0.0.0.0}:${APP_PORT:-18080}:18080"
     volumes:
       - backups:/app/backups
+      - ./updates:/app/updates
     security_opt:
       - no-new-privileges:true
     networks:

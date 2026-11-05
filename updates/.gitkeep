@@ -1,0 +1,2 @@
+# Bu klasör uygulama ile host güncelleme ajanı arasında paylaşılır.
+# update.request / update.status / agent.status dosyaları çalışma zamanında oluşur.

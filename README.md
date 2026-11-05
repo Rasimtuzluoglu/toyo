@@ -19,6 +19,7 @@ Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş em
 - Plaka ile hızlı iş emri: kayıtlı plaka müşteri ve araçla eşleşir; kayıtsız plakada müşteri + araç + iş emri tek adımda oluşur
 - Tek ekranda hızlı iş emri: plaka yazınca otomatik eşleşme, hazır işlem düğmeleri ve “Kaydet ve Tamamla”
 - Tamamla + tahsilat (Cari/Nakit/Kart), tek tık teslim ve 10 dakikalık “Geri Al”
+- Ayarlar → GitHub son commit kontrolü ve host ajanıyla Docker üzerinden güncelleme
 - Manuel veya otomatik iş emri numarası; mükerrer numara engeli
 - Hazır işçilik/parça kalem şablonları ve son baktığınız işlere hızlı erişim
 - Araç kabul formu (yakıt, hasar notu, eşyalar), teslim tutanağı ve ıslak imza çıktısı

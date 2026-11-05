@@ -31,6 +31,8 @@ public enum AuditAction {
     PAYMENT_CANCELLED("Tahsilat iptali"),
     PASSWORD_CHANGED("Parola değiştirme"),
     BUSINESS_SETTINGS_UPDATED("İşletme bilgileri güncelleme"),
+    APP_UPDATE_REQUESTED("Yazılım güncelleme isteği"),
+    APP_UPDATE_COMPLETED("Yazılım güncelleme tamamlandı"),
     BACKUP_TRIGGERED("Yedekleme başlatma"),
     BACKUP_COMPLETED("Yedekleme tamamlandı"),
     BACKUP_FAILED("Yedekleme hatası");

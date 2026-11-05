@@ -9,6 +9,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,6 +28,8 @@ import tr.com.servisdefteri.backup.BackupService;
 import tr.com.servisdefteri.backup.BackupStatus;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.FormTokenService;
+import tr.com.servisdefteri.security.AppUserPrincipal;
+import tr.com.servisdefteri.update.UpdateService;
 
 import java.util.Locale;
 
@@ -38,14 +41,17 @@ public class SettingsController {
     private final AuditLogRepository auditLogRepository;
     private final FormTokenService formTokenService;
     private final BusinessSettingsService businessSettingsService;
+    private final UpdateService updateService;
 
     public SettingsController(BackupService backupService, AuditLogRepository auditLogRepository,
                               FormTokenService formTokenService,
-                              BusinessSettingsService businessSettingsService) {
+                              BusinessSettingsService businessSettingsService,
+                              UpdateService updateService) {
         this.backupService = backupService;
         this.auditLogRepository = auditLogRepository;
         this.formTokenService = formTokenService;
         this.businessSettingsService = businessSettingsService;
+        this.updateService = updateService;
     }
 
     @GetMapping
@@ -116,6 +122,36 @@ public class SettingsController {
         return "redirect:/settings";
     }
 
+    @PostMapping("/update/check")
+    public String checkUpdate(@RequestParam(name = "formToken", required = false) String formToken,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            formTokenService.consume(session, formToken);
+            updateService.checkForUpdates();
+            redirectAttributes.addFlashAttribute("successMessage", "GitHub'daki son sürüm kontrol edildi.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/settings";
+    }
+
+    @PostMapping("/update/apply")
+    public String applyUpdate(@RequestParam(name = "formToken", required = false) String formToken,
+                              @AuthenticationPrincipal AppUserPrincipal principal,
+                              HttpSession session,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            formTokenService.consume(session, formToken);
+            updateService.requestUpdate(principal == null ? "sistem" : principal.getUsername());
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Güncelleme isteği alındı. Ajan birkaç dakika içinde uygulamayı yeniden başlatacak.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/settings";
+    }
+
     @GetMapping("/backups/{id}/download")
     public ResponseEntity<Resource> download(@PathVariable Long id) {
         Resource resource = backupService.download(id);
@@ -153,6 +189,7 @@ public class SettingsController {
         model.addAttribute("backupCron", backupService.getProperties().getCron());
         model.addAttribute("recentAudit", auditLogRepository.findAllByOrderByCreatedAtDesc(
                 PageRequest.of(0, 10)).getContent());
+        model.addAttribute("updateInfo", updateService.info());
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "settings");
     }

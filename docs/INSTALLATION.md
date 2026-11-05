@@ -91,6 +91,26 @@ powershell -ExecutionPolicy Bypass -File .\scripts\restore-drill.ps1
 
 Betik yeni bir yedek alır, ayrı bir test veritabanına geri yükler, temel tabloları doğrular ve test veritabanını temizler.
 
+### Yazılım güncelleme ajanı
+
+Ayarlar ekranındaki **Güncelle ve Yeniden Başlat** düğmesi, container içinden Docker komutu çalıştırmaz. Bunun yerine `updates/update.request` dosyasına istek bırakır; host bilgisayarda çalışan ajan `git pull` ve `docker compose up -d --build` işlemini yapar.
+
+Tek seferlik kurulum:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-update-agent.ps1
+```
+
+Bu betik ajanı Startup klasörüne ekler ve hemen başlatır. Ajan her 10 saniyede `updates/agent.status` dosyasına heartbeat yazar; Ayarlar ekranında **Ajan hazır** görünür.
+
+- **Manuel güncelleme:** Ayarlar → **Kontrol Et** → **Güncelle ve Yeniden Başlat**. Uygulama 1-3 dakika erişilemez olabilir ve oturumlar kapanır.
+- **Otomatik güncelleme:** Ajanı `UPDATE_AUTO=true` ortam değişkeniyle başlatırsanız 5 dakikada bir GitHub kontrol edilir ve yeni commit otomatik uygulanır. Canlı kullanımda mesai saatleri dışında tercih edin.
+- Ajan, yalnızca hızlı ileri alma (`git pull --ff-only`) yapar. Yerel değişiklik varsa güncelleme **hata** olarak durur; önce commit/stash yapılmalıdır.
+- GitHub deposu özel ise `APP_UPDATE_GITHUB_TOKEN` ortam değişkenini tanımlayın.
+- Güncelleme günlükleri: `updates/update.log` ve `updates/agent.log`.
+
+> Ajan host yetkisiyle çalışır; yalnızca güvenli ve yalnızca bu iş için kullanılan bilgisayarda çalıştırın.
+
 ### Temel komutlar
 
 ```bash

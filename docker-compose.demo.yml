@@ -43,6 +43,7 @@ services:
       DB_PORT: 5432
       DB_NAME: servisdefteri_demo
       BACKUP_ENABLED: "false"
+      APP_UPDATE_ENABLED: "false"
       THYMELEAF_CACHE: "false"
       TZ: Europe/Istanbul
     ports:

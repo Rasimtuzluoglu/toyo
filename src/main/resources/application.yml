@@ -76,6 +76,12 @@ app:
     username: ${INITIAL_ADMIN_USERNAME:}
     password: ${INITIAL_ADMIN_PASSWORD:}
     full-name: ${INITIAL_ADMIN_FULL_NAME:İşletme Sahibi}
+  update:
+    enabled: ${APP_UPDATE_ENABLED:true}
+    directory: ${APP_UPDATE_DIR:./updates}
+    repository: ${APP_UPDATE_REPO:Rasimtuzluoglu/toyo}
+    current-commit: ${APP_BUILD_COMMIT:unknown}
+    github-token: ${APP_UPDATE_GITHUB_TOKEN:}
   backup:
     enabled: ${BACKUP_ENABLED:true}
     directory: ${BACKUP_DIR:./backups}

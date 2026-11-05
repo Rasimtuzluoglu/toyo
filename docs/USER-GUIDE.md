@@ -320,8 +320,10 @@ Sağ üstteki **oynat** simgesi 6 adımlık sunum turunu başlatır: kokpit → 
 - Geçmiş yedekleri **İndir** ile bilgisayara alma
 - Son denetim kayıtları
 - Tüm denetim kayıtları: işlem türüne göre filtreleme
+- **Yazılım Güncellemesi:** GitHub’daki son commit’i kontrol eder; host ajanı çalışıyorsa **Güncelle ve Yeniden Başlat** ile Docker imajı yeniden oluşturulur. Güncelleme sırasında uygulama kısa süre erişilemez ve oturumlar kapanır.
 
 Yedekleme ve geri yükleme adımları için `docs/BACKUP-RESTORE.md`.
+Güncelleme ajanı kurulumu için `docs/INSTALLATION.md` → *Yazılım güncelleme ajanı*.
 
 ## Denetim Kaydı
 

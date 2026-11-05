@@ -17,6 +17,8 @@ out/
 .env
 *.log
 backups/
+updates/*
+!updates/.gitkeep
 *.dump
 *.sql.gz
 
