@@ -1,11 +1,12 @@
-$ErrorActionPreference = "Stop"
+param(
+    [string]$RequestedCommit = ""
+)
+
+$ErrorActionPreference = "Continue"
 
 # GitHub'daki son commit'i çeker, Docker imajını yeniden oluşturur ve sağlık kontrolü yapar.
 # Uygulama içindeki "Güncelle ve Yeniden Başlat" düğmesi bu betiği host ajanı üzerinden tetikler.
 # Kullanım: powershell -ExecutionPolicy Bypass -File .\scripts\update-toyota.ps1
-param(
-    [string]$RequestedCommit = ""
-)
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $updatesDir = Join-Path $projectRoot "updates"
@@ -82,9 +83,9 @@ try {
     Write-Status "running" "Docker imajı yeniden oluşturuluyor ($newCommit)..." $newCommit $startedAt
     Write-Log "Docker imajı yeniden oluşturuluyor: $newCommit"
 
-    docker compose up -d --build *>&1 | Tee-Object -FilePath $logFile -Append
+    docker compose up -d --build *>> $logFile
     if ($LASTEXITCODE -ne 0) {
-        throw "docker compose başarısız."
+        throw "docker compose başarısız. Ayrıntı: updates/update.log"
     }
 
     Write-Log "Sağlık kontrolü bekleniyor..."

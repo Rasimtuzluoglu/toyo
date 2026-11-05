@@ -53,6 +53,26 @@ class UpdateServiceTest {
     }
 
     @Test
+    void requestUpdateWritesTargetCommitForHostAgent() throws Exception {
+        Files.writeString(tempDir.resolve("agent.status"),
+                "{\"heartbeat\":\"2026-11-05T20:00:00Z\",\"auto\":false}");
+        UpdateService service = new UpdateService(true, tempDir.toString(), "owner/repo",
+                "1111111", "", objectMapper, Clock.fixed(NOW, ZoneId.of("Europe/Istanbul")),
+                mock(AuditService.class)) {
+            @Override
+            LatestCommit fetchLatestCommit() {
+                return new LatestCommit("abcdef1234567890", "Yeni sürüm", "2026-11-05T19:00:00Z");
+            }
+        };
+
+        service.requestUpdate("patron");
+
+        String request = Files.readString(tempDir.resolve("update.request"));
+        assertThat(request).contains("\"targetCommit\" : \"abcdef1234567890\"");
+        assertThat(request).contains("\"requestedBy\" : \"patron\"");
+    }
+
+    @Test
     void unknownCurrentCommitIsShownAsUnknown() {
         UpdateInfo info = service("unknown").info();
 

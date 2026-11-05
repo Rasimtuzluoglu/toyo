@@ -153,7 +153,7 @@ public class UpdateService {
         }
     }
 
-    private LatestCommit fetchLatestCommit() {
+    LatestCommit fetchLatestCommit() {
         try {
             HttpRequest.Builder builder = HttpRequest.newBuilder(
                             URI.create("https://api.github.com/repos/" + repository + "/commits/main"))
@@ -321,7 +321,7 @@ public class UpdateService {
         return lineBreak < 0 ? message.trim() : message.substring(0, lineBreak).trim();
     }
 
-    private record LatestCommit(String sha, String message, String date) {
+    static record LatestCommit(String sha, String message, String date) {
     }
 
     private record AgentState(boolean online, boolean autoUpdate, String heartbeat) {

@@ -245,7 +245,7 @@ Testler gerçek PostgreSQL 16 üzerinde Testcontainers ile çalışır; Docker e
 - İş emri ve makbuz PDF üretimi
 - Araç kabul/teslim tutanağı ve günlük randevu akışı
 
-Son çalıştırma sonucu: **85 test, 0 hata** (`mvn clean package`). Ayrıntılı rapor `target/surefire-reports/` altındadır.
+Son çalıştırma sonucu: **86 test, 0 hata** (`mvn clean package`). Ayrıntılı rapor `target/surefire-reports/` altındadır.
 
 ## Proje Yapısı
 
