@@ -41,9 +41,35 @@ public class BusinessSettings {
     @Column(name = "backup_directory", length = 500)
     private String backupDirectory;
 
+    @Column(nullable = false, length = 120)
+    private String tagline = "Yetkili Servis ve Bakım";
+
+    @Column(name = "primary_color", nullable = false, length = 7)
+    private String primaryColor = "#eb0a1e";
+
+    @Column(name = "logo_data", columnDefinition = "BYTEA")
+    private byte[] logoData;
+
+    @Column(name = "logo_content_type", length = 100)
+    private String logoContentType;
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "updated_by")
     private Long updatedBy;
+
+    public String getLogoUrl() {
+        return logoData != null && logoData.length > 0 ? "/branding/logo" : "/images/toyota.png";
+    }
+
+    public String getPrimaryColorDark() {
+        try {
+            java.awt.Color color = java.awt.Color.decode(primaryColor);
+            java.awt.Color darker = color.darker();
+            return String.format("#%02x%02x%02x", darker.getRed(), darker.getGreen(), darker.getBlue());
+        } catch (RuntimeException ex) {
+            return "#c00718";
+        }
+    }
 }

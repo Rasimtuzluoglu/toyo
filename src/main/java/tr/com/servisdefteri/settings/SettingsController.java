@@ -64,7 +64,13 @@ public class SettingsController {
             populateSettings(model, session);
             return "settings/index";
         }
-        businessSettingsService.update(form);
+        try {
+            businessSettingsService.update(form);
+        } catch (BusinessRuleException ex) {
+            bindingResult.reject("business.failed", ex.getMessage());
+            populateSettings(model, session);
+            return "settings/index";
+        }
         redirectAttributes.addFlashAttribute("successMessage", "İşletme bilgileri güncellendi.");
         return "redirect:/settings";
     }

@@ -2,9 +2,11 @@ package tr.com.servisdefteri.settings;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 import tr.com.servisdefteri.common.validation.ValidPhone;
 
 @Getter
@@ -31,4 +33,14 @@ public class BusinessSettingsForm {
 
     @Size(max = 20, message = "Vergi numarası en fazla 20 karakter olabilir.")
     private String taxNumber;
+
+    @Size(max = 120, message = "Slogan en fazla 120 karakter olabilir.")
+    private String tagline;
+
+    @Pattern(regexp = "^$|^#[0-9a-fA-F]{6}$", message = "Ana renk #RRGGBB biçiminde olmalıdır.")
+    private String primaryColor = "#eb0a1e";
+
+    private MultipartFile logo;
+
+    private boolean removeLogo;
 }

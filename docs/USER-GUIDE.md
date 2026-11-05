@@ -306,7 +306,8 @@ Sağ üstteki **oynat** simgesi 6 adımlık sunum turunu başlatır: kokpit → 
 
 ## Ayarlar ve Yedekleme (PATRON)
 
-- **İşletme bilgileri:** işletme adı, telefon, e-posta, adres, vergi dairesi/no. Bu bilgiler iş emri, makbuz ve cari ekstre çıktılarında görünür.
+- **İşletme bilgileri:** işletme adı, slogan, telefon, e-posta, adres, vergi dairesi/no ve ana renk. Bu bilgiler giriş ekranı, menü, iş emri, makbuz ve ekstre çıktılarında görünür.
+- **Logo:** PNG/JPEG/WebP, en fazla 2 MB. Yüklenen logo giriş ekranı, menü, belgeler ve PDF’lerde kullanılır; kaldırılabilir.
 - Yedek klasörü, saklama süresi ve cron bilgisi
 - **Sunucuda Yedekle** ve **Yedek Al ve İndir** (tarayıcıda istediğiniz klasörü seçerek kaydetme)
 - Geçmiş yedekleri **İndir** ile bilgisayara alma

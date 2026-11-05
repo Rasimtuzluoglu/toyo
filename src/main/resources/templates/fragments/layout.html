@@ -7,24 +7,31 @@
     <meta name="theme-color" content="#12253d">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Toyota Plaza">
-    <title th:text="${title} + ' · Toyota Plaza Öztoprak'">Toyota Plaza Öztoprak</title>
-    <link rel="icon" type="image/png" th:href="@{/images/toyota.png}">
-    <link rel="apple-touch-icon" th:href="@{/images/toyota.png}">
+    <title th:text="${title + ' · ' + (brand != null ? brand.name : 'Servis Yönetimi')}">Servis Yönetimi</title>
+    <link rel="icon" type="image/png" th:href="${brand != null ? brand.logoUrl : '/images/toyota.png'}">
+    <link rel="apple-touch-icon" th:href="${brand != null ? brand.logoUrl : '/images/toyota.png'}">
     <link rel="manifest" th:href="@{/manifest.json}">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.css}">
     <link rel="stylesheet" th:href="@{/css/app.css(v=1.0.0)}">
+    <style th:inline="css">
+        :root {
+            --sd-accent: [[${brand != null ? brand.primaryColor : '#eb0a1e'}]];
+            --sd-accent-dark: [[${brand != null ? brand.primaryColorDark : '#c00718'}]];
+            --sd-gold: [[${brand != null ? brand.primaryColor : '#eb0a1e'}]];
+        }
+    </style>
 </head>
 <body>
 
 <aside class="sd-sidebar" th:fragment="sidebar(active)" aria-label="Ana menü">
     <a class="sd-brand" th:href="@{/}">
         <span class="sd-brand-mark">
-            <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+            <img th:src="${brand != null ? brand.logoUrl : '/images/toyota.png'}" alt="" class="sd-brand-logo">
         </span>
         <span class="sd-brand-text">
-            <strong>Toyota Plaza Öztoprak</strong>
-            <span>Yetkili Servis ve Bakım</span>
+            <strong th:text="${brand != null ? brand.name : 'Servis Yönetimi'}">İşletme</strong>
+            <span th:text="${brand != null ? brand.tagline : 'Yetkili Servis ve Bakım'}">Yetkili Servis ve Bakım</span>
         </span>
     </a>
     <button type="button" class="sd-sidebar-close" data-sidebar-close aria-label="Menüyü kapat">
@@ -166,7 +173,7 @@
 </div>
 
 <footer class="sd-footer" th:fragment="footer">
-    <span>Toyota Plaza Öztoprak · Servis ve cari hesap yönetimi</span>
+    <span th:text="${(brand != null ? brand.name : 'Servis Yönetimi') + ' · Servis ve cari hesap yönetimi'}">Servis ve cari hesap yönetimi</span>
     <span class="sd-footer-right">
         <span>Para birimi: TRY · Saat dilimi: Europe/Istanbul</span>
         <span th:replace="~{fragments/layout :: poweredBy}"></span>

@@ -17,7 +17,7 @@
 <div class="print-page">
     <div class="print-header">
         <div>
-            <img class="print-logo" th:src="@{/images/toyota.png}" alt="Toyota">
+            <img class="print-logo" th:src="${business.logoUrl}" alt="Logo">
             <h1 th:text="${business.name}">Toyota Plaza Öztoprak</h1>
             <div class="record-meta" th:text="${business.phone == null ? 'Yetkili Servis ve Bakım' : business.phone}">
                 0555 000 00 00

@@ -6,15 +6,15 @@
     <section class="auth-brand">
         <div class="auth-brand-top">
             <span class="sd-brand-mark">
-                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+                <img th:src="${brand.logoUrl}" alt="" class="sd-brand-logo">
             </span>
             <div class="sd-brand-text">
-                <strong>Toyota Plaza Öztoprak</strong>
-                <span>Yetkili Servis ve Bakım</span>
+                <strong th:text="${brand.name}">İşletme</strong>
+                <span th:text="${brand.tagline}">Yetkili Servis ve Bakım</span>
             </div>
         </div>
         <div>
-            <h1>Toyota Plaza Öztoprak'ta her kayıt, tek bir defterde.</h1>
+            <h1>Her kayıt, tek bir defterde.</h1>
             <p>
                 Müşteri ve araç kayıtları, iş emirleri, cari hesaplar ve tahsilatlar.
                 Dağınık Excel dosyaları yerine işletmenizin güncel durumunu tek ekrandan yönetin.
@@ -32,11 +32,11 @@
     <section class="auth-form-wrap">
         <div class="auth-mobile-brand d-lg-none">
             <span class="sd-brand-mark">
-                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+                <img th:src="${brand.logoUrl}" alt="" class="sd-brand-logo">
             </span>
             <div class="sd-brand-text">
-                <strong>Toyota Plaza Öztoprak</strong>
-                <span>Yetkili Servis ve Bakım</span>
+                <strong th:text="${brand.name}">İşletme</strong>
+                <span th:text="${brand.tagline}">Yetkili Servis ve Bakım</span>
             </div>
         </div>
         <div class="auth-card">
@@ -46,6 +46,10 @@
             <div class="alert alert-danger" th:if="${param.error}" role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>
                 Kullanıcı adı veya parola hatalı. Lütfen tekrar deneyin.
+            </div>
+            <div class="alert alert-warning" th:if="${param.locked}" role="alert">
+                <i class="bi bi-lock-fill me-1" aria-hidden="true"></i>
+                Çok fazla hatalı giriş denemesi yapıldı. Lütfen 15 dakika sonra tekrar deneyin.
             </div>
             <div class="alert alert-success" th:if="${param.logout}" role="status">
                 Güvenli biçimde çıkış yaptınız.

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.mock.web.MockMultipartFile;
 import tr.com.servisdefteri.appointment.Appointment;
 import tr.com.servisdefteri.appointment.AppointmentForm;
 import tr.com.servisdefteri.appointment.AppointmentService;
@@ -15,6 +16,8 @@ import tr.com.servisdefteri.security.Role;
 import tr.com.servisdefteri.security.User;
 import tr.com.servisdefteri.report.ReportService;
 import tr.com.servisdefteri.settings.BusinessSettingsService;
+import tr.com.servisdefteri.settings.BusinessSettings;
+import tr.com.servisdefteri.settings.BusinessSettingsForm;
 import tr.com.servisdefteri.support.BusinessTestSupport;
 import tr.com.servisdefteri.vehicle.Vehicle;
 import tr.com.servisdefteri.workorder.FuelLevel;
@@ -329,6 +332,42 @@ class UsabilityIT extends BusinessTestSupport {
         assertThatThrownBy(() -> workOrderService.create(duplicate))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("zaten kullanılıyor");
+    }
+
+    @Test
+    void brandingSettingsAndLogoCanBeUpdated() throws Exception {
+        BusinessSettings original = businessSettingsService.get();
+        try {
+            BusinessSettingsForm form = new BusinessSettingsForm();
+            form.setName("Test Bayi");
+            form.setTagline("Test Servis");
+            form.setPrimaryColor("#0055aa");
+            form.setLogo(new MockMultipartFile("logo", "logo.png", "image/png",
+                    "test-logo".getBytes(StandardCharsets.UTF_8)));
+            businessSettingsService.update(form);
+
+            BusinessSettings updated = businessSettingsService.get();
+            assertThat(updated.getName()).isEqualTo("Test Bayi");
+            assertThat(updated.getTagline()).isEqualTo("Test Servis");
+            assertThat(updated.getPrimaryColor()).isEqualTo("#0055aa");
+            assertThat(updated.getLogoData()).isNotEmpty();
+
+            mockMvc.perform(get("/branding/logo"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType("image/png"));
+        } finally {
+            BusinessSettingsForm reset = new BusinessSettingsForm();
+            reset.setName(original.getName());
+            reset.setTagline(original.getTagline());
+            reset.setPrimaryColor(original.getPrimaryColor());
+            reset.setPhone(original.getPhone());
+            reset.setEmail(original.getEmail());
+            reset.setAddress(original.getAddress());
+            reset.setTaxOffice(original.getTaxOffice());
+            reset.setTaxNumber(original.getTaxNumber());
+            reset.setRemoveLogo(true);
+            businessSettingsService.update(reset);
+        }
     }
 
     private void assertPdf(MvcResult result) {

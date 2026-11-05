@@ -15,8 +15,8 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     @Test
     void allMigrationsAreAppliedAndExpectedTablesExist() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("13");
-        assertThat(flyway.info().applied()).hasSize(13);
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("14");
+        assertThat(flyway.info().applied()).hasSize(14);
 
         Long tables = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.tables

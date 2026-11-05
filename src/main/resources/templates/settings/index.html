@@ -22,7 +22,8 @@
                 </div>
             </div>
 
-            <form th:action="@{/settings/business}" method="post" th:object="${businessForm}" data-submit-once>
+            <form th:action="@{/settings/business}" method="post" enctype="multipart/form-data"
+                  th:object="${businessForm}" data-submit-once>
                 <div class="sd-card">
                     <div class="sd-card-header">
                         <h2><i class="bi bi-shop me-2"></i>İşletme bilgileri</h2>
@@ -36,6 +37,42 @@
                                 <input class="form-control" id="businessName" type="text" th:field="*{name}"
                                        th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" maxlength="200" required>
                                 <div class="invalid-feedback" th:errors="*{name}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="businessTagline">Slogan / alt başlık</label>
+                                <input class="form-control" id="businessTagline" type="text" th:field="*{tagline}"
+                                       th:classappend="${#fields.hasErrors('tagline')} ? 'is-invalid'" maxlength="120">
+                                <div class="invalid-feedback" th:errors="*{tagline}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="businessPrimaryColor">Ana renk</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <span class="color-dot"
+                                              th:style="'background:' + *{primaryColor}"></span>
+                                    </span>
+                                    <input class="form-control" id="businessPrimaryColor" type="text"
+                                           th:field="*{primaryColor}"
+                                           th:classappend="${#fields.hasErrors('primaryColor')} ? 'is-invalid'"
+                                           maxlength="7" placeholder="#eb0a1e">
+                                </div>
+                                <div class="invalid-feedback d-block" th:errors="*{primaryColor}"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="businessLogo">Logo</label>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img th:src="${brand.logoUrl}" alt="Mevcut logo" class="brand-preview">
+                                    <div class="flex-grow-1">
+                                        <input class="form-control" id="businessLogo" name="logo" type="file"
+                                               accept="image/png,image/jpeg,image/webp">
+                                        <div class="form-check mt-2" th:if="${brand.logoData != null}">
+                                            <input class="form-check-input" type="checkbox" id="removeLogo"
+                                                   th:field="*{removeLogo}">
+                                            <label class="form-check-label" for="removeLogo">Mevcut logoyu kaldır</label>
+                                        </div>
+                                        <div class="form-text">PNG, JPEG veya WebP; en fazla 2 MB.</div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label" for="businessPhone">Telefon</label>

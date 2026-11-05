@@ -1823,6 +1823,24 @@ body.command-open {
     font-size: 0.62rem;
 }
 
+.brand-preview {
+    width: 92px;
+    height: 64px;
+    object-fit: contain;
+    padding: 6px;
+    border: 1px solid var(--sd-border);
+    border-radius: 10px;
+    background: #fff;
+}
+
+.color-dot {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid var(--sd-border-strong);
+}
+
 /* ---------- Error ---------- */
 .error-page {
     min-height: 100vh;

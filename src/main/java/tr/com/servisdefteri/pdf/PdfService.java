@@ -402,13 +402,9 @@ public class PdfService {
 
         PdfPCell left = new PdfPCell();
         left.setBorder(Rectangle.NO_BORDER);
-        try {
-            Image logo = Image.getInstance(readResource("static/images/toyota.png"));
-            logo.scaleToFit(64, 48);
-            logo.setAlignment(Element.ALIGN_LEFT);
+        Image logo = brandLogo(business);
+        if (logo != null) {
             left.addElement(logo);
-        } catch (IOException ex) {
-            // Logo okunamazsa belge markasız devam eder.
         }
         Paragraph businessName = new Paragraph(safe(business.getName()), nameFont);
         businessName.setSpacingBefore(4);
@@ -564,6 +560,20 @@ public class PdfService {
             return input.readAllBytes();
         } catch (IOException ex) {
             throw new IllegalStateException("Kaynak okunamadı: " + path, ex);
+        }
+    }
+
+    private Image brandLogo(BusinessSettings business) {
+        try {
+            byte[] data = business.getLogoData();
+            Image image = data != null && data.length > 0
+                    ? Image.getInstance(data)
+                    : Image.getInstance(readResource("static/images/toyota.png"));
+            image.scaleToFit(64, 48);
+            image.setAlignment(Element.ALIGN_LEFT);
+            return image;
+        } catch (RuntimeException | IOException ex) {
+            return null;
         }
     }
 }

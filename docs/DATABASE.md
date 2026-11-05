@@ -186,7 +186,7 @@ Yedekleme denemelerinin sonucu: `started_at`, `finished_at`, `status` (BASARILI,
 
 ### `business_settings`
 
-Tek satırlık işletme kimliği (`id = 1`). `name`, `phone`, `email`, `address`, `tax_office`, `tax_number`, `backup_directory`, `updated_at`, `updated_by` alanlarını taşır. İş emri, tahsilat makbuzu ve cari ekstre çıktılarında kullanılır. Tek satır kuralı CHECK kısıtıyla korunur. `backup_directory` boşsa `BACKUP_DIR` ortam değişkeni kullanılır.
+Tek satırlık işletme kimliği (`id = 1`). `name`, `tagline`, `primary_color`, `logo_data`, `logo_content_type`, `phone`, `email`, `address`, `tax_office`, `tax_number`, `backup_directory`, `updated_at`, `updated_by` alanlarını taşır. İş emri, tahsilat makbuzu, cari ekstre ve tüm marka alanlarında kullanılır. Tek satır kuralı CHECK kısıtıyla korunur. `backup_directory` boşsa `BACKUP_DIR` ortam değişkeni kullanılır.
 
 ### `vehicle_intakes`
 
@@ -240,6 +240,7 @@ Sequence değerleri transaction rollback'inde geri alınmaz; bu nedenle numarala
 | V11 | `V11__intake_delivery_appointments.sql` | Araç kabul, teslim tutanağı ve randevular |
 | V12 | `V12__backup_directory.sql` | Seçilebilir yedek klasörü ve yedek dosyası yolu |
 | V13 | `V13__digital_signatures.sql` | Araç kabul ve teslim tutanağına dijital imza |
+| V14 | `V14__branding_settings.sql` | White-label slogan, ana renk ve logo |
 
 Uygulama açılışında Flyway doğrular ve eksik migration'ları sırayla uygular. `flyway_schema_history` tablosu şema sürümünü tutar.
 

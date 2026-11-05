@@ -54,7 +54,6 @@ Beklenen durum:
 Uygulama: `http://localhost:18080`
 
 ### Yerel ağda kullanım (VPS / internete açma yok)
-
 Bu kurulum yalnızca yerel bilgisayar ve aynı ağdaki cihazlar için tasarlanmıştır. Uygulama internete açılmaz; PostgreSQL portu da dışarı yayınlanmaz.
 
 - **Yalnızca bu bilgisayardan kullanılacaksa:** `.env` içinde `APP_BIND_ADDRESS=127.0.0.1` yapın.
@@ -64,6 +63,31 @@ Bu kurulum yalnızca yerel bilgisayar ve aynı ağdaki cihazlar için tasarlanm�
 - Modem/router üzerinde bu port için **port yönlendirme yapmayın**. Dışarıdan erişim gerekirse VPS veya port açmak yerine VPN kullanın.
 - Yerel ağda HTTPS yoktur; güvenilir ve parola korumalı bir Wi-Fi kullanın.
 - Yedekleri aynı bilgisayarda tutmayın; **Yedek Al ve İndir** ile harici disk/NAS'a kopyalayın.
+
+### Windows'ta otomatik başlatma
+
+Tek seferlik kurulum:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-autostart.ps1
+```
+
+Bu betik, oturum açıldığında uygulamayı başlatan bir kısayolu Startup klasörüne ekler.
+Docker Desktop'ta **Settings → General → Start Docker Desktop when you sign in** seçeneğini de açın.
+
+Manuel başlatma:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start-toyota.ps1
+```
+
+### Yedek geri yükleme tatbikatı
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\restore-drill.ps1
+```
+
+Betik yeni bir yedek alır, ayrı bir test veritabanına geri yükler, temel tabloları doğrular ve test veritabanını temizler.
 
 ### Temel komutlar
 

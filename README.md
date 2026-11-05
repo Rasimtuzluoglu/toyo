@@ -32,7 +32,7 @@ Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş em
 - Tahsilatlar, birden fazla borca dağıtım, tahsilat iptali (ters kayıt)
 - Dashboard ve gerçek verilerden üretilen raporlar
 - Denetim kaydı (audit log)
-- İşletme adı/telefon/adres/vergi bilgisi ayarı; iş emri, makbuz ve ekstre çıktılarında kullanım
+- White-label marka ayarı: işletme adı, slogan, ana renk ve logo (giriş ekranı, menü, PDF ve belgeler dahil)
 - Excel (.xlsx) ve CSV dışa aktarma: müşteri, araç, iş emri, tahsilat listeleri ile tüm raporlar
 - İş emri ve tahsilat makbuzu için doğrudan PDF indirme
 - `pg_dump` tabanlı yedekleme; sunucu klasörü seçimi ve tarayıcıdan istediğiniz klasöre indirme
@@ -243,7 +243,7 @@ Testler gerçek PostgreSQL 16 üzerinde Testcontainers ile çalışır; Docker e
 - İş emri ve makbuz PDF üretimi
 - Araç kabul/teslim tutanağı ve günlük randevu akışı
 
-Son çalıştırma sonucu: **66 test, 0 hata** (`mvn clean package`). Ayrıntılı rapor `target/surefire-reports/` altındadır.
+Son çalıştırma sonucu: **67 test, 0 hata** (`mvn clean package`). Ayrıntılı rapor `target/surefire-reports/` altındadır.
 
 ## Proje Yapısı
 
@@ -277,6 +277,8 @@ docs/           mimari, veritabanı, kurulum, yedekleme, kullanım
 - [Kurulum](docs/INSTALLATION.md)
 - [Yedekleme ve Geri Yükleme](docs/BACKUP-RESTORE.md)
 - [Kullanıcı Rehberi](docs/USER-GUIDE.md)
+- [Case Study](docs/CASE-STUDY.md)
+- [Demo Video Senaryosu](docs/DEMO-VIDEO-SCRIPT.md)
 
 ## Güvenlik Notları
 

@@ -30,7 +30,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/webjars/**", "/images/**", "/favicon.ico",
-                                "/manifest.json").permitAll()
+                                "/manifest.json", "/branding/**").permitAll()
                         .requestMatchers("/login", "/setup", "/setup/**", "/403", "/error", "/error/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/users/**", "/settings/**", "/audit/**").hasRole("PATRON")

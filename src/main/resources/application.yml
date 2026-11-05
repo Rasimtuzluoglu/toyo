@@ -36,6 +36,9 @@ spring:
       cookie:
         http-only: true
         same-site: lax
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 5MB
 
 server:
   port: ${SERVER_PORT:18080}

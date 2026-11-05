@@ -6,15 +6,15 @@
     <section class="auth-brand">
         <div class="auth-brand-top">
             <span class="sd-brand-mark">
-                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+                <img th:src="${brand.logoUrl}" alt="" class="sd-brand-logo">
             </span>
             <div class="sd-brand-text">
-                <strong>Toyota Plaza Öztoprak</strong>
-                <span>Yetkili Servis ve Bakım</span>
+                <strong th:text="${brand.name}">İşletme</strong>
+                <span th:text="${brand.tagline}">Yetkili Servis ve Bakım</span>
             </div>
         </div>
         <div>
-            <h1>Toyota Plaza Öztoprak kurulumunu tamamlayın.</h1>
+            <h1>İlk kurulumu tamamlayın.</h1>
             <p>
                 Sistemde henüz kullanıcı yok. Güvenli bir işletme sahibi hesabı oluşturarak kurulumu tamamlayın.
                 Bu ekran yalnızca hiç kullanıcı yokken erişilebilir.
@@ -31,11 +31,11 @@
     <section class="auth-form-wrap">
         <div class="auth-mobile-brand d-lg-none">
             <span class="sd-brand-mark">
-                <img th:src="@{/images/toyota.png}" alt="" class="sd-brand-logo">
+                <img th:src="${brand.logoUrl}" alt="" class="sd-brand-logo">
             </span>
             <div class="sd-brand-text">
-                <strong>Toyota Plaza Öztoprak</strong>
-                <span>Yetkili Servis ve Bakım</span>
+                <strong th:text="${brand.name}">İşletme</strong>
+                <span th:text="${brand.tagline}">Yetkili Servis ve Bakım</span>
             </div>
         </div>
         <div class="auth-card">

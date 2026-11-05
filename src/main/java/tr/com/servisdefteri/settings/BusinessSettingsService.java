@@ -44,7 +44,8 @@ public class BusinessSettingsService {
     }
 
     @Transactional
-    public BusinessSettings update(BusinessSettingsForm form) {        BusinessSettings settings = repository.findById(SETTINGS_ID)
+    public BusinessSettings update(BusinessSettingsForm form) {
+        BusinessSettings settings = repository.findById(SETTINGS_ID)
                 .orElseGet(BusinessSettings::new);
         settings.setId(SETTINGS_ID);
         settings.setName(form.getName().trim());
@@ -53,12 +54,42 @@ public class BusinessSettingsService {
         settings.setAddress(blankToNull(form.getAddress()));
         settings.setTaxOffice(blankToNull(form.getTaxOffice()));
         settings.setTaxNumber(blankToNull(form.getTaxNumber()));
+        settings.setTagline(form.getTagline() == null || form.getTagline().isBlank()
+                ? "Yetkili Servis ve Bakım" : form.getTagline().trim());
+        settings.setPrimaryColor(form.getPrimaryColor() == null || form.getPrimaryColor().isBlank()
+                ? "#eb0a1e" : form.getPrimaryColor());
+        applyLogo(settings, form);
         settings.setUpdatedAt(LocalDateTime.now(clock));
         settings.setUpdatedBy(currentUserService.idOrNull());
         BusinessSettings saved = repository.save(settings);
         auditService.record(AuditAction.BUSINESS_SETTINGS_UPDATED, "İşletmeAyarları", SETTINGS_ID,
                 "İşletme bilgileri güncellendi: " + saved.getName());
         return saved;
+    }
+
+    private void applyLogo(BusinessSettings settings, BusinessSettingsForm form) {
+        if (form.isRemoveLogo()) {
+            settings.setLogoData(null);
+            settings.setLogoContentType(null);
+            return;
+        }
+        if (form.getLogo() == null || form.getLogo().isEmpty()) {
+            return;
+        }
+        String contentType = form.getLogo().getContentType();
+        if (contentType == null || !(contentType.equals("image/png")
+                || contentType.equals("image/jpeg") || contentType.equals("image/webp"))) {
+            throw new BusinessRuleException("Logo PNG, JPEG veya WebP olmalıdır.");
+        }
+        if (form.getLogo().getSize() > 2 * 1024 * 1024) {
+            throw new BusinessRuleException("Logo boyutu en fazla 2 MB olabilir.");
+        }
+        try {
+            settings.setLogoData(form.getLogo().getBytes());
+            settings.setLogoContentType(contentType);
+        } catch (IOException ex) {
+            throw new BusinessRuleException("Logo okunamadı: " + ex.getMessage());
+        }
     }
 
     @Transactional
@@ -91,13 +122,16 @@ public class BusinessSettingsService {
                 "Yedek klasörü güncellendi: " + (normalized == null ? "varsayılan" : normalized));
     }
 
-    public BusinessSettingsForm toForm(BusinessSettings settings) {        BusinessSettingsForm form = new BusinessSettingsForm();
+    public BusinessSettingsForm toForm(BusinessSettings settings) {
+        BusinessSettingsForm form = new BusinessSettingsForm();
         form.setName(settings.getName());
         form.setPhone(settings.getPhone());
         form.setEmail(settings.getEmail());
         form.setAddress(settings.getAddress());
         form.setTaxOffice(settings.getTaxOffice());
         form.setTaxNumber(settings.getTaxNumber());
+        form.setTagline(settings.getTagline());
+        form.setPrimaryColor(settings.getPrimaryColor());
         return form;
     }
 

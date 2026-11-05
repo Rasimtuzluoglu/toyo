@@ -14,6 +14,15 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 
 > **Önemli:** Otomatik yedek alınması, geri yüklemenin başarılı olduğunu kanıtlamaz. Aşağıdaki geri yükleme testi düzenli olarak yapılmalıdır.
 
+## Tatbikat Sonucu
+
+- Tarih: **05.11.2026**
+- Yöntem: `scripts/restore-drill.ps1` ile yeni yedek alındı, `servisdefteri_restore_test` veritabanına `pg_restore` ile geri yüklendi.
+- Doğrulama: `users=1`, `customers=0`, `vehicles=0`, `work_orders=0`, `business_settings=1`; test veritabanı temizlendi.
+- Sonuç: **BAŞARILI**
+
+> Bu tatbikat, yedeğin geri yüklenebildiğini gösterir; üretim verisiyle gerçek geri yükleme öncesinde yine yedek alınmalıdır.
+
 ## Manuel Yedek (Arayüz)
 
 1. PATRON hesabıyla giriş yapın.
