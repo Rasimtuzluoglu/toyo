@@ -36,6 +36,8 @@ INITIAL_ADMIN_FULL_NAME=Isletme Sahibi
 
 > `INITIAL_ADMIN_*` değişken adları geriye dönük uyumluluk için korunmuştur; oluşturulan hesabın rolü **PATRON**'dur. Değerler boş bırakılırsa uygulama ilk açılışta kullanıcı oluşturmaz; `/setup` ekranından ilk PATRON hesabı oluşturulur. Herkesçe bilinen bir varsayılan parola yoktur.
 >
+> Kurulum **yalnızca bir kez** yapılabilir. İlk patron oluşturulduğunda `installation_state.setup_completed = TRUE` olur; `/setup` adresi bundan sonra doğrudan giriş ekranına yönlenir. Kullanıcı tablosu sonradan boşalsa bile kurulum ekranı yeniden açılmaz.
+>
 > `.env` dosyasını Git'e eklemeyin. `.gitignore` bunu engeller.
 
 ## 3. Docker ile Kurulum
@@ -166,7 +168,7 @@ Varsayılan `dev` profili:
 ## 5. İlk Giriş
 
 1. `http://localhost:18080` adresini açın.
-2. Kullanıcı yoksa `/setup` ekranına yönlendirilirsiniz.
+2. İlk kurulumda `/setup` ekranına yönlendirilirsiniz. Bu ekran yalnızca bir kez açılır.
 3. Ad soyad, kullanıcı adı, güçlü parola girin. Bu hesap **PATRON** rolüyle oluşturulur.
 4. Giriş yaptıktan sonra **Kullanıcılar** ekranından **MUHASEBE** ve **SERVIS** hesaplarını oluşturun.
 
@@ -244,7 +246,9 @@ docker compose exec db pg_isready -U servisdefteri -d servisdefteri
 
 ### "Kullanıcı yok" uyarısı
 
-Uygulama logunda `Sistemde kullanıcı yok` mesajı varsa tarayıcıdan `/setup` açın veya `INITIAL_ADMIN_*` değişkenlerini tanımlayıp container'ı yeniden başlatın.
+Uygulama logunda `Sistemde kullanıcı yok` mesajı varsa ve kurulum daha önce tamamlanmamışsa tarayıcıdan `/setup` açın veya `INITIAL_ADMIN_*` değişkenlerini tanımlayıp container'ı yeniden başlatın.
+
+Kurulum bir kez tamamlandıysa `/setup` bilinçli olarak kapalıdır. Kullanıcılar silinmişse `/setup` yerine veritabanı yedeğini geri yükleyin.
 
 ### Yedekleme başarısız
 

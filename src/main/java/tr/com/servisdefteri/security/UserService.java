@@ -17,14 +17,18 @@ import java.util.Locale;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final InstallationStateRepository installationStateRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
     private final CurrentUserService currentUserService;
     private final Clock clock;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+    public UserService(UserRepository userRepository,
+                       InstallationStateRepository installationStateRepository,
+                       PasswordEncoder passwordEncoder,
                        AuditService auditService, CurrentUserService currentUserService, Clock clock) {
         this.userRepository = userRepository;
+        this.installationStateRepository = installationStateRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditService = auditService;
         this.currentUserService = currentUserService;
@@ -33,7 +37,10 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public boolean isInitialized() {
-        return userRepository.count() > 0;
+        boolean setupCompleted = installationStateRepository.findById(InstallationState.SINGLETON_ID)
+                .map(InstallationState::isSetupCompleted)
+                .orElse(false);
+        return setupCompleted || userRepository.count() > 0;
     }
 
     @Transactional(readOnly = true)
@@ -48,7 +55,9 @@ public class UserService {
 
     @Transactional
     public User createInitialPatron(String username, String rawPassword, String fullName) {
-        if (userRepository.count() > 0) {
+        InstallationState state = installationStateRepository.findForUpdate()
+                .orElseThrow(() -> new BusinessRuleException("Kurulum durumu bulunamadı."));
+        if (state.isSetupCompleted() || userRepository.count() > 0) {
             throw new BusinessRuleException("Kurulum daha önce tamamlanmış.");
         }
         PasswordPolicy.requireStrong(rawPassword);
@@ -60,6 +69,9 @@ public class UserService {
         user.setEnabled(true);
         user.setCreatedAt(LocalDateTime.now(clock));
         User saved = userRepository.save(user);
+        state.setSetupCompleted(true);
+        state.setCompletedAt(LocalDateTime.now(clock));
+        installationStateRepository.save(state);
         auditService.recordAs(saved.getId(), saved.getUsername(), AuditAction.USER_CREATED,
                 "Kullanıcı", saved.getId(), "İlk işletme sahibi (patron) hesabı oluşturuldu");
         return saved;

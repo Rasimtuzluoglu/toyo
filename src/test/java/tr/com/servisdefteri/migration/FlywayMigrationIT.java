@@ -15,8 +15,8 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     @Test
     void allMigrationsAreAppliedAndExpectedTablesExist() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("15");
-        assertThat(flyway.info().applied()).hasSize(15);
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("16");
+        assertThat(flyway.info().applied()).hasSize(16);
 
         Long tables = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.tables
@@ -25,9 +25,10 @@ class FlywayMigrationIT extends IntegrationTestSupport {
                     'work_orders', 'work_order_items', 'payments',
                     'account_transactions', 'payment_allocations',
                     'audit_logs', 'backup_runs', 'business_settings',
-                    'vehicle_intakes', 'vehicle_deliveries', 'appointments')
+                    'vehicle_intakes', 'vehicle_deliveries', 'appointments',
+                    'installation_state')
                 """, Long.class);
-        assertThat(tables).isEqualTo(15L);
+        assertThat(tables).isEqualTo(16L);
     }
 
     @Test

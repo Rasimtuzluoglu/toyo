@@ -202,6 +202,10 @@ a:hover {
     font-size: 0.86rem;
 }
 
+.sd-sidebar-footer > span {
+    display: block;
+}
+
 .sd-main {
     margin-left: var(--sd-sidebar-width);
     min-height: 100vh;

@@ -26,6 +26,12 @@ class SecurityIT extends IntegrationTestSupport {
         patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
         muhasebe = createUser("muhasebe", "Muhasebe Kullanıcısı", Role.MUHASEBE);
         servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        jdbcTemplate.update("update installation_state set setup_completed = true, completed_at = now()");
+    }
+
+    private void resetSetupState() {
+        jdbcTemplate.update("update installation_state set setup_completed = false, completed_at = null");
+        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
     }
 
     @Test
@@ -43,7 +49,7 @@ class SecurityIT extends IntegrationTestSupport {
 
     @Test
     void firstRunRedirectsRootAndLoginToSetup() throws Exception {
-        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
+        resetSetupState();
 
         mockMvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
@@ -198,19 +204,19 @@ class SecurityIT extends IntegrationTestSupport {
     }
 
     @Test
-    void setupIsOnlyAvailableWhenThereAreNoUsers() throws Exception {
+    void setupIsOnlyAvailableBeforeFirstInstallation() throws Exception {
         mockMvc.perform(get("/setup"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
 
-        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
+        resetSetupState();
         mockMvc.perform(get("/setup"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void setupCreatesFirstPatronAndCannotRunTwice() throws Exception {
-        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
+        resetSetupState();
 
         mockMvc.perform(post("/setup").with(csrf())
                         .param("username", "ilkpatron")
@@ -223,8 +229,24 @@ class SecurityIT extends IntegrationTestSupport {
         User created = userRepository.findByUsernameIgnoreCase("ilkpatron").orElseThrow();
         assertThat(created.getRole()).isEqualTo(Role.PATRON);
 
+        Boolean completed = jdbcTemplate.queryForObject(
+                "select setup_completed from installation_state where id = 1", Boolean.class);
+        assertThat(completed).isTrue();
+
+        // Kullanıcı tablosu boşalsa bile kurulum bir daha açılmaz.
+        jdbcTemplate.execute("TRUNCATE TABLE users CASCADE");
         mockMvc.perform(get("/setup"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
+        mockMvc.perform(post("/setup").with(csrf())
+                        .param("username", "ikinci")
+                        .param("fullName", "İkinci Patron")
+                        .param("password", "SecondAdmin1234")
+                        .param("confirmPassword", "SecondAdmin1234"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        Long userCount = jdbcTemplate.queryForObject("select count(*) from users", Long.class);
+        assertThat(userCount).isZero();
     }
 }

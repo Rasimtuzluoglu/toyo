@@ -175,7 +175,7 @@ Varsayılan port `18080`'dir (8080 başka uygulamalar tarafından kullanılabild
 İki desteklenen yöntem vardır:
 
 1. **Ortam değişkenleri:** Uygulama ilk açılışta kullanıcı yoksa `INITIAL_ADMIN_USERNAME` ve `INITIAL_ADMIN_PASSWORD` ile PATRON oluşturur. Parola en az 10 karakter, büyük harf, küçük harf ve rakam içermelidir.
-2. **Kurulum ekranı:** Ortam değişkenleri boşsa tarayıcıdan `/setup` açılır. Bu ekran yalnızca hiç kullanıcı yokken çalışır ve ilk PATRON hesabını siz oluşturursunuz.
+2. **Kurulum ekranı:** Ortam değişkenleri boşsa tarayıcıdan `/setup` açılır. Bu ekran **yalnızca bir kez**, ilk PATRON hesabı oluşturulurken çalışır; sonrasında `/setup` giriş ekranına yönlenir ve kullanıcılar silinse bile yeniden açılmaz.
 
 Oluşturulan parolalar BCrypt ile hashlenir; düz metin saklanmaz. README veya kaynak kodda varsayılan parola bulunmaz.
 

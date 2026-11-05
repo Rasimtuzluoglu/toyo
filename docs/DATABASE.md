@@ -190,6 +190,10 @@ Yedekleme denemelerinin sonucu: `started_at`, `finished_at`, `status` (BASARILI,
 
 Tek satırlık işletme kimliği (`id = 1`). `name`, `tagline`, `primary_color`, `logo_data`, `logo_content_type`, `phone`, `email`, `address`, `tax_office`, `tax_number`, `backup_directory`, `updated_at`, `updated_by` alanlarını taşır. İş emri, tahsilat makbuzu, cari ekstre ve tüm marka alanlarında kullanılır. Tek satır kuralı CHECK kısıtıyla korunur. `backup_directory` boşsa `BACKUP_DIR` ortam değişkeni kullanılır.
 
+### `installation_state`
+
+Tek satırlık kurulum durumu (`id = 1`). `setup_completed` ve `completed_at` alanlarını taşır. İlk patron hesabı oluşturulduğunda `setup_completed = TRUE` yapılır; kullanıcı tablosu sonradan boşalsa bile `/setup` bir daha açılmaz. Tek satır kuralı CHECK kısıtıyla korunur.
+
 ### `vehicle_intakes`
 
 Her iş emri için tek araç kabul kaydı (`work_order_id` UNIQUE). `intake_at`, `fuel_level` (BOS/CEYREK/YARIM/UCDORT/DOLU), `damage_notes`, `valuables`, `signature_data` (PNG data URL), `created_by`, `created_at`, `updated_at`. Islak imza çıktı üzerinde alınır; dijital imza da saklanır.
@@ -244,6 +248,7 @@ Sequence değerleri transaction rollback'inde geri alınmaz; bu nedenle numarala
 | V13 | `V13__digital_signatures.sql` | Araç kabul ve teslim tutanağına dijital imza |
 | V14 | `V14__branding_settings.sql` | White-label slogan, ana renk ve logo |
 | V15 | `V15__work_order_debit_reactivation.sql` | Tamamlama geri alınınca yeniden borçlandırma |
+| V16 | `V16__one_time_setup.sql` | Tek seferlik kurulum durumu (`installation_state`) |
 
 Uygulama açılışında Flyway doğrular ve eksik migration'ları sırayla uygular. `flyway_schema_history` tablosu şema sürümünü tutar.
 
