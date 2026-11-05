@@ -84,6 +84,21 @@ a:hover {
     color: #fff;
 }
 
+.sd-sidebar-close {
+    display: none;
+    position: absolute;
+    top: 16px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
 .sd-brand-mark {
     width: 46px;
     height: 46px;
@@ -2028,6 +2043,10 @@ body.command-open {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+    }
+
+    .sd-sidebar-close {
+        display: inline-flex;
     }
 
     .sd-topbar {

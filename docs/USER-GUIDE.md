@@ -109,6 +109,22 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 4. Plaka kayıtlı değilse aynı ekranda müşteri adı, telefon, marka/model ve şikâyet girerek **Hızlı İş Emri Oluştur** deyin. Müşteri, araç ve iş emri tek adımda oluşur.
 5. Plaka daha önce açılmışsa mevcut müşteri ve araç yeniden kullanılır; mükerrer kayıt açılmaz.
 
+### Hızlı iş emri ve tek tık tamamlama
+
+**İş Emirleri → Hızlı İş Emri** ekranı, detaylı formu doldurmadan işi bitirmek içindir:
+
+1. İş emri numarasını girin (boş bırakılırsa otomatik üretilir).
+2. Plakayı girin. Kayıtlı plakada müşteri/araç otomatik kullanılır.
+3. Yeni plakada müşteri adı ve telefonu girin.
+4. İsterseniz yapılan işlemi ve tutarı yazın.
+5. **Kaydet** veya **Kaydet ve Tamamla** deyin.
+
+**Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Böylece işlem birkaç tıkla tamamlanır.
+
+### Manuel iş emri numarası
+
+Detaylı iş emri formunda **İş emri no** alanı manuel doldurulabilir. Boş bırakılırsa sistem otomatik numara üretir. Aynı numara ikinci kez kullanılamaz. Borçlandırılmış iş emrinin numarası değiştirilemez.
+
 ### Yeni iş emri
 
 1. **İş Emirleri → Yeni İş Emri**

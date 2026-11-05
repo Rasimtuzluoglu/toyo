@@ -188,6 +188,7 @@ public class WorkOrderController {
     public String quickCreate(@Valid @ModelAttribute("quickForm") QuickWorkOrderForm quickForm,
                               BindingResult bindingResult,
                               @RequestParam(name = "formToken", required = false) String formToken,
+                              @RequestParam(name = "source", defaultValue = "inline") String source,
                               HttpSession session,
                               Model model,
                               RedirectAttributes redirectAttributes) {
@@ -197,16 +198,28 @@ public class WorkOrderController {
             bindingResult.reject("form.token", ex.getMessage());
         }
         if (bindingResult.hasErrors()) {
-            return quickFormView(quickForm, session, model);
+            return quickFormView(quickForm, source, session, model);
         }
         try {
             WorkOrder order = quickWorkOrderService.create(quickForm);
-            redirectAttributes.addFlashAttribute("successMessage", "İş emri hızlı kayıtla oluşturuldu.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    quickForm.isCompleteNow()
+                            ? "İş emri oluşturuldu ve tamamlandı."
+                            : "İş emri hızlı kayıtla oluşturuldu.");
             return "redirect:/work-orders/" + order.getId();
         } catch (BusinessRuleException ex) {
             bindingResult.reject("quick.failed", ex.getMessage());
-            return quickFormView(quickForm, session, model);
+            return quickFormView(quickForm, source, session, model);
         }
+    }
+
+    @GetMapping("/quick")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String quickForm(HttpSession session, Model model) {
+        model.addAttribute("quickForm", new QuickWorkOrderForm());
+        model.addAttribute("formToken", formTokenService.issue(session));
+        model.addAttribute("activeMenu", "workorders");
+        return "workorders/quick";
     }
 
     @PostMapping
@@ -464,7 +477,14 @@ public class WorkOrderController {
         }
     }
 
-    private String quickFormView(QuickWorkOrderForm quickForm, HttpSession session, Model model) {
+    private String quickFormView(QuickWorkOrderForm quickForm, String source,
+                                 HttpSession session, Model model) {
+        if ("quick".equals(source)) {
+            model.addAttribute("quickForm", quickForm);
+            model.addAttribute("formToken", formTokenService.issue(session));
+            model.addAttribute("activeMenu", "workorders");
+            return "workorders/quick";
+        }
         WorkOrderForm orderForm = new WorkOrderForm();
         orderForm.setOpenedAt(LocalDateTime.now(clock).withSecond(0).withNano(0));
         model.addAttribute("workOrderForm", orderForm);

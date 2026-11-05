@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Setter
 public class WorkOrderForm {
 
+    @Size(max = 30, message = "İş emri numarası en fazla 30 karakter olabilir.")
+    private String orderNo;
+
     @NotNull(message = "Müşteri seçilmelidir.")
     private Long customerId;
 

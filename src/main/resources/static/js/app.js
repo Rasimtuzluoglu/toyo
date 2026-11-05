@@ -103,6 +103,10 @@
         var body = document.body;
         var toggle = document.querySelector('[data-sidebar-toggle]');
         var overlay = document.querySelector('[data-sidebar-overlay]');
+        var sidebar = document.querySelector('.sd-sidebar');
+        var closeSidebar = function () {
+            body.classList.remove('sidebar-open');
+        };
 
         if (toggle) {
             toggle.addEventListener('click', function () {
@@ -110,10 +114,28 @@
             });
         }
         if (overlay) {
-            overlay.addEventListener('click', function () {
-                body.classList.remove('sidebar-open');
-            });
+            overlay.addEventListener('click', closeSidebar);
         }
+        document.querySelectorAll('[data-sidebar-close]').forEach(function (button) {
+            button.addEventListener('click', closeSidebar);
+        });
+        document.addEventListener('click', function (event) {
+            if (!body.classList.contains('sidebar-open')) {
+                return;
+            }
+            if (sidebar && sidebar.contains(event.target)) {
+                return;
+            }
+            if (toggle && toggle.contains(event.target)) {
+                return;
+            }
+            closeSidebar();
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeSidebar();
+            }
+        });
 
         document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
             button.addEventListener('click', function () {

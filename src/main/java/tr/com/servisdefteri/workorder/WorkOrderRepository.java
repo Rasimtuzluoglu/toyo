@@ -112,6 +112,10 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
     long countByStatusIn(Collection<WorkOrderStatus> statuses);
 
+    boolean existsByOrderNoIgnoreCase(String orderNo);
+
+    boolean existsByOrderNoIgnoreCaseAndIdNot(String orderNo, Long id);
+
     @Query("""
             select max(w.openedAt) from WorkOrder w
             where w.vehicle.id = :vehicleId and w.status in :statuses

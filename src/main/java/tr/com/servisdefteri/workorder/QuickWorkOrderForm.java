@@ -13,16 +13,17 @@ import tr.com.servisdefteri.common.validation.ValidPlate;
 @Setter
 public class QuickWorkOrderForm {
 
+    @Size(max = 30, message = "İş emri numarası en fazla 30 karakter olabilir.")
+    private String orderNo;
+
     @NotBlank(message = "Plaka zorunludur.")
     @ValidPlate
     @Size(max = 20, message = "Plaka en fazla 20 karakter olabilir.")
     private String plate;
 
-    @NotBlank(message = "Müşteri adı zorunludur.")
     @Size(max = 200, message = "Müşteri adı en fazla 200 karakter olabilir.")
     private String customerName;
 
-    @NotBlank(message = "Telefon zorunludur.")
     @ValidPhone
     @Size(max = 30, message = "Telefon en fazla 30 karakter olabilir.")
     private String phone;
@@ -39,4 +40,14 @@ public class QuickWorkOrderForm {
 
     @Size(max = 2000, message = "Şikâyet en fazla 2000 karakter olabilir.")
     private String complaint;
+
+    @Size(max = 300, message = "İşlem açıklaması en fazla 300 karakter olabilir.")
+    private String serviceDescription;
+
+    @jakarta.validation.constraints.DecimalMin(value = "0.00", message = "Tutar negatif olamaz.")
+    @jakarta.validation.constraints.Digits(integer = 12, fraction = 2,
+            message = "Tutar en fazla 2 ondalık basamak içerebilir.")
+    private java.math.BigDecimal serviceAmount;
+
+    private boolean completeNow;
 }

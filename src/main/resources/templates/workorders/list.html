@@ -40,6 +40,10 @@
                     <a class="btn btn-outline-secondary" th:href="@{/work-orders/board}">
                         <i class="bi bi-calendar2-check me-1"></i> Günlük İşler
                     </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/quick}"
+                       sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                        <i class="bi bi-lightning-charge me-1"></i> Hızlı İş Emri
+                    </a>
                     <a class="btn btn-primary" th:href="@{/work-orders/new}"
                        sec:authorize="hasAnyRole('PATRON','SERVIS')">
                         <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri

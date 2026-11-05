@@ -30,8 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -288,6 +287,48 @@ class UsabilityIT extends BusinessTestSupport {
                     assertThat(reminder.plate()).isEqualTo("34BKM001");
                     assertThat(reminder.daysSince()).isGreaterThanOrEqualTo(199);
                 });
+    }
+
+    @Test
+    void quickWorkOrderCanBeCompletedInOneStep() {
+        QuickWorkOrderForm form = quickForm("34 hzl 001", "Hızlı Müşteri", "0555 121 21 21");
+        form.setOrderNo("HZL-2026-001");
+        form.setServiceDescription("Periyodik bakım");
+        form.setServiceAmount(new java.math.BigDecimal("2400.00"));
+        form.setCompleteNow(true);
+
+        WorkOrder[] holder = new WorkOrder[1];
+        runAsSystemPatron(() -> holder[0] = quickWorkOrderService.create(form));
+        WorkOrder order = holder[0];
+
+        assertThat(order.getOrderNo()).isEqualTo("HZL-2026-001");
+        assertThat(order.getStatus().name()).isEqualTo("TAMAMLANDI");
+        assertThat(order.isDebited()).isTrue();
+        assertThat(order.getTotalAmount()).isEqualByComparingTo("2400.00");
+        assertThat(accountService.balance(order.getCustomer().getId())).isEqualByComparingTo("2400.00");
+    }
+
+    @Test
+    void duplicateManualOrderNumberIsRejected() {
+        Customer customer = createCustomer("Numara Müşteri", "0555 131 31 31");
+        Vehicle vehicle = createVehicle(customer, "34 NUM 001");
+
+        tr.com.servisdefteri.workorder.WorkOrderForm first = new tr.com.servisdefteri.workorder.WorkOrderForm();
+        first.setOrderNo("OZ-2026-100");
+        first.setCustomerId(customer.getId());
+        first.setVehicleId(vehicle.getId());
+        first.setOpenedAt(LocalDateTime.now().minusMinutes(5));
+        workOrderService.create(first);
+
+        tr.com.servisdefteri.workorder.WorkOrderForm duplicate = new tr.com.servisdefteri.workorder.WorkOrderForm();
+        duplicate.setOrderNo("oz-2026-100");
+        duplicate.setCustomerId(customer.getId());
+        duplicate.setVehicleId(vehicle.getId());
+        duplicate.setOpenedAt(LocalDateTime.now().minusMinutes(5));
+
+        assertThatThrownBy(() -> workOrderService.create(duplicate))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("zaten kullanılıyor");
     }
 
     private void assertPdf(MvcResult result) {

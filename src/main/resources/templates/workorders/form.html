@@ -22,6 +22,10 @@
                        th:href="${order == null} ? @{/work-orders} : @{/work-orders/{id}(id=${order.id})}">
                         <i class="bi bi-arrow-left me-1"></i> Geri
                     </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/quick}"
+                       th:if="${order == null}" sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                        <i class="bi bi-lightning-charge me-1"></i> Hızlı İş Emri
+                    </a>
                 </div>
             </div>
 
@@ -67,22 +71,30 @@
                         <form method="post" th:action="@{/work-orders/quick}" th:object="${quickForm}"
                               data-submit-once>
                             <input type="hidden" name="formToken" th:value="${formToken}">
+                            <input type="hidden" name="source" value="inline">
                             <input type="hidden" th:field="*{plate}">
                             <div th:replace="~{fragments/layout :: globalErrors}"></div>
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label" for="quickCustomerName">Müşteri adı <span class="required">*</span></label>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="quickOrderNoInline">İş emri no</label>
+                                    <input class="form-control" id="quickOrderNoInline" type="text"
+                                           name="orderNo" th:value="*{orderNo}" maxlength="30"
+                                           placeholder="Boş bırakılırsa otomatik">
+                                    <div class="invalid-feedback d-block" th:errors="*{orderNo}"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="quickCustomerName">Müşteri adı</label>
                                     <input class="form-control" id="quickCustomerName" type="text"
                                            th:field="*{customerName}"
                                            th:classappend="${#fields.hasErrors('customerName')} ? 'is-invalid'"
-                                           maxlength="200" placeholder="Ad soyad veya firma unvanı">
+                                           maxlength="200" placeholder="Yeni plaka için zorunlu">
                                     <div class="invalid-feedback" th:errors="*{customerName}"></div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" for="quickPhone">Telefon <span class="required">*</span></label>
+                                <div class="col-md-4">
+                                    <label class="form-label" for="quickPhone">Telefon</label>
                                     <input class="form-control" id="quickPhone" type="tel" th:field="*{phone}"
                                            th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'"
-                                           maxlength="30" placeholder="05xx xxx xx xx">
+                                           maxlength="30" placeholder="Yeni plaka için zorunlu">
                                     <div class="invalid-feedback" th:errors="*{phone}"></div>
                                 </div>
                                 <div class="col-md-3">
@@ -132,7 +144,18 @@
                     </div>
                     <div class="sd-card-body">
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label" for="orderNo">İş emri no</label>
+                                <input class="form-control" id="orderNo" type="text" th:field="*{orderNo}"
+                                       th:classappend="${#fields.hasErrors('orderNo')} ? 'is-invalid'"
+                                       th:readonly="${order != null and order.debited}"
+                                       maxlength="30" placeholder="Boş bırakılırsa otomatik">
+                                <div class="invalid-feedback" th:errors="*{orderNo}"></div>
+                                <div class="form-text" th:if="${order != null and order.debited}">
+                                    Borçlandırılmış iş emrinin numarası değiştirilemez.
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label" for="customerSelect">Müşteri <span class="required">*</span></label>
                                 <select class="form-select" id="customerSelect" th:field="*{customerId}"
                                         th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid'">
@@ -141,7 +164,7 @@
                                 </select>
                                 <div class="invalid-feedback" th:errors="*{customerId}"></div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label" for="vehicleSelect">Araç <span class="required">*</span></label>
                                 <select class="form-select" id="vehicleSelect" th:field="*{vehicleId}"
                                         th:classappend="${#fields.hasErrors('vehicleId')} ? 'is-invalid'">

@@ -53,7 +53,10 @@ public class QuickWorkOrderService {
             customer = vehicle.getCustomer();
         } else {
             String phoneNormalized = PhoneNormalizer.normalize(form.getPhone());
-            String customerName = form.getCustomerName().trim();
+            String customerName = form.getCustomerName() == null ? "" : form.getCustomerName().trim();
+            if (customerName.isBlank() || phoneNormalized.isBlank()) {
+                throw new BusinessRuleException("Yeni plaka için müşteri adı ve telefon zorunludur.");
+            }
             customer = customerRepository
                     .findFirstByPhoneNormalizedAndNameIgnoreCase(phoneNormalized, customerName)
                     .orElseGet(() -> {
@@ -76,13 +79,33 @@ public class QuickWorkOrderService {
         }
 
         WorkOrderForm orderForm = new WorkOrderForm();
+        orderForm.setOrderNo(form.getOrderNo());
         orderForm.setCustomerId(customer.getId());
         orderForm.setVehicleId(vehicle.getId());
         orderForm.setOpenedAt(LocalDateTime.now(clock).withSecond(0).withNano(0));
         orderForm.setMileage(form.getMileage() != null ? form.getMileage()
                 : (vehicle.getCurrentMileage() > 0 ? vehicle.getCurrentMileage() : null));
         orderForm.setComplaint(blankToNull(form.getComplaint()));
-        return workOrderService.create(orderForm);
+        WorkOrder order = workOrderService.create(orderForm);
+
+        String serviceDescription = blankToNull(form.getServiceDescription());
+        if (serviceDescription != null || (form.getServiceAmount() != null
+                && form.getServiceAmount().signum() > 0)) {
+            WorkOrderItemForm item = new WorkOrderItemForm();
+            item.setType(WorkOrderItemType.HIZMET);
+            item.setDescription(serviceDescription != null ? serviceDescription : "Hızlı servis işlemi");
+            item.setQuantity(java.math.BigDecimal.ONE);
+            item.setUnitPrice(form.getServiceAmount() == null
+                    ? java.math.BigDecimal.ZERO : form.getServiceAmount());
+            workOrderService.addItem(order.getId(), item);
+        }
+
+        if (form.isCompleteNow()) {
+            workOrderService.changeStatus(order.getId(), WorkOrderStatus.ISLEMDE);
+            workOrderService.changeStatus(order.getId(), WorkOrderStatus.TAMAMLANDI);
+            order = workOrderService.findById(order.getId());
+        }
+        return order;
     }
 
     private String blankToNull(String value) {

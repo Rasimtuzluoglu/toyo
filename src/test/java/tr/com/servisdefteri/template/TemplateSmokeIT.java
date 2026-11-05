@@ -56,6 +56,7 @@ class TemplateSmokeIT extends BusinessTestSupport {
                 "/work-orders",
                 "/work-orders/board",
                 "/work-orders/new",
+                "/work-orders/quick",
                 orderUrl,
                 orderUrl + "/edit",
                 orderUrl + "/print",

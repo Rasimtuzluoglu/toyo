@@ -169,7 +169,11 @@ public class WorkOrderService {
         validateOpenedAt(form.getOpenedAt());
 
         WorkOrder order = new WorkOrder();
-        order.setOrderNo(nextOrderNo(form.getOpenedAt()));
+        String requestedOrderNo = blankToNull(form.getOrderNo());
+        if (requestedOrderNo != null && workOrderRepository.existsByOrderNoIgnoreCase(requestedOrderNo)) {
+            throw new BusinessRuleException("Bu iş emri numarası zaten kullanılıyor: " + requestedOrderNo);
+        }
+        order.setOrderNo(requestedOrderNo != null ? requestedOrderNo : nextOrderNo(form.getOpenedAt()));
         order.setCustomer(customer);
         order.setVehicle(vehicle);
         order.setAssignedUser(resolveAssignedUser(form.getAssignedUserId()));
@@ -209,6 +213,17 @@ public class WorkOrderService {
             throw new BusinessRuleException("İş emri kilometresi geriye alınamaz.");
         }
         validateOpenedAt(form.getOpenedAt());
+
+        String requestedOrderNo = blankToNull(form.getOrderNo());
+        if (requestedOrderNo != null && !requestedOrderNo.equalsIgnoreCase(order.getOrderNo())) {
+            if (order.isDebited()) {
+                throw new BusinessRuleException("Borçlandırılmış iş emrinin numarası değiştirilemez.");
+            }
+            if (workOrderRepository.existsByOrderNoIgnoreCaseAndIdNot(requestedOrderNo, id)) {
+                throw new BusinessRuleException("Bu iş emri numarası zaten kullanılıyor: " + requestedOrderNo);
+            }
+            order.setOrderNo(requestedOrderNo);
+        }
 
         order.setCustomer(customer);
         order.setVehicle(vehicle);
@@ -317,6 +332,7 @@ public class WorkOrderService {
     @Transactional(readOnly = true)
     public WorkOrderForm toForm(WorkOrder order) {
         WorkOrderForm form = new WorkOrderForm();
+        form.setOrderNo(order.getOrderNo());
         form.setCustomerId(order.getCustomer().getId());
         form.setVehicleId(order.getVehicle().getId());
         form.setAssignedUserId(order.getAssignedUser() == null ? null : order.getAssignedUser().getId());
