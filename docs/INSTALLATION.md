@@ -213,7 +213,7 @@ Testler üretim veritabanınıza dokunmaz; ayrı container kullanır.
 
 ### Yerel CI
 
-GitHub Actions kotasından bağımsız olarak test + Docker build:
+Test + Docker build (yerel CI):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\ci-local.ps1

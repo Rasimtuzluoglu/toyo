@@ -247,7 +247,7 @@ PDF/Excel/CSV çıktıları, araç kabul/teslim ve randevu akışı.
 
 Son çalıştırma: **86 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
 
-### GitHub Actions’a alternatif: yerel CI
+### Yerel CI
 
 ```powershell
 # Testler + Docker imajı
