@@ -29,7 +29,7 @@ function Write-Utf8($path, $text) {
 
 function Write-Heartbeat {
     $payload = [ordered]@{
-        heartbeat = (Get-Date).ToString("o")
+        heartbeat = (Get-Date).ToUniversalTime().ToString("o")
         auto      = $auto
         pid       = $PID
     }

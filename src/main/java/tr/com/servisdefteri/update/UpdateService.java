@@ -218,7 +218,7 @@ public class UpdateService {
         boolean online = false;
         if (heartbeat != null && !heartbeat.isBlank()) {
             try {
-                Instant beat = Instant.parse(heartbeat);
+                Instant beat = OffsetDateTime.parse(heartbeat).toInstant();
                 online = !beat.isBefore(Instant.now(clock).minus(AGENT_ONLINE_WINDOW));
             } catch (RuntimeException ignored) {
                 // Geçersiz heartbeat çevrimdışı sayılır.
