@@ -123,8 +123,8 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 4. **Fiş numarası** alanını girin. Bu alan **zorunludur**; aynı numara ikinci kez kullanılamaz.
 5. **Müşteri ne dedi?** alanına şikâyeti yazın.
 6. **Yapılacak iş** alanına işlemi yazın veya hazır seçeneklerden birine basın.
-7. **Kim ilgileniyor?** alanına sorumlu kişinin adını yazın.
-8. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır.
+7. **Kim ilgileniyor?** alanına sorumlu kişinin adını yazın. Son kullanılan isimler alanın altında küçük öneri düğmeleri olarak çıkar; tıklayınca yazılır.
+8. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır. Art arda kayıt girecekseniz **Kaydet ve Yeni** ile formu boş olarak yeniden açabilirsiniz.
 
 - **Kilometre** ve **ekip notu** isteğe bağlıdır; **Gelişmiş alanlar** bölümündedir.
 - **Düzenle** ekranı da sadeleştirildi: fiş no, sorumlu, şikâyet ve yapılan işlemler ana bölümde; müşteri/araç, açılış tarihi, tespit ve ekip notu **Gelişmiş alanlar** altında.
@@ -144,6 +144,17 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 6. **Kaydet** veya **Kaydet ve Tamamla** deyin.
 
 **Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Kayıt sonrası ekranda **Tahsilat Al**, **Teslim Tutanağı**, **Yeni İş Emri** ve **Yazdır** düğmeleri görünür.
+
+### Toplu iş emri içe aktarma
+
+**İş Emirleri → İçe Aktar** ekranından CSV veya Excel dosyası yüklenir.
+
+- Zorunlu sütunlar: **Fiş No, Plaka, Şikâyet, Yapılacak İş**
+- Yeni plaka için **Müşteri** ve **Telefon** da zorunludur.
+- İsteğe bağlı: **İlgilenen**, **Kilometre**
+- İlk satır başlık olmalıdır; en fazla 200 satır aktarılır.
+- Bir satırda hata varsa **hiçbir kayıt oluşturulmaz**; hata listesi satır numarasıyla gösterilir.
+- **Şablon İndir** düğmesiyle örnek CSV dosyasını indirebilirsiniz.
 
 ### İş emri numarası
 

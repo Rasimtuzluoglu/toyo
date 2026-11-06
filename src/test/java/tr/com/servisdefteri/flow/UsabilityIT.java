@@ -411,6 +411,35 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void saveAndNewCreatesOrderAndReturnsToBlankForm() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        MockHttpSession session = new MockHttpSession();
+        String token = formTokenService.issue(session);
+        long before = count("select count(*) from work_orders");
+
+        mockMvc.perform(post("/work-orders/new")
+                        .session(session)
+                        .with(user(principal(servis)))
+                        .with(csrf())
+                        .param("formToken", token)
+                        .param("orderNo", "YNI-2026-003")
+                        .param("plate", "34 YNI 003")
+                        .param("customerName", "Seri Kayıt Müşteri")
+                        .param("phone", "0555 197 97 97")
+                        .param("complaint", "Seri giriş")
+                        .param("serviceDescription", "Kontrol")
+                        .param("assignedName", "Seri Usta")
+                        .param("saveAndNew", "true"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/work-orders/new"));
+
+        assertThat(count("select count(*) from work_orders")).isEqualTo(before + 1);
+        assertThat(jdbcTemplate.queryForObject("""
+                select assigned_name from work_orders where order_no = 'YNI-2026-003'
+                """, String.class)).isEqualTo("Seri Usta");
+    }
+
+    @Test
     void quickPageOffersPlateLookupAndServiceShortcuts() throws Exception {
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
 

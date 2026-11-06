@@ -176,12 +176,20 @@
                                 <div class="invalid-feedback" th:errors="*{vehicleId}"></div>
                                 <div class="form-text">Liste seçilen müşteriye göre filtrelenir.</div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 assigned-field">
                                 <label class="form-label" for="assignedName">Sorumlu çalışan</label>
                                 <input class="form-control" id="assignedName" type="text"
                                        th:field="*{assignedName}"
                                        th:classappend="${#fields.hasErrors('assignedName')} ? 'is-invalid'"
+                                       data-assigned-name-input
                                        maxlength="100" placeholder="Örn. Ahmet Usta">
+                                <div class="assigned-chips"
+                                     th:if="${assignedNameSuggestions != null and !assignedNameSuggestions.isEmpty()}">
+                                    <button type="button" class="assigned-chip"
+                                            th:each="name : ${assignedNameSuggestions}"
+                                            th:text="${name}"
+                                            th:attr="data-assigned-suggestion=${name}"></button>
+                                </div>
                                 <div class="invalid-feedback" th:errors="*{assignedName}"></div>
                             </div>
                             <div class="col-md-4">

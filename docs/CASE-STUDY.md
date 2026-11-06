@@ -33,7 +33,7 @@ tahsilat, randevu ve belge süreçlerini tek bir yerel ağ uygulamasında toplar
 - Flyway migration (V16), Spring Security, Bean Validation
 - Apache POI (Excel), OpenPDF (PDF), Noto Sans (Türkçe karakter)
 - Docker / Docker Compose, yerel ağda çalışır
-- 98 otomatik test (Testcontainers ile gerçek PostgreSQL)
+- 104 otomatik test (Testcontainers ile gerçek PostgreSQL)
 - Modüler monolit; katmanlı servis/repository yapısı
 - White-label: işletme adı, slogan, ana renk ve logo ayarlanabilir
 

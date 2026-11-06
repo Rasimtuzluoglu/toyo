@@ -47,7 +47,7 @@
                                        th:attr="data-lookup-url=@{/vehicles/lookup},data-suggest-url=@{/vehicles/suggest}"
                                        data-quick-plate
                                        maxlength="20" placeholder="34 ABC 123, müşteri veya telefon" autocomplete="off"
-                                       autocapitalize="characters" autofocus aria-describedby="quickPlateStatus"
+                                       autocapitalize="characters" aria-describedby="quickPlateStatus"
                                        required>
                                 <span class="quick-plate-hint">
                                     <i class="bi bi-search me-1"></i>Kayıtlıysa müşteri otomatik gelir
@@ -121,17 +121,25 @@
                                        th:field="*{orderNo}"
                                        th:classappend="${#fields.hasErrors('orderNo')} ? 'is-invalid'"
                                        th:attr="data-order-no-check-url=@{/work-orders/order-no/available}"
-                                       data-order-no
+                                       data-order-no autofocus
                                        maxlength="30" placeholder="Örn. 2026-1001" required>
                                 <div class="form-text" data-order-no-status></div>
                                 <div class="invalid-feedback" th:errors="*{orderNo}"></div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 assigned-field">
                                 <label class="form-label" for="assignedName">Kim ilgileniyor?</label>
                                 <input class="form-control" id="assignedName" type="text"
                                        th:field="*{assignedName}"
                                        th:classappend="${#fields.hasErrors('assignedName')} ? 'is-invalid'"
+                                       data-assigned-name-input
                                        maxlength="100" placeholder="Örn. Ahmet Usta">
+                                <div class="assigned-chips"
+                                     th:if="${assignedNameSuggestions != null and !assignedNameSuggestions.isEmpty()}">
+                                    <button type="button" class="assigned-chip"
+                                            th:each="name : ${assignedNameSuggestions}"
+                                            th:text="${name}"
+                                            th:attr="data-assigned-suggestion=${name}"></button>
+                                </div>
                                 <div class="invalid-feedback" th:errors="*{assignedName}"></div>
                             </div>
 
@@ -211,6 +219,9 @@
                     <button class="btn btn-primary" type="submit">
                         <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
                         <i class="bi bi-check2-circle me-1"></i> Kaydet
+                    </button>
+                    <button class="btn btn-outline-primary" type="submit" name="saveAndNew" value="true">
+                        <i class="bi bi-plus-lg me-1"></i> Kaydet ve Yeni
                     </button>
                 </div>
             </form>

@@ -379,6 +379,11 @@ public class WorkOrderService {
     }
 
     @Transactional(readOnly = true)
+    public List<String> recentAssignedNames() {
+        return workOrderRepository.findRecentAssignedNames();
+    }
+
+    @Transactional(readOnly = true)
     public WorkOrderItemForm toItemForm(WorkOrderItem item) {
         WorkOrderItemForm form = new WorkOrderItemForm();
         form.setType(item.getType());

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('İş Emri İçe Aktar')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('workorders')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Servis Operasyonu</div>
+                    <h1 class="page-title">İş Emri İçe Aktar</h1>
+                    <p class="page-subtitle">CSV veya Excel dosyasındaki satırları toplu iş emrine dönüştürün.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/import/template}">
+                        <i class="bi bi-download me-1"></i> Şablon İndir
+                    </a>
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders}">İş Emirleri</a>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Dosya yükle</h2>
+                            <span class="record-meta">En fazla 200 satır</span>
+                        </div>
+                        <div class="sd-card-body">
+                            <form method="post" th:action="@{/work-orders/import}"
+                                  enctype="multipart/form-data" data-submit-once>
+                                <div class="mb-3">
+                                    <label class="form-label" for="file">CSV veya Excel dosyası</label>
+                                    <input class="form-control" id="file" name="file" type="file"
+                                           accept=".csv,.xlsx,.xls" required>
+                                    <div class="form-text">
+                                        Virgül veya noktalı virgül ayraçlı CSV; .xlsx/.xls desteklenir.
+                                        Telefon ve fiş nolarını metin olarak tutmanız önerilir.
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-upload me-1"></i> İçe Aktar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="sd-card" th:if="${importErrors != null and !importErrors.isEmpty()}">
+                        <div class="sd-card-header">
+                            <h2>Düzeltilmesi gereken satırlar</h2>
+                            <span class="record-meta">Hiçbir kayıt oluşturulmadı</span>
+                        </div>
+                        <div class="sd-card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Satır</th>
+                                        <th>Hata</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="error : ${importErrors}">
+                                        <td class="record-meta"
+                                            th:text="${error.row() == 0 ? 'Dosya' : error.row()}">1</td>
+                                        <td th:text="${error.message()}">Hata</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-5">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Zorunlu sütunlar</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <ul class="mb-3">
+                                <li><strong>Fiş No</strong> — zorunlu, benzersiz</li>
+                                <li><strong>Plaka</strong> — zorunlu</li>
+                                <li><strong>Şikâyet</strong> — zorunlu</li>
+                                <li><strong>Yapılacak İş</strong> — zorunlu</li>
+                            </ul>
+                            <p class="mb-2">
+                                <strong>Yeni plaka</strong> için <strong>Müşteri</strong> ve
+                                <strong>Telefon</strong> da zorunludur.
+                            </p>
+                            <p class="record-meta mb-0">
+                                İsteğe bağlı: İlgilenen, Kilometre. İlk satır başlık olmalıdır.
+                                Bir satırda hata varsa hiçbir kayıt oluşturulmaz.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

@@ -172,6 +172,19 @@
             });
         }
 
+        document.querySelectorAll('[data-assigned-suggestion]').forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                var field = chip.closest('.assigned-field');
+                var input = field ? field.querySelector('[data-assigned-name-input]') : null;
+                if (!input) {
+                    return;
+                }
+                input.value = chip.getAttribute('data-assigned-suggestion') || '';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.focus();
+            });
+        });
+
         document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
             button.addEventListener('click', function () {
                 var targetId = button.getAttribute('data-password-toggle');
@@ -200,12 +213,19 @@
 
         document.querySelectorAll('form[data-submit-once]').forEach(function (form) {
             form.addEventListener('submit', function (event) {
-                if (event.defaultPrevented) {
+                if (event.defaultPrevented || form.dataset.submitting) {
                     return;
                 }
-                var button = form.querySelector('button[type="submit"]');
-                if (button && !form.dataset.submitting) {
-                    form.dataset.submitting = 'true';
+                var button = event.submitter || form.querySelector('button[type="submit"]');
+                form.dataset.submitting = 'true';
+                if (button && button.name) {
+                    var copy = document.createElement('input');
+                    copy.type = 'hidden';
+                    copy.name = button.name;
+                    copy.value = button.value;
+                    form.appendChild(copy);
+                }
+                if (button) {
                     button.disabled = true;
                     button.classList.add('disabled');
                     var spinner = button.querySelector('.spinner-border');

@@ -17,6 +17,15 @@ import java.util.Optional;
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
     @Query(value = """
+            select assigned_name from work_orders
+            where assigned_name is not null and trim(assigned_name) <> ''
+            group by assigned_name
+            order by max(created_at) desc
+            limit 8
+            """, nativeQuery = true)
+    List<String> findRecentAssignedNames();
+
+    @Query(value = """
             select w from WorkOrder w join fetch w.customer c join fetch w.vehicle v
             left join fetch w.assignedUser
             where (cast(:status as string) is null or w.status = :status)

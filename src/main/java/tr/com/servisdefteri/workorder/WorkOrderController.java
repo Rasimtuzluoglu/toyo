@@ -3,6 +3,7 @@ package tr.com.servisdefteri.workorder;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.CsvUtil;
@@ -56,6 +58,7 @@ public class WorkOrderController {
     private final Clock clock;
     private final ExportService exportService;
     private final QuickWorkOrderService quickWorkOrderService;
+    private final WorkOrderImportService importService;
     private final WorkOrderItemTemplateRepository itemTemplateRepository;
     private final AccountService accountService;
     private final PdfService pdfService;
@@ -67,6 +70,7 @@ public class WorkOrderController {
                                FormTokenService formTokenService, Clock clock,
                                ExportService exportService,
                                QuickWorkOrderService quickWorkOrderService,
+                               WorkOrderImportService importService,
                                WorkOrderItemTemplateRepository itemTemplateRepository,
                                AccountService accountService,
                                PdfService pdfService,
@@ -79,6 +83,7 @@ public class WorkOrderController {
         this.clock = clock;
         this.exportService = exportService;
         this.quickWorkOrderService = quickWorkOrderService;
+        this.importService = importService;
         this.itemTemplateRepository = itemTemplateRepository;
         this.accountService = accountService;
         this.pdfService = pdfService;
@@ -196,6 +201,7 @@ public class WorkOrderController {
     public String createNewOrder(@Valid @ModelAttribute("quickForm") QuickWorkOrderForm quickForm,
                                  BindingResult bindingResult,
                                  @RequestParam(name = "formToken", required = false) String formToken,
+                                 @RequestParam(name = "saveAndNew", defaultValue = "false") boolean saveAndNew,
                                  HttpSession session,
                                  Model model,
                                  RedirectAttributes redirectAttributes) {
@@ -218,6 +224,11 @@ public class WorkOrderController {
         try {
             quickForm.setCompleteNow(false);
             WorkOrder order = quickWorkOrderService.create(quickForm);
+            if (saveAndNew) {
+                redirectAttributes.addFlashAttribute("successMessage",
+                        "İş emri açıldı. Yeni kayıt için form hazır.");
+                return "redirect:/work-orders/new";
+            }
             redirectAttributes.addFlashAttribute("successMessage", "İş emri açıldı.");
             redirectAttributes.addFlashAttribute("quickCreated", true);
             redirectAttributes.addFlashAttribute("quickCompleted", false);
@@ -230,6 +241,7 @@ public class WorkOrderController {
 
     private String newOrderView(QuickWorkOrderForm quickForm, HttpSession session, Model model) {
         model.addAttribute("quickForm", quickForm);
+        addAssignedNameSuggestions(model);
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/new";
@@ -280,6 +292,7 @@ public class WorkOrderController {
             quickForm.setPlate(plate.trim());
         }
         model.addAttribute("quickForm", quickForm);
+        addAssignedNameSuggestions(model);
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/quick";
@@ -294,6 +307,39 @@ public class WorkOrderController {
     }
 
     public record OrderNoCheck(boolean available, String message) {
+    }
+
+    @GetMapping("/import")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String importForm(Model model) {
+        model.addAttribute("activeMenu", "workorders");
+        return "workorders/import";
+    }
+
+    @PostMapping("/import")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String importFile(@RequestParam("file") MultipartFile file, Model model,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            int count = importService.importFile(file);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    count + " iş emri içe aktarıldı.");
+            return "redirect:/work-orders";
+        } catch (WorkOrderImportException ex) {
+            model.addAttribute("importErrors", ex.getErrors());
+            model.addAttribute("activeMenu", "workorders");
+            return "workorders/import";
+        }
+    }
+
+    @GetMapping("/import/template")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public ResponseEntity<byte[]> importTemplate() {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"is-emri-ice-aktarma-sablonu.csv\"")
+                .contentType(MediaType.parseMediaType("text/csv; charset=UTF-8"))
+                .body(importService.template());
     }
 
     @PostMapping
@@ -615,6 +661,11 @@ public class WorkOrderController {
                 : customerService.activeCustomers());
         model.addAttribute("vehicles", includeInactive ? vehicleService.allVehicles()
                 : vehicleService.activeVehicles());
+        addAssignedNameSuggestions(model);
+    }
+
+    private void addAssignedNameSuggestions(Model model) {
+        model.addAttribute("assignedNameSuggestions", workOrderService.recentAssignedNames());
     }
 
     private String quickFormView(QuickWorkOrderForm quickForm, String source,
