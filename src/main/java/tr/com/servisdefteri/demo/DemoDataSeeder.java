@@ -44,6 +44,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Yalnizca "demo" profilinde calisir. Bos demo veritabanini gercekci ornek
@@ -67,6 +68,7 @@ public class DemoDataSeeder implements ApplicationRunner {
     private final PaymentService paymentService;
     private final AppointmentService appointmentService;
     private final Clock clock;
+    private int orderSequence;
 
     public DemoDataSeeder(CustomerRepository customerRepository, UserRepository userRepository,
                           PasswordEncoder passwordEncoder, CustomerService customerService,
@@ -111,6 +113,7 @@ public class DemoDataSeeder implements ApplicationRunner {
     }
 
     private void seed() {
+        orderSequence = 0;
         List<Customer> customers = new ArrayList<>();
         customers.add(customer("Ahmet Yılmaz", "0532 410 20 10", CustomerType.BIREYSEL, "ahmet.yilmaz@example.com"));
         customers.add(customer("Ayşe Demir", "0533 411 20 11", CustomerType.BIREYSEL, "ayse.demir@example.com"));
@@ -251,6 +254,7 @@ public class DemoDataSeeder implements ApplicationRunner {
 
     private WorkOrder order(Customer customer, Vehicle vehicle, int daysAgo, String complaint) {
         WorkOrderForm form = new WorkOrderForm();
+        form.setOrderNo("IS-2026-" + String.format(Locale.ROOT, "%06d", ++orderSequence));
         form.setCustomerId(customer.getId());
         form.setVehicleId(vehicle.getId());
         LocalDateTime openedAt = daysAgo == 0
