@@ -166,6 +166,11 @@ class UsabilityIT extends BusinessTestSupport {
                 .andExpect(jsonPath("$[0].plate").value("34SUG001"))
                 .andExpect(jsonPath("$[0].customerName").value("Tahmin Müşteri"));
 
+        mockMvc.perform(get("/vehicles/suggest").param("q", "34 SUG")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].plate").value("34SUG001"));
+
         mockMvc.perform(get("/vehicles/suggest").param("q", "0555 197")
                         .with(user(principal(servis))))
                 .andExpect(status().isOk())

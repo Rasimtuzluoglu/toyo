@@ -18,6 +18,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
             where (cast(:q as string) is null
                    or lower(function('translate', v.plate, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                    or lower(v.plateNormalized) like :q
+                   or lower(v.plateNormalized) like replace(cast(:q as string), ' ', '')
                    or lower(function('translate', v.brand, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                    or lower(function('translate', v.model, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                    or lower(function('translate', c.name, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
@@ -31,6 +32,7 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
                     where (cast(:q as string) is null
                            or lower(function('translate', v.plate, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                            or lower(v.plateNormalized) like :q
+                           or lower(v.plateNormalized) like replace(cast(:q as string), ' ', '')
                            or lower(function('translate', v.brand, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                            or lower(function('translate', v.model, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                            or lower(function('translate', c.name, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
