@@ -70,9 +70,10 @@ Araç sahibi değiştiğinde kayıt eklenir. `previous_customer_id`, `new_custom
 | Kolon | Tip | Kısıt |
 |---|---|---|
 | `id` | BIGSERIAL | PK |
-| `order_no` | VARCHAR(30) | UNIQUE, NOT NULL (`IS-YYYY-NNNNNN`) |
+| `order_no` | VARCHAR(30) | UNIQUE, NOT NULL; manuel girilir |
 | `customer_id`, `vehicle_id` | BIGINT | FK, NOT NULL |
-| `assigned_user_id` | BIGINT | FK → users.id, NULL |
+| `assigned_user_id` | BIGINT | FK → users.id, NULL; eski atamalar için korunur |
+| `assigned_name` | VARCHAR(100) | Serbest metin ilgilenen kişi, NULL |
 | `opened_at` | TIMESTAMP | NOT NULL |
 | `complaint`, `diagnosis`, `work_done`, `notes` | VARCHAR(2000) | NULL |
 | `mileage` | INTEGER | CHECK ≥ 0 veya NULL |
@@ -83,7 +84,7 @@ Araç sahibi değiştiğinde kayıt eklenir. `previous_customer_id`, `new_custom
 | `created_at`, `created_by` | | |
 | `version` | BIGINT | Optimistic lock |
 
-`order_no` üretimi `work_order_no_seq` sequence'ından yapılır. `customer_id`, iş emrinin açıldığı andaki müşteriyi temsil eder; araç sahibi sonradan değişse bile bu ilişki korunur.
+`order_no` manuel girilir ve benzersiz olmalıdır; uygulama otomatik numara üretmez. `customer_id`, iş emrinin açıldığı andaki müşteriyi temsil eder; araç sahibi sonradan değişse bile bu ilişki korunur. `assigned_name` serbest metindir; eski `assigned_user_id` kayıtları V17 ile isimlere kopyalanmıştır.
 
 Günlük iş panosu açık işleri `status IN ('BEKLIYOR','ISLEMDE')` ile, bugün biten işleri ise `closed_at` veya `delivered_at` değeri bugünün aralığında olan `TAMAMLANDI`/`TESLIM_EDILDI` kayıtlarıyla okur. Ayrı bir “gün” tablosu yoktur; devir, durum ve kapanış zaman damgalarından hesaplanır.
 
@@ -210,10 +211,10 @@ Günlük randevu planı. `customer_id`, `vehicle_id`, `starts_at`, `status` (PLA
 
 | Sequence | Kullanım |
 |---|---|
-| `work_order_no_seq` | İş emri numarası |
+| `work_order_no_seq` | Eski otomatik fiş no üretimi; artık kullanılmıyor (fiş no manuel) |
 | `payment_receipt_seq` | Tahsilat makbuz numarası |
 
-Sequence değerleri transaction rollback'inde geri alınmaz; bu nedenle numaralarda boşluk görülebilir. Bu, benzersizliği garanti etmek için bilinçli bir tercihtir.
+Tahsilat makbuz sequence değerleri transaction rollback'inde geri alınmaz; bu nedenle makbuz numaralarında boşluk görülebilir. Bu, benzersizliği garanti etmek için bilinçli bir tercihtir.
 
 ## İndeksler
 
@@ -249,6 +250,7 @@ Sequence değerleri transaction rollback'inde geri alınmaz; bu nedenle numarala
 | V14 | `V14__branding_settings.sql` | White-label slogan, ana renk ve logo |
 | V15 | `V15__work_order_debit_reactivation.sql` | Tamamlama geri alınınca yeniden borçlandırma |
 | V16 | `V16__one_time_setup.sql` | Tek seferlik kurulum durumu (`installation_state`) |
+| V17 | `V17__work_order_assigned_name.sql` | İş emrinde serbest metin ilgilenen kişi; eski kullanıcı atamalarını isme kopyalar |
 
 Uygulama açılışında Flyway doğrular ve eksik migration'ları sırayla uygular. `flyway_schema_history` tablosu şema sürümünü tutar.
 

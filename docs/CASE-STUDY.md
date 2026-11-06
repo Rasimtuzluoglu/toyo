@@ -30,7 +30,7 @@ tahsilat, randevu ve belge süreçlerini tek bir yerel ağ uygulamasında toplar
 ## Teknik Yapı
 
 - Java 21, Spring Boot 3.5, Thymeleaf, PostgreSQL 16
-- Flyway migration (V16), Spring Security, Bean Validation
+- Flyway migration (V17), Spring Security, Bean Validation
 - Apache POI (Excel), OpenPDF (PDF), Noto Sans (Türkçe karakter)
 - Docker / Docker Compose, yerel ağda çalışır
 - 104 otomatik test (Testcontainers ile gerçek PostgreSQL)
@@ -49,12 +49,6 @@ tahsilat, randevu ve belge süreçlerini tek bir yerel ağ uygulamasında toplar
 | Kayıp/eksik iş emri | ___ | ___ |
 | Müşteriye dönüş süresi | ___ | ___ |
 | Günlük kullanıcı sayısı | ___ | ___ |
-
-## Ekran Görüntüleri
-
-- [Ana Panel](screenshots/dashboard.jpg)
-- [Günlük İşler / Kanban](screenshots/board.jpg)
-- [Giriş](screenshots/login.jpg)
 
 ## Sonuç
 
