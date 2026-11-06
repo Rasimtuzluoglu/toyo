@@ -185,7 +185,7 @@ public class AppointmentController {
     @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
     public String startWorkOrder(@PathVariable Long id) {
         appointmentService.markArrived(id);
-        return "redirect:/work-orders/quick?plate=" + appointmentService.vehiclePlate(id);
+        return "redirect:/work-orders/new?plate=" + appointmentService.vehiclePlate(id);
     }
 
     @PostMapping("/{id}/cancel")

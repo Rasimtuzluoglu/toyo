@@ -3,6 +3,7 @@ package tr.com.servisdefteri.flow;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.mock.web.MockMultipartFile;
 import tr.com.servisdefteri.appointment.Appointment;
@@ -10,6 +11,7 @@ import tr.com.servisdefteri.appointment.AppointmentForm;
 import tr.com.servisdefteri.appointment.AppointmentService;
 import tr.com.servisdefteri.appointment.AppointmentStatus;
 import tr.com.servisdefteri.common.BusinessRuleException;
+import tr.com.servisdefteri.common.FormTokenService;
 import tr.com.servisdefteri.customer.Customer;
 import tr.com.servisdefteri.payment.Payment;
 import tr.com.servisdefteri.payment.PaymentMethod;
@@ -49,6 +51,9 @@ class UsabilityIT extends BusinessTestSupport {
 
     @Autowired
     private QuickWorkOrderService quickWorkOrderService;
+
+    @Autowired
+    private FormTokenService formTokenService;
 
     @Autowired
     private VehicleDocumentService vehicleDocumentService;
@@ -138,20 +143,66 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
-    void plateLookupPrefillsFormOrOffersQuickCreate() throws Exception {        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
-        Customer customer = createCustomer("Plaka Müşteri", "0555 333 44 55");
-        createVehicle(customer, "34 PLK 001");
+    void newWorkOrderPagePrefillsPlateFromLink() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
 
         mockMvc.perform(get("/work-orders/new").param("plate", "34 PLK 001")
                         .with(user(principal(patron))))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("bulundu")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-quick-plate")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("34 PLK 001")));
+    }
 
-        mockMvc.perform(get("/work-orders/new").param("plate", "99 XYZ 999")
-                        .with(user(principal(patron))))
+    @Test
+    void newWorkOrderPageIsSingleScreenAndOnlySaves() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+
+        mockMvc.perform(get("/work-orders/new").with(user(principal(servis))))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("kayıtlı değil")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Hızlı İş Emri Oluştur")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Müşteri ne dedi?")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Yapılacak iş")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Kim ilgileniyor?")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Gelişmiş alanlar")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Kaydet")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Kaydet ve Tamamla"))));
+    }
+
+    @Test
+    void newWorkOrderSavesAssignedUserAndServiceWithoutCompleting() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        MockHttpSession session = new MockHttpSession();
+        String token = formTokenService.issue(session);
+
+        mockMvc.perform(post("/work-orders/new")
+                        .session(session)
+                        .with(user(principal(servis)))
+                        .with(csrf())
+                        .param("formToken", token)
+                        .param("plate", "34 YNI 001")
+                        .param("customerName", "Yeni Akış Müşteri")
+                        .param("phone", "0555 196 96 96")
+                        .param("complaint", "Fren yaparken ses geliyor")
+                        .param("serviceDescription", "Fren bakımı")
+                        .param("assignedUserId", servis.getId().toString())
+                        .param("notes", "Ekip notu")
+                        .param("completeNow", "true"))
+                .andExpect(status().is3xxRedirection());
+
+        Long orderId = jdbcTemplate.queryForObject("""
+                select w.id from work_orders w
+                join vehicles v on v.id = w.vehicle_id
+                where v.plate_normalized = '34YNI001'
+                order by w.id desc limit 1
+                """, Long.class);
+        WorkOrder order = workOrderService.findById(orderId);
+
+        assertThat(order.getStatus().name()).isEqualTo("BEKLIYOR");
+        assertThat(order.getAssignedUser().getId()).isEqualTo(servis.getId());
+        assertThat(order.getComplaint()).isEqualTo("Fren yaparken ses geliyor");
+        assertThat(order.getNotes()).isEqualTo("Ekip notu");
+        assertThat(order.getItems()).anySatisfy(item ->
+                assertThat(item.getDescription()).isEqualTo("Fren bakımı"));
     }
 
     @Test
@@ -209,7 +260,7 @@ class UsabilityIT extends BusinessTestSupport {
                         .flashAttr("quickCompleted", true)
                         .with(user(principal(patron))))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Yeni Hızlı İş")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Yeni İş Emri")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Tahsilat Al")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Teslim Tutanağı")));
     }
@@ -281,7 +332,7 @@ class UsabilityIT extends BusinessTestSupport {
                         .with(user(principal(servis)))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/work-orders/quick?plate=34APT001"));
+                .andExpect(redirectedUrl("/work-orders/new?plate=34APT001"));
 
         assertThat(appointmentService.findById(appointment.getId()).getStatus())
                 .isEqualTo(AppointmentStatus.GELDI);

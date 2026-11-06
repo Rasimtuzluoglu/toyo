@@ -1,57 +1,60 @@
-# Toyota Plaza Ã–ztoprak Â· Servis YÃ¶netimi
+# Toyota Plaza Öztoprak · Servis Yönetimi
 
-Toyota Plaza Ã–ztoprak iÃ§in geliÅŸtirilen bu uygulama; mÃ¼ÅŸteri, araÃ§, iÅŸ emri, cari hesap,
-tahsilat ve randevu sÃ¼reÃ§lerini **tek bir yerel aÄŸ uygulamasÄ±nda** toplar. Veri iÅŸletmenin
-kendi bilgisayarÄ±nda kalÄ±r; bulut hesabÄ±, dÄ±ÅŸ servis veya port yÃ¶nlendirme gerekmez.
+Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş emri, cari hesap,
+tahsilat ve randevu süreçlerini **tek bir yerel ağ uygulamasında** toplar. Veri işletmenin
+kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme gerekmez.
 
-> GÃ¼ncel durum: Ã¼retim ve demo ortamÄ± Ã§alÄ±ÅŸÄ±yor Â· **87 otomatik test** Â· yerel CI + Docker imaj doÄŸrulamasÄ±
+> Güncel durum: üretim ve demo ortamı çalışıyor · **89 otomatik test** · yerel CI + Docker imaj doğrulaması
 
-## Ã–ne Ã‡Ä±kanlar
+## Öne Çıkanlar
 
 **Operasyon**
-- GÃ¼nlÃ¼k iÅŸ panosu: bitmemiÅŸ iÅŸler her gÃ¼n devreder, bitenler ertesi gÃ¼n listeden kalkar.
-- Kanban Ã¼zerinde sÃ¼rÃ¼kle-bÄ±rak veya tek tÄ±kla durum ilerletme; plaka/mÃ¼ÅŸteri aramasÄ±.
-- YoÄŸun gÃ¼nler iÃ§in kompakt kart, sabit yÃ¼kseklikte kayan kolonlar, yaÅŸ filtreleri ve katlanabilir biten kolonlarÄ±.
-- Telefonda **Bekliyor / Ä°ÅŸlemde / TamamlandÄ± / Teslim Edildi** sekmeleri.
-- Plaka odaklÄ± hÄ±zlÄ± iÅŸ emri: kayÄ±tlÄ± plakada mÃ¼ÅŸteri/araÃ§ otomatik gelir.
-- HazÄ±r iÅŸlem dÃ¼ÄŸmeleri, tek ekranda **Kaydet ve Tamamla**.
-- Randevuyu otomatik â€œGeldiâ€ yapÄ±p plakasÄ± Ã¶n dolu hÄ±zlÄ± iÅŸ emrini aÃ§ma.
-- GÃ¼nlÃ¼k ve haftalÄ±k randevu takvimi; bakÄ±m hatÄ±rlatmalarÄ± (180 gÃ¼n / 10.000 km).
-- Ctrl+K komut paleti, 6 adÄ±mlÄ±k sunum turu, manuel/otomatik iÅŸ emri no ve hazÄ±r kalem ÅŸablonlarÄ±.
+- Günlük iş panosu: bitmemiş işler her gün devreder, bitenler ertesi gün listeden kalkar.
+- Kanban üzerinde sürükle-bırak veya tek tıkla durum ilerletme; plaka/müşteri araması.
+- Yoğun günler için kompakt kart, sabit yükseklikte kayan kolonlar, yaş filtreleri ve katlanabilir biten kolonları.
+- Telefonda **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmeleri.
+- Yeni İş Emri tek ekran: plaka, müşteri şikâyeti, yapılacak iş ve sorumlu kişi; müşteri/araç listesi ve gereksiz alanlar gizli.
+- Plaka ile hızlı iş emri: kayıtlı plakada müşteri/araç otomatik gelir; yeni plakada müşteri + araç + iş emri tek adımda oluşur.
+- Hazır işlem düğmeleri, tek ekranda **Kaydet ve Tamamla**.
+- Randevuyu otomatik “Geldi” yapıp plakası ön dolu yeni iş emrini açma.
+- Günlük ve haftalık randevu takvimi; bakım hatırlatmaları (180 gün / 10.000 km).
+- Ctrl+K komut paleti, 6 adımlık sunum turu, manuel/otomatik iş emri no ve hazır kalem şablonları.
 
 **Finans**
-- Ä°ÅŸ emri tamamlanÄ±nca otomatik cari borÃ§; iptalde ters kayÄ±t (silme yok).
+- İş emri tamamlanınca otomatik cari borç; iptalde ters kayıt (silme yok).
 - Tamamla + tahsilat: **Cari / Nakit / Kart**.
-- TahsilatlarÄ± birden fazla borca daÄŸÄ±tma, tahsilat iptali, cari ekstre ve yaÅŸlandÄ±rma.
-- Excel (.xlsx), CSV ve PDF Ã§Ä±ktÄ±larÄ±; dashboard ve raporlar.
+- Tahsilatları birden fazla borca dağıtma, tahsilat iptali, cari ekstre ve yaşlandırma.
+- Excel (.xlsx), CSV ve PDF çıktıları; dashboard ve raporlar.
 
 **Belgeler ve marka**
-- AraÃ§ kabul formu, teslim tutanaÄŸÄ±, Ä±slak imza Ã§Ä±ktÄ±sÄ± ve dijital imza.
-- White-label: iÅŸletme adÄ±, slogan, ana renk ve logo; giriÅŸ, menÃ¼, belgeler ve PDFâ€™lerde geÃ§erli.
-- Ä°ÅŸ emri ve tahsilat makbuzu iÃ§in doÄŸrudan PDF indirme.
+- Araç kabul formu, teslim tutanağı, ıslak imza çıktısı ve dijital imza.
+- White-label: işletme adı, slogan, ana renk ve logo; giriş, menü, belgeler ve PDF’lerde geçerli.
+- İş emri ve tahsilat makbuzu için doğrudan PDF indirme.
 
-**GÃ¼venlik, veri ve bakÄ±m**
-- PATRON / MUHASEBE / SERVIS rolleri; yetkiler sunucu tarafÄ±nda uygulanÄ±r.
-- CSRF, BCrypt (strength 12), oturum sabitleme, 5 hatalÄ± giriÅŸte 15 dakika kilit.
-- Ä°ÅŸlem denetim kaydÄ±: kullanÄ±cÄ±, zaman, IP ve detay.
-- Tek seferlik kurulum; kullanÄ±cÄ±lar silinse bile `/setup` yeniden aÃ§Ä±lmaz.
-- GÃ¼nlÃ¼k otomatik yedek + gÃ¼ncelleme Ã¶ncesi yedek; yedek indirme ve geri yÃ¼kleme tatbikatÄ±.
-- Ayarlar â†’ GitHub son commit kontrolÃ¼ ve host ajanÄ±yla Docker Ã¼zerinden gÃ¼ncelleme.
+**Güvenlik, veri ve bakım**
+- PATRON / MUHASEBE / SERVIS rolleri; yetkiler sunucu tarafında uygulanır.
+- CSRF, BCrypt (strength 12), oturum sabitleme, 5 hatalı girişte 15 dakika kilit.
+- İşlem denetim kaydı: kullanıcı, zaman, IP ve detay.
+- Tek seferlik kurulum; kullanıcılar silinse bile `/setup` yeniden açılmaz.
+- Günlük otomatik yedek + güncelleme öncesi yedek; yedek indirme ve geri yükleme tatbikatı.
+- Ayarlar → GitHub son commit kontrolü ve host ajanıyla Docker üzerinden güncelleme.
 
-Kapsam dÄ±ÅŸÄ±: e-fatura, banka/kart Ã¶deme kuruluÅŸu entegrasyonu, otomatik SMS/WhatsApp,
-bulut dÄ±ÅŸ eriÅŸim, Ã§ok iÅŸletmeli SaaS, tam stok/depo, native mobil uygulama, tam muhasebe sistemi.
+Kapsam dışı: e-fatura, banka/kart ödeme kuruluşu entegrasyonu, otomatik SMS/WhatsApp,
+bulut dış erişim, çok işletmeli SaaS, tam stok/depo, native mobil uygulama, tam muhasebe sistemi.
 
-## Ekran GÃ¶rÃ¼ntÃ¼leri
+## Ekran Görüntüleri
 
-| Ana Panel | GÃ¼nlÃ¼k Ä°ÅŸler |
+| Ana Panel | Günlük İşler |
 |---|---|
-| ![Ana Panel](docs/screenshots/dashboard.jpg) | ![GÃ¼nlÃ¼k Ä°ÅŸler](docs/screenshots/board.jpg) |
+| ![Ana Panel](docs/screenshots/dashboard.jpg) | ![Günlük İşler](docs/screenshots/board.jpg) |
 
-![GiriÅŸ](docs/screenshots/login.jpg)
+| Yeni İş Emri | Giriş |
+|---|---|
+| ![Yeni İş Emri](docs/screenshots/new-work-order.jpg) | ![Giriş](docs/screenshots/login.jpg) |
 
-## HÄ±zlÄ± BaÅŸlangÄ±Ã§ (Docker)
+## Hızlı Başlangıç (Docker)
 
-1. Ortam dosyasÄ±nÄ± oluÅŸturun:
+1. Ortam dosyasını oluşturun:
 
    ```bash
    cp .env.example .env
@@ -59,12 +62,12 @@ bulut dÄ±ÅŸ eriÅŸim, Ã§ok iÅŸletmeli SaaS, tam stok/depo, native mobil
 
    Windows PowerShell: `Copy-Item .env.example .env`
 
-2. `.env` iÃ§inde en az `POSTGRES_PASSWORD` deÄŸerini deÄŸiÅŸtirin. Ä°lk iÅŸletme sahibini
-   ortam deÄŸiÅŸkeninden oluÅŸturmak isterseniz `INITIAL_ADMIN_USERNAME`,
-   `INITIAL_ADMIN_PASSWORD` ve `INITIAL_ADMIN_FULL_NAME` deÄŸerlerini de doldurun.
-   **VarsayÄ±lan parola yoktur.**
+2. `.env` içinde en az `POSTGRES_PASSWORD` değerini değiştirin. İlk işletme sahibini
+   ortam değişkeninden oluşturmak isterseniz `INITIAL_ADMIN_USERNAME`,
+   `INITIAL_ADMIN_PASSWORD` ve `INITIAL_ADMIN_FULL_NAME` değerlerini de doldurun.
+   **Varsayılan parola yoktur.**
 
-3. Servisleri baÅŸlatÄ±n:
+3. Servisleri başlatın:
 
    ```bash
    docker compose up -d --build
@@ -72,8 +75,8 @@ bulut dÄ±ÅŸ eriÅŸim, Ã§ok iÅŸletmeli SaaS, tam stok/depo, native mobil
    docker compose logs -f app
    ```
 
-4. TarayÄ±cÄ±dan `http://localhost:18080` adresini aÃ§Ä±n. Ä°lk kurulumda `/setup` ekranÄ±ndan
-   PATRON (iÅŸletme sahibi) hesabÄ±nÄ± oluÅŸturun. Bu ekran **yalnÄ±zca bir kez** aÃ§Ä±lÄ±r.
+4. Tarayıcıdan `http://localhost:18080` adresini açın. İlk kurulumda `/setup` ekranından
+   PATRON (işletme sahibi) hesabını oluşturun. Bu ekran **yalnızca bir kez** açılır.
 
 5. Durdurma:
 
@@ -82,21 +85,21 @@ bulut dÄ±ÅŸ eriÅŸim, Ã§ok iÅŸletmeli SaaS, tam stok/depo, native mobil
    docker compose restart app
    ```
 
-   > `docker compose down -v` **volumeâ€™larÄ± siler** ve veritabanÄ± kayÄ±tlarÄ±nÄ± geri
-   > dÃ¶ndÃ¼rÃ¼lemez biÃ§imde kaybettirir. Normal kullanÄ±mda `-v` kullanmayÄ±n.
+   > `docker compose down -v` **volume’ları siler** ve veritabanı kayıtlarını geri
+   > döndürülemez biçimde kaybettirir. Normal kullanımda `-v` kullanmayın.
 
-PostgreSQL portu ana compose dosyasÄ±nda bilerek yayÄ±nlanmaz. Yerel geliÅŸtirmede veritabanÄ±na
-host Ã¼zerinden eriÅŸmek iÃ§in:
+PostgreSQL portu ana compose dosyasında bilerek yayınlanmaz. Yerel geliştirmede veritabanına
+host üzerinden erişmek için:
 
 ```bash
 docker compose -f docker-compose.yml -f compose.dev.yml up -d db
 ```
 
-Bu komut portu yalnÄ±zca `127.0.0.1:5432` Ã¼zerinde aÃ§ar.
+Bu komut portu yalnızca `127.0.0.1:5432` üzerinde açar.
 
-## Demo / Sunum OrtamÄ±
+## Demo / Sunum Ortamı
 
-GerÃ§ek veriyi kirletmeden sistemi gÃ¶stermek iÃ§in ayrÄ± veritabanÄ± ve port kullanÄ±lÄ±r.
+Gerçek veriyi kirletmeden sistemi göstermek için ayrı veritabanı ve port kullanılır.
 
 ```bash
 docker compose up -d --build
@@ -104,57 +107,57 @@ docker compose -f docker-compose.demo.yml up -d
 ```
 
 - Adres: `http://localhost:18081`
-- KullanÄ±cÄ±: `demo` Â· Parola: `DemoPass1234`
-- Veri: 12 mÃ¼ÅŸteri, 12 Toyota araÃ§, 12 iÅŸ emri, 5 tahsilat, 4 randevu.
-- Demo verisi yalnÄ±zca `demo` profilinde ve boÅŸ veritabanÄ±nda oluÅŸturulur; Ã¼retim verisine dokunmaz.
-- SÄ±fÄ±rlama: `docker compose -f docker-compose.demo.yml down -v` â†’ `... up -d`
+- Kullanıcı: `demo` · Parola: `DemoPass1234`
+- Veri: 12 müşteri, 12 Toyota araç, 12 iş emri, 5 tahsilat, 4 randevu.
+- Demo verisi yalnızca `demo` profilinde ve boş veritabanında oluşturulur; üretim verisine dokunmaz.
+- Sıfırlama: `docker compose -f docker-compose.demo.yml down -v` → `... up -d`
 
-### 5 dakikalÄ±k sunum akÄ±ÅŸÄ±
+### 5 dakikalık sunum akışı
 
-1. **GiriÅŸ** â†’ `demo / DemoPass1234`
-2. **Ana Panel** â†’ aÃ§Ä±k iÅŸ, bugÃ¼nkÃ¼ tahsilat, alacak, randevu ve teslimata hazÄ±r araÃ§lar.
-3. **GÃ¼nlÃ¼k Ä°ÅŸler** â†’ sekmeler/arama; bir iÅŸte **Cari/Nakit/Kart** seÃ§ip **Tamamla**; **Geri Al**.
-4. **HÄ±zlÄ± Ä°ÅŸ Emri** â†’ `34 TP 1001` yazÄ±n; mÃ¼ÅŸteri/araÃ§ otomatik gelsin; **Kaydet ve Tamamla**.
-5. **Randevular** â†’ **Ä°ÅŸ Emri AÃ§**; randevu â€œGeldiâ€ olur, plaka dolu hÄ±zlÄ± form aÃ§Ä±lÄ±r.
-6. **Teslimata hazÄ±r** â†’ **Teslim Et**; teslim ekranÄ±nda bakiye ve **Tahsilat Al**.
-7. **Tahsilat/Raporlar** â†’ makbuz PDFâ€™i, cari ekstre ve Excel/CSV indirme.
-8. **Ayarlar** â†’ yedekleme ve **GÃ¼ncelleme** kartÄ±.
+1. **Giriş** → `demo / DemoPass1234`
+2. **Ana Panel** → açık iş, bugünkü tahsilat, alacak, randevu ve teslimata hazır araçlar.
+3. **Günlük İşler** → sekmeler/arama; bir işte **Cari/Nakit/Kart** seçip **Tamamla**; **Geri Al**.
+4. **Yeni İş Emri** → `34 TP 1001` yazın; müşteri/araç otomatik gelsin; şikâyet ve işi girip **Kaydet**.
+5. **Randevular** → **İş Emri Aç**; randevu “Geldi” olur, plaka dolu yeni iş emri açılır.
+6. **Teslimata hazır** → **Teslim Et**; teslim ekranında bakiye ve **Tahsilat Al**.
+7. **Tahsilat/Raporlar** → makbuz PDF’i, cari ekstre ve Excel/CSV indirme.
+8. **Ayarlar** → yedekleme ve **Güncelleme** kartı.
 
-## Roller ve GÃ¼nlÃ¼k AkÄ±ÅŸ
+## Roller ve Günlük Akış
 
 | Rol | Kapsam |
 |---|---|
-| **PATRON** | TÃ¼m iÅŸlemler: operasyon, finans, raporlar, kullanÄ±cÄ±lar, ayarlar, yedekleme, gÃ¼ncelleme |
-| **MUHASEBE** | Tahsilat, cari hesap, raporlar ve dashboard; mÃ¼ÅŸteri/araÃ§/iÅŸ emrini gÃ¶rÃ¼ntÃ¼ler, iÅŸ emrini iptal edebilir |
-| **SERVIS** | MÃ¼ÅŸteri, araÃ§, iÅŸ emri ve gÃ¼nlÃ¼k akÄ±ÅŸ; finans ekranlarÄ±na eriÅŸemez, tahsilat alamaz, iptal edemez |
+| **PATRON** | Tüm işlemler: operasyon, finans, raporlar, kullanıcılar, ayarlar, yedekleme, güncelleme |
+| **MUHASEBE** | Tahsilat, cari hesap, raporlar ve dashboard; müşteri/araç/iş emrini görüntüler, iş emrini iptal edebilir |
+| **SERVIS** | Müşteri, araç, iş emri ve günlük akış; finans ekranlarına erişemez, tahsilat alamaz, iptal edemez |
 
-Ä°ÅŸ emri akÄ±ÅŸÄ±:
+İş emri akışı:
 
 ```text
-Bekliyor â†’ Ä°ÅŸlemde â†’ TamamlandÄ± â†’ Teslim Edildi
-    â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”´â”€â”€â”€â”€â”€â”€â†’ Ä°ptal (ters kayÄ±t)
+Bekliyor → İşlemde → Tamamlandı → Teslim Edildi
+    └──────────┴──────────┴──────→ İptal (ters kayıt)
 ```
 
-- Tamamlamadan sonra 10 dakika iÃ§inde **Geri Al**; borÃ§ varsa ters kayÄ±t oluÅŸur.
-- Tahsilat, iptal ve ters kayÄ±tlar denetim kaydÄ±na yazÄ±lÄ±r.
+- Tamamlamadan sonra 10 dakika içinde **Geri Al**; borç varsa ters kayıt oluşur.
+- Tahsilat, iptal ve ters kayıtlar denetim kaydına yazılır.
 
 ## Teknolojiler
 
 | Katman | Teknoloji |
 |---|---|
 | Dil | Java 21 LTS |
-| Ã‡atÄ± | Spring Boot 3.5.16 |
+| Çatı | Spring Boot 3.5.16 |
 | Web | Spring MVC + Thymeleaf |
 | Veri | Spring Data JPA / Hibernate, PostgreSQL 16 |
-| DÄ±ÅŸa aktarma | Apache POI 5.5.1 (Excel .xlsx), UTF-8 BOM CSV |
-| PDF | OpenPDF 2.2.2, Noto Sans (gÃ¶mÃ¼lÃ¼ TÃ¼rkÃ§e karakter desteÄŸi) |
+| Dışa aktarma | Apache POI 5.5.1 (Excel .xlsx), UTF-8 BOM CSV |
+| PDF | OpenPDF 2.2.2, Noto Sans (gömülü Türkçe karakter desteği) |
 | Migration | Flyway (V16) |
-| GÃ¼venlik | Spring Security, BCrypt (strength 12), CSRF |
-| UI | Bootstrap 5.3.3, Bootstrap Icons, Ã¶zel CSS |
+| Güvenlik | Spring Security, BCrypt (strength 12), CSRF |
+| UI | Bootstrap 5.3.3, Bootstrap Icons, özel CSS |
 | Test | JUnit 5, Spring Boot Test, MockMvc, Testcontainers (PostgreSQL 16) |
 | Paketleme | Maven, Docker, Docker Compose |
 
-## Yerel GeliÅŸtirme
+## Yerel Geliştirme
 
 ```bash
 # 1) PostgreSQL 16
@@ -176,63 +179,63 @@ $env:DB_PASSWORD="..."
 mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
-VarsayÄ±lan port `18080`â€™dir. Port doluysa `SERVER_PORT` (uygulama) veya `APP_PORT` (Docker)
-ile deÄŸiÅŸtirin.
+Varsayılan port `18080`’dir. Port doluysa `SERVER_PORT` (uygulama) veya `APP_PORT` (Docker)
+ile değiştirin.
 
-## Ortam DeÄŸiÅŸkenleri
+## Ortam Değişkenleri
 
-| DeÄŸiÅŸken | AÃ§Ä±klama | VarsayÄ±lan |
+| Değişken | Açıklama | Varsayılan |
 |---|---|---|
-| `POSTGRES_DB` | VeritabanÄ± adÄ± | `servisdefteri` |
-| `POSTGRES_USER` | VeritabanÄ± kullanÄ±cÄ±sÄ± | `servisdefteri` |
-| `POSTGRES_PASSWORD` | VeritabanÄ± parolasÄ± | Zorunlu |
-| `APP_PORT` | Dockerâ€™da dÄ±ÅŸ port | `18080` |
-| `APP_BIND_ADDRESS` | Dinlenecek aÄŸ arayÃ¼zÃ¼; `127.0.0.1` = yalnÄ±zca bu bilgisayar, `0.0.0.0` = yerel aÄŸ | `0.0.0.0` |
+| `POSTGRES_DB` | Veritabanı adı | `servisdefteri` |
+| `POSTGRES_USER` | Veritabanı kullanıcısı | `servisdefteri` |
+| `POSTGRES_PASSWORD` | Veritabanı parolası | Zorunlu |
+| `APP_PORT` | Docker’da dış port | `18080` |
+| `APP_BIND_ADDRESS` | Dinlenecek ağ arayüzü; `127.0.0.1` = yalnızca bu bilgisayar, `0.0.0.0` = yerel ağ | `0.0.0.0` |
 | `SERVER_PORT` | Uygulama portu | `18080` |
-| `SESSION_TIMEOUT` | Oturum sÃ¼resi | `2h` |
+| `SESSION_TIMEOUT` | Oturum süresi | `2h` |
 | `DB_URL` | JDBC adresi | `jdbc:postgresql://localhost:5432/servisdefteri` |
-| `DB_USERNAME` / `DB_PASSWORD` | Uygulama DB kullanÄ±cÄ±sÄ± | `servisdefteri` / zorunlu |
-| `INITIAL_ADMIN_USERNAME` | Ä°lk PATRON kullanÄ±cÄ± adÄ± | BoÅŸ |
-| `INITIAL_ADMIN_PASSWORD` | Ä°lk PATRON parolasÄ± | BoÅŸ |
-| `INITIAL_ADMIN_FULL_NAME` | Ä°lk PATRON ad soyad | `Ä°ÅŸletme Sahibi` |
-| `BACKUP_ENABLED` | ZamanlanmÄ±ÅŸ yedekleme | `true` |
+| `DB_USERNAME` / `DB_PASSWORD` | Uygulama DB kullanıcısı | `servisdefteri` / zorunlu |
+| `INITIAL_ADMIN_USERNAME` | İlk PATRON kullanıcı adı | Boş |
+| `INITIAL_ADMIN_PASSWORD` | İlk PATRON parolası | Boş |
+| `INITIAL_ADMIN_FULL_NAME` | İlk PATRON ad soyad | `İşletme Sahibi` |
+| `BACKUP_ENABLED` | Zamanlanmış yedekleme | `true` |
 | `BACKUP_DIR` | Yedek dizini | `./backups` (Docker: `/app/backups`) |
-| `BACKUP_RETENTION_DAYS` | Yedek saklama sÃ¼resi | `14` |
+| `BACKUP_RETENTION_DAYS` | Yedek saklama süresi | `14` |
 | `BACKUP_CRON` | Yedekleme cron ifadesi | `0 0 2 * * *` |
 | `PG_DUMP_PATH` | pg_dump yolu | `pg_dump` |
-| `DB_HOST` / `DB_PORT` / `DB_NAME` | Yedekleme baÄŸlantÄ±sÄ± | `localhost` / `5432` / `servisdefteri` |
-| `APP_UPDATE_ENABLED` | Ayarlarâ€™daki gÃ¼ncelleme Ã¶zelliÄŸi | `true` |
-| `APP_UPDATE_DIR` | Host ajanÄ±yla paylaÅŸÄ±lan klasÃ¶r | `./updates` (Docker: `/app/updates`) |
-| `APP_UPDATE_REPO` | Ä°zlenecek GitHub deposu | `Rasimtuzluoglu/toyo` |
-| `APP_UPDATE_GITHUB_TOKEN` | Ã–zel depo iÃ§in GitHub token | BoÅŸ |
-| `GIT_COMMIT` | Docker imajÄ±na yazÄ±lan sÃ¼rÃ¼m etiketi | `unknown` |
+| `DB_HOST` / `DB_PORT` / `DB_NAME` | Yedekleme bağlantısı | `localhost` / `5432` / `servisdefteri` |
+| `APP_UPDATE_ENABLED` | Ayarlar’daki güncelleme özelliği | `true` |
+| `APP_UPDATE_DIR` | Host ajanıyla paylaşılan klasör | `./updates` (Docker: `/app/updates`) |
+| `APP_UPDATE_REPO` | İzlenecek GitHub deposu | `Rasimtuzluoglu/toyo` |
+| `APP_UPDATE_GITHUB_TOKEN` | Özel depo için GitHub token | Boş |
+| `GIT_COMMIT` | Docker imajına yazılan sürüm etiketi | `unknown` |
 
-`.env` dosyasÄ± Gitâ€™e eklenmez. Ã–rnek deÄŸerler `.env.example` iÃ§indedir.
+`.env` dosyası Git’e eklenmez. Örnek değerler `.env.example` içindedir.
 
-## Yedekleme ve GÃ¼ncelleme
+## Yedekleme ve Güncelleme
 
 **Otomatik yedek**
-- VarsayÄ±lan her gÃ¼n **02:00** (`BACKUP_CRON`), `pg_dump` custom format.
-- 14 gÃ¼n saklanÄ±r (`BACKUP_RETENTION_DAYS`); Dockerâ€™da `servisdefteri-backups` volumeâ€™Ã¼nde.
-- **Her yazÄ±lÄ±m gÃ¼ncellemesinden Ã¶nce** ayrÄ±ca `pre-update-...dump` alÄ±nÄ±r; yedek alÄ±namazsa gÃ¼ncelleme durur.
-- Manuel **Sunucuda Yedekle** ve **Yedek Al ve Ä°ndir** (PATRON).
-- Yedek aynÄ± bilgisayarda durur; disk arÄ±zasÄ±na karÅŸÄ± harici disk/NASâ€™a kopyalayÄ±n.
-- AyrÄ±ntÄ±lar: [Yedekleme ve Geri YÃ¼kleme](docs/BACKUP-RESTORE.md) Â· tatbikat: `scripts/restore-drill.ps1`
+- Varsayılan her gün **02:00** (`BACKUP_CRON`), `pg_dump` custom format.
+- 14 gün saklanır (`BACKUP_RETENTION_DAYS`); Docker’da `servisdefteri-backups` volume’ünde.
+- **Her yazılım güncellemesinden önce** ayrıca `pre-update-...dump` alınır; yedek alınamazsa güncelleme durur.
+- Manuel **Sunucuda Yedekle** ve **Yedek Al ve İndir** (PATRON).
+- Yedek aynı bilgisayarda durur; disk arızasına karşı harici disk/NAS’a kopyalayın.
+- Ayrıntılar: [Yedekleme ve Geri Yükleme](docs/BACKUP-RESTORE.md) · tatbikat: `scripts/restore-drill.ps1`
 
-**Ayarlar â†’ YazÄ±lÄ±m GÃ¼ncellemesi**
-- **Kontrol Et**: GitHubâ€™daki son commitâ€™i gÃ¶sterir.
-- **GÃ¼ncelle ve Yeniden BaÅŸlat**: host ajanÄ±na istek bÄ±rakÄ±r; ajan yedek alÄ±r,
+**Ayarlar → Yazılım Güncellemesi**
+- **Kontrol Et**: GitHub’daki son commit’i gösterir.
+- **Güncelle ve Yeniden Başlat**: host ajanına istek bırakır; ajan yedek alır,
   `git pull --ff-only origin main` yapar, `docker compose up -d --build` ile yeniden kurar
-  ve saÄŸlÄ±k kontrolÃ¼ yapar.
+  ve sağlık kontrolü yapar.
 - Ajan kurulumu (tek seferlik):
 
   ```powershell
   powershell -ExecutionPolicy Bypass -File .\scripts\install-update-agent.ps1
   ```
 
-- GÃ¼ncelleme sÄ±rasÄ±nda uygulama 1â€“3 dakika eriÅŸilemez; oturumlar kapanÄ±r.
-- Otomatik yakalama iÃ§in `UPDATE_AUTO=true` ortam deÄŸiÅŸkeniyle ajanÄ± baÅŸlatÄ±n.
-- GÃ¼nlÃ¼kler: `updates/agent.log`, `updates/update.log`.
+- Güncelleme sırasında uygulama 1–3 dakika erişilemez; oturumlar kapanır.
+- Otomatik yakalama için `UPDATE_AUTO=true` ortam değişkeniyle ajanı başlatın.
+- Günlükler: `updates/agent.log`, `updates/update.log`.
 
 ## Testler ve Yerel CI
 
@@ -240,86 +243,86 @@ ile deÄŸiÅŸtirin.
 mvn test
 ```
 
-Testler gerÃ§ek PostgreSQL 16 Ã¼zerinde Testcontainers ile Ã§alÄ±ÅŸÄ±r; Docker eriÅŸimi gerekir.
-Kapsam: cari bakiye/tutar hesaplarÄ±, durum geÃ§iÅŸleri, mÃ¼ÅŸteri-araÃ§-iÅŸ emri-tahsilat akÄ±ÅŸÄ±,
-mÃ¼kerrer borÃ§/plaka/tahsilat kontrolleri, rol yetkileri, panonun devir/bitiÅŸ davranÄ±ÅŸÄ±,
-plaka aramasÄ±, Flyway migration ve kÄ±sÄ±tlar, CSRF/form belirteci, tÃ¼m ana sayfalarÄ±n renderâ€™Ä±,
-PDF/Excel/CSV Ã§Ä±ktÄ±larÄ±, araÃ§ kabul/teslim ve randevu akÄ±ÅŸÄ±.
+Testler gerçek PostgreSQL 16 üzerinde Testcontainers ile çalışır; Docker erişimi gerekir.
+Kapsam: cari bakiye/tutar hesapları, durum geçişleri, müşteri-araç-iş emri-tahsilat akışı,
+mükerrer borç/plaka/tahsilat kontrolleri, rol yetkileri, panonun devir/bitiş davranışı,
+plaka araması, yaş filtreleri, Flyway migration ve kısıtlar, CSRF/form belirteci,
+tüm ana sayfaların render’ı, PDF/Excel/CSV çıktıları, araç kabul/teslim ve randevu akışı.
 
-Son Ã§alÄ±ÅŸtÄ±rma: **87 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
+Son çalıştırma: **89 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
 
 ### Yerel CI
 
 ```powershell
-# Testler + Docker imajÄ±
+# Testler + Docker imajı
 powershell -ExecutionPolicy Bypass -File .\scripts\ci-local.ps1
 
-# Ä°steÄŸe baÄŸlÄ±: her push Ã¶ncesi otomatik Ã§alÄ±ÅŸsÄ±n
+# İsteğe bağlı: her push öncesi otomatik çalışsın
 powershell -ExecutionPolicy Bypass -File .\scripts\install-ci-hook.ps1
 ```
 
-- Docker Desktop aÃ§Ä±k olmalÄ±dÄ±r.
+- Docker Desktop açık olmalıdır.
 - Log: `logs/ci-local.log`.
-- Pre-push hook, test veya Docker build baÅŸarÄ±sÄ±zsa pushâ€™u durdurur.
-- KaldÄ±rmak iÃ§in `.git/hooks/pre-push` dosyasÄ±nÄ± silin.
+- Pre-push hook, test veya Docker build başarısızsa push’u durdurur.
+- Kaldırmak için `.git/hooks/pre-push` dosyasını silin.
 
-## Proje YapÄ±sÄ±
+## Proje Yapısı
 
 ```text
 src/main/java/tr/com/servisdefteri/
-  account/      cari hareketler, bakiye, ters kayÄ±t
+  account/      cari hareketler, bakiye, ters kayıt
   appointment/  randevular
-  audit/        denetim kaydÄ±
+  audit/        denetim kaydı
   backup/       pg_dump yedekleme
-  common/       ortak hata, doÄŸrulama, CSV, format
-  config/       gÃ¼venlik, web, ilk iÅŸletme sahibi
-  customer/     mÃ¼ÅŸteri modÃ¼lÃ¼
+  common/       ortak hata, doğrulama, CSV, format
+  config/       güvenlik, web, ilk işletme sahibi
+  customer/     müşteri modülü
   dashboard/    ana panel
-  payment/      tahsilat ve daÄŸÄ±tÄ±m
+  payment/      tahsilat ve dağıtım
   report/       raporlar ve CSV
   search/       global arama
-  security/     kullanÄ±cÄ±, rol, oturum, tek seferlik kurulum
-  settings/     ayarlar, marka ve audit ekranÄ±
-  update/       GitHub sÃ¼rÃ¼m kontrolÃ¼ ve host ajanÄ± isteÄŸi
-  vehicle/      araÃ§ modÃ¼lÃ¼
-  workorder/    iÅŸ emri, kalem ve belgeler
+  security/     kullanıcı, rol, oturum, tek seferlik kurulum
+  settings/     ayarlar, marka ve audit ekranı
+  update/       GitHub sürüm kontrolü ve host ajanı isteği
+  vehicle/      araç modülü
+  workorder/    iş emri, kalem ve belgeler
 src/main/resources/
-  db/migration/ Flyway migration dosyalarÄ±
-  templates/    Thymeleaf ÅŸablonlarÄ±
-  static/       CSS, JavaScript ve varsayÄ±lan logo
-scripts/        baÅŸlatma, yedek tatbikatÄ±, CI, gÃ¼ncelleme ajanÄ±
-updates/        uygulama â†” host ajanÄ± Ã§alÄ±ÅŸma dosyalarÄ±
-docs/           mimari, veritabanÄ±, kurulum, yedekleme, kullanÄ±m
+  db/migration/ Flyway migration dosyaları
+  templates/    Thymeleaf şablonları
+  static/       CSS, JavaScript ve varsayılan logo
+scripts/        başlatma, yedek tatbikatı, CI, güncelleme ajanı
+updates/        uygulama ↔ host ajanı çalışma dosyaları
+docs/           mimari, veritabanı, kurulum, yedekleme, kullanım
 ```
 
-## DokÃ¼mantasyon
+## Dokümantasyon
 
 - [Mimari](docs/ARCHITECTURE.md)
-- [VeritabanÄ±](docs/DATABASE.md)
+- [Veritabanı](docs/DATABASE.md)
 - [Kurulum](docs/INSTALLATION.md)
-- [Yedekleme ve Geri YÃ¼kleme](docs/BACKUP-RESTORE.md)
-- [KullanÄ±cÄ± Rehberi](docs/USER-GUIDE.md)
+- [Yedekleme ve Geri Yükleme](docs/BACKUP-RESTORE.md)
+- [Kullanıcı Rehberi](docs/USER-GUIDE.md)
 - [Case Study](docs/CASE-STUDY.md)
 - [Demo Video Senaryosu](docs/DEMO-VIDEO-SCRIPT.md)
 
-## GÃ¼venlik ve Yerel AÄŸ NotlarÄ±
+## Güvenlik ve Yerel Ağ Notları
 
-- Uygulama yerel aÄŸ iÃ§indir; internete aÃ§mayÄ±n, modemde port yÃ¶nlendirmeyin.
-- Tablet/telefon aynÄ± Wi-Fiâ€™den `http://<sunucu-ip>:18080` ile baÄŸlanÄ±r.
-- Windows GÃ¼venlik DuvarÄ±â€™nda yalnÄ±zca **Ã¶zel aÄŸ** profiline izin verin.
-- Yerel aÄŸda HTTPS yoktur; gÃ¼venilir ve parola korumalÄ± bir Wi-Fi kullanÄ±n.
-- TÃ¼m yetki kontrolleri sunucu tarafÄ±ndadÄ±r; menÃ¼/buton gizleme tek baÅŸÄ±na gÃ¼venlik sayÄ±lmaz.
-- CSRF aÃ§Ä±ktÄ±r; formlar POST/Redirect/GET dÃ¼zenindedir.
-- Finansal iptaller PATRON/MUHASEBE ile sÄ±nÄ±rlÄ±dÄ±r; iÅŸ emri durum geÃ§iÅŸleri PATRON/SERVIS yetkisindedir.
-- Parola, oturum belirteci ve gereksiz kiÅŸisel veri loglanmaz.
-- Ãœretimde `spring.jpa.hibernate.ddl-auto=validate`; ÅŸema yalnÄ±zca Flyway ile deÄŸiÅŸir.
-- Yedek dosyalarÄ± web kÃ¶kÃ¼nde deÄŸildir; indirme yalnÄ±zca PATRON oturumuyla yapÄ±lÄ±r.
+- Uygulama yerel ağ içindir; internete açmayın, modemde port yönlendirmeyin.
+- Tablet/telefon aynı Wi-Fi’den `http://<sunucu-ip>:18080` ile bağlanır.
+- Windows Güvenlik Duvarı’nda yalnızca **özel ağ** profiline izin verin.
+- Yerel ağda HTTPS yoktur; güvenilir ve parola korumalı bir Wi-Fi kullanın.
+- Tüm yetki kontrolleri sunucu tarafındadır; menü/buton gizleme tek başına güvenlik sayılmaz.
+- CSRF açıktır; formlar POST/Redirect/GET düzenindedir.
+- Finansal iptaller PATRON/MUHASEBE ile sınırlıdır; iş emri durum geçişleri PATRON/SERVIS yetkisindedir.
+- Parola, oturum belirteci ve gereksiz kişisel veri loglanmaz.
+- Üretimde `spring.jpa.hibernate.ddl-auto=validate`; şema yalnızca Flyway ile değişir.
+- Yedek dosyaları web kökünde değildir; indirme yalnızca PATRON oturumuyla yapılır.
 
-## Lisans / KullanÄ±m
+## Lisans / Kullanım
 
-Bu proje Toyota Plaza Ã–ztoprak iÃ§in yerel iÅŸletme kullanÄ±mÄ± amacÄ±yla geliÅŸtirilmiÅŸtir.
-GerÃ§ek mÃ¼ÅŸteri verileriyle kullanmadan Ã¶nce kendi yedekleme ve eriÅŸim politikanÄ±zÄ± uygulayÄ±n.
+Bu proje Toyota Plaza Öztoprak için yerel işletme kullanımı amacıyla geliştirilmiştir.
+Gerçek müşteri verileriyle kullanmadan önce kendi yedekleme ve erişim politikanızı uygulayın.
 
 ---
 
-<sub>powered by [RasimTuzluoÄŸlu](https://www.linkedin.com/in/rasimtuzluoglu311/)</sub>
+<sub>powered by [RasimTuzluoğlu](https://www.linkedin.com/in/rasimtuzluoglu311/)</sub>

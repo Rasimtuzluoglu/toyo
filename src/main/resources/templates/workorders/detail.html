@@ -57,8 +57,8 @@
                           th:text="${order.orderNo + ' · ' + order.vehicle.plate}">IS-0000 · 34ABC123</span>
                 </div>
                 <div class="quick-success-actions">
-                    <a class="btn btn-primary btn-sm" th:href="@{/work-orders/quick}">
-                        <i class="bi bi-lightning-charge me-1"></i> Yeni Hızlı İş
+                    <a class="btn btn-primary btn-sm" th:href="@{/work-orders/new}">
+                        <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
                     </a>
                     <a class="btn btn-outline-success btn-sm"
                        sec:authorize="hasAnyRole('PATRON','MUHASEBE')"

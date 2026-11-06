@@ -32,7 +32,6 @@ import tr.com.servisdefteri.security.Role;
 import tr.com.servisdefteri.security.User;
 import tr.com.servisdefteri.security.UserService;
 import tr.com.servisdefteri.settings.BusinessSettingsService;
-import tr.com.servisdefteri.vehicle.Vehicle;
 import tr.com.servisdefteri.vehicle.VehicleService;
 
 import java.time.Clock;
@@ -181,20 +180,67 @@ public class WorkOrderController {
 
     @GetMapping("/new")
     @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
-    public String createForm(@RequestParam(required = false) Long customerId,
-                             @RequestParam(required = false) Long vehicleId,
+    public String createForm(@RequestParam(required = false) Long vehicleId,
                              @RequestParam(required = false) String plate,
+                             @AuthenticationPrincipal AppUserPrincipal principal,
                              HttpSession session, Model model) {
-        WorkOrderForm form = new WorkOrderForm();
-        form.setCustomerId(customerId);
-        form.setVehicleId(vehicleId);
-        form.setOpenedAt(LocalDateTime.now(clock).withSecond(0).withNano(0));
-        model.addAttribute("workOrderForm", form);
-        addFormOptions(model, false);
-        addQuickStart(model, plate, form);
+        QuickWorkOrderForm quickForm = new QuickWorkOrderForm();
+        if (plate != null && !plate.isBlank()) {
+            quickForm.setPlate(plate.trim());
+        } else if (vehicleId != null) {
+            quickForm.setPlate(vehicleService.findById(vehicleId).getPlate());
+        }
+        quickForm.setAssignedUserId(principal == null ? null : principal.getId());
+        return newOrderView(quickForm, session, model);
+    }
+
+    @PostMapping("/new")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String createNewOrder(@Valid @ModelAttribute("quickForm") QuickWorkOrderForm quickForm,
+                                 BindingResult bindingResult,
+                                 @RequestParam(name = "formToken", required = false) String formToken,
+                                 @AuthenticationPrincipal AppUserPrincipal principal,
+                                 HttpSession session,
+                                 Model model,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            formTokenService.consume(session, formToken);
+        } catch (BusinessRuleException ex) {
+            bindingResult.reject("form.token", ex.getMessage());
+        }
+        if (quickForm.getAssignedUserId() == null && principal != null) {
+            quickForm.setAssignedUserId(principal.getId());
+        }
+        if (quickForm.getComplaint() == null || quickForm.getComplaint().isBlank()) {
+            bindingResult.rejectValue("complaint", "complaint.required",
+                    "Müşterinin ne dediğini yazın.");
+        }
+        if (quickForm.getServiceDescription() == null || quickForm.getServiceDescription().isBlank()) {
+            bindingResult.rejectValue("serviceDescription", "service.required",
+                    "Yapılacak işi yazın veya hazır seçeneklerden birini seçin.");
+        }
+        if (bindingResult.hasErrors()) {
+            return newOrderView(quickForm, session, model);
+        }
+        try {
+            quickForm.setCompleteNow(false);
+            WorkOrder order = quickWorkOrderService.create(quickForm);
+            redirectAttributes.addFlashAttribute("successMessage", "İş emri açıldı.");
+            redirectAttributes.addFlashAttribute("quickCreated", true);
+            redirectAttributes.addFlashAttribute("quickCompleted", false);
+            return "redirect:/work-orders/" + order.getId();
+        } catch (BusinessRuleException ex) {
+            bindingResult.reject("quick.failed", ex.getMessage());
+            return newOrderView(quickForm, session, model);
+        }
+    }
+
+    private String newOrderView(QuickWorkOrderForm quickForm, HttpSession session, Model model) {
+        model.addAttribute("quickForm", quickForm);
+        model.addAttribute("users", userService.findAll().stream().filter(User::isEnabled).toList());
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "workorders");
-        return "workorders/form";
+        return "workorders/new";
     }
 
     @PostMapping("/quick")
@@ -564,24 +610,6 @@ public class WorkOrderController {
         model.addAttribute("vehicles", includeInactive ? vehicleService.allVehicles()
                 : vehicleService.activeVehicles());
         model.addAttribute("users", users);
-    }
-
-    private void addQuickStart(Model model, String plate, WorkOrderForm form) {
-        QuickWorkOrderForm quickForm = new QuickWorkOrderForm();
-        quickForm.setPlate(plate);
-        model.addAttribute("quickForm", quickForm);
-        if (plate == null || plate.isBlank()) {
-            return;
-        }
-        model.addAttribute("plateQuery", plate.trim());
-        Vehicle match = vehicleService.findByPlate(plate);
-        if (match != null) {
-            form.setCustomerId(match.getCustomer().getId());
-            form.setVehicleId(match.getId());
-            model.addAttribute("plateMatch", match);
-        } else {
-            model.addAttribute("plateNotFound", plate.trim());
-        }
     }
 
     private String quickFormView(QuickWorkOrderForm quickForm, String source,

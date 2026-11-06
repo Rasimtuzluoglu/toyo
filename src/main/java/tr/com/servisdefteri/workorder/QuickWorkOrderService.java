@@ -86,6 +86,8 @@ public class QuickWorkOrderService {
         orderForm.setMileage(form.getMileage() != null ? form.getMileage()
                 : (vehicle.getCurrentMileage() > 0 ? vehicle.getCurrentMileage() : null));
         orderForm.setComplaint(blankToNull(form.getComplaint()));
+        orderForm.setAssignedUserId(form.getAssignedUserId());
+        orderForm.setNotes(blankToNull(form.getNotes()));
         WorkOrder order = workOrderService.create(orderForm);
 
         String serviceDescription = blankToNull(form.getServiceDescription());

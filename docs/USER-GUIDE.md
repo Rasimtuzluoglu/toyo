@@ -103,38 +103,37 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 
 ## İş Emirleri
 
-### Plaka ile hızlı iş emri
+### Yeni iş emri (tek ekran)
 
 1. **İş Emirleri → Yeni İş Emri**
-2. Üstteki **Plaka ile hızlı başlat** alanına plakayı yazıp **Plakayı Ara** düğmesine basın.
-3. Plaka kayıtlıysa müşteri ve araç formda otomatik seçilir.
-4. Plaka kayıtlı değilse aynı ekranda müşteri adı, telefon, marka/model ve şikâyet girerek **Hızlı İş Emri Oluştur** deyin. Müşteri, araç ve iş emri tek adımda oluşur.
-5. Plaka daha önce açılmışsa mevcut müşteri ve araç yeniden kullanılır; mükerrer kayıt açılmaz.
+2. **Plaka** alanına plakayı yazın. Kayıtlı plakada müşteri ve araç kartı otomatik gelir.
+3. Plaka kayıtlı değilse **ad soyad** ve **telefon** alanları açılır; marka/model opsiyoneldir.
+4. **Müşteri ne dedi?** alanına şikâyeti yazın.
+5. **Yapılacak iş** alanına işlemi yazın veya hazır seçeneklerden birine basın.
+6. **Kim ilgileniyor?** alanından sorumlu kişiyi seçin (varsayılan: işlemi açan kullanıcı).
+7. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır.
+
+- **Fiş numarası**, **kilometre** ve **ekip notu** isteğe bağlıdır; **Gelişmiş alanlar** bölümündedir. Fiş numarası boş bırakılırsa otomatik üretilir.
+- “Tespit edilen arıza”, “yapılan işlemler” ve işçilik/parça kalemleri kayıttan sonra detay ekranında girilir.
+- “Yapılacak iş” iş emrine hizmet kalemi olarak eklenir; fiyatı detaydan güncellenir.
+- Plaka daha önce açılmışsa mevcut müşteri ve araç yeniden kullanılır; mükerrer kayıt açılmaz.
 
 ### Hızlı iş emri ve tek tık tamamlama
 
-**İş Emirleri → Hızlı İş Emri** ekranı, detaylı formu doldurmadan işi bitirmek içindir:
+**İş Emirleri → Hızlı İş** ekranı, işi hemen bitirmek içindir:
 
 1. Plakayı yazın. Kayıtlı plakada müşteri ve araç kartı otomatik gelir; yeni müşteri alanları gizlenir.
 2. Yeni plakada ad soyad ve telefon alanları açılır; bu iki alan zorunludur.
 3. Hazır işlem düğmelerinden birini seçin veya yapılan işlemi yazın; tutarı girin.
 4. **Kaydet** veya **Kaydet ve Tamamla** deyin.
 
-İş emri numarası varsayılan olarak otomatik üretilir. Kendi numaranızı kullanacaksanız **Gelişmiş: iş emri numarası** bölümünü açın.
+Fiş numarası varsayılan olarak otomatik üretilir. Kendi numaranızı kullanacaksanız **Gelişmiş: iş emri numarası** bölümünü açın.
 
-**Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Kayıt sonrası ekranda **Tahsilat Al**, **Teslim Tutanağı**, **Yeni Hızlı İş** ve **Yazdır** düğmeleri görünür.
+**Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Kayıt sonrası ekranda **Tahsilat Al**, **Teslim Tutanağı**, **Yeni İş Emri** ve **Yazdır** düğmeleri görünür.
 
 ### Manuel iş emri numarası
 
-Detaylı iş emri formunda **İş emri no** alanı manuel doldurulabilir. Boş bırakılırsa sistem otomatik numara üretir. Aynı numara ikinci kez kullanılamaz. Borçlandırılmış iş emrinin numarası değiştirilemez.
-
-### Yeni iş emri
-
-1. **İş Emirleri → Yeni İş Emri**
-2. Müşteri seçin; araç listesi müşteriye göre filtrelenir.
-3. Açılış tarihi, şikâyet, tespit, yapılan işlemler, kilometre ve iç notu girin.
-4. Kaydedin.
-5. Detay ekranından işçilik/parça kalemlerini ekleyin.
+Yeni iş emrinde **Gelişmiş alanlar → Fiş numarası** manuel doldurulabilir. Boş bırakılırsa sistem otomatik numara üretir. Aynı numara ikinci kez kullanılamaz. Borçlandırılmış iş emrinin numarası değiştirilemez.
 
 > Müşteri ile aracın sahibi aynı olmalıdır. Farklı müşterinin aracıyla iş emri açılamaz.
 
