@@ -21,27 +21,35 @@ Yetkiler sunucuda kontrol edilir. Menüde görünmeyen bir adrese doğrudan gidi
 
 Sağ üstteki kullanıcı menüsü → **Parola Değiştir**. Mevcut parola, yeni parola ve tekrarı girilir. Yeni parola en az 10 karakter olmalı; büyük harf, küçük harf ve rakam içermelidir.
 
-## Ana Panel
+## Rol Bazlı Giriş
 
-- Aktif müşteri ve araç sayıları
-- Açık ve işlemde olan iş emri sayıları
-- PATRON/MUHASEBE için: kalan net alacak, bugünkü tahsilat, borçlu müşteriler, son cari işlemler
-- Devam eden işler ve **bugün tamamlanan/teslim edilen işler** tabloları
-- Günlük iş panosuna ve hızlı işlem bağlantılarına erişim
+Uygulama açıldığında rolünüze göre sade bir ekran gelir:
 
-SERVIS rolünde finansal kartlar gösterilmez.
+- **PATRON:** İşletme kokpiti (operasyon + finans).
+- **MUHASEBE:** **Finans** özeti — bugünkü tahsilat, kalan alacak, borçlu müşteri, açık borçlar ve son tahsilatlar. Kanban, randevu ve bakım kartları bu ekranda gösterilmez.
+- **SERVIS:** doğrudan **Bugün** panosuna düşer; finansal kart ve menüler görünmez.
 
-## Günlük İşler
+Sol menü role göre kısalır:
 
-**Günlük İşler** ekranı, servisin her sabah bakacağı tek listedir.
+- **SERVIS:** Bugün, Randevular, Müşteriler, Araçlar, İşler
+- **MUHASEBE:** Özet, İş Emirleri, Cari Hesaplar, Tahsilatlar, Raporlar
+- **PATRON:** tüm modüller
+
+Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla geçilir. Sunum turu ve hızlı komut, sağ üstteki kullanıcı menüsündedir.
+
+## Günlük İşler / Bugün
+
+**Günlük İşler** ekranı, servisin her sabah bakacağı tek listedir. SERVIS rolünde ekranın adı **Bugün** olur.
 
 - **Devam eden işler:** `Bekliyor` ve `İşlemde` durumundaki tüm işler her gün otomatik olarak listelenir. İşin kaç gündür açık olduğu (“Bugün açıldı”, “Dünden devir”, “3 günden beri açık”) gösterilir.
 - **Bugün biten işler:** `Tamamlandı` veya `Teslim Edildi` durumuna bugün geçen işler görünür. Ertesi gün bu listenin dışında kalır.
 - Bitmemiş iş ertesi gün de listede görünmeye devam eder; iş kapanana kadar devreder.
 - İş tamamlandığında veya teslim edildiğinde “bitti” sayılır; iki durum da ertesi gün panodan kalkar.
+- Üstteki üç sayaç **Bekleyen / İşlemde / Teslimata hazır** durumunu gösterir; tıklayınca ilgili kolona gidilir.
 - Satırdaki **İşleme Al / Tamamla / Teslim Et** düğmeleriyle detaya girmeden durum ilerletilebilir.
 - Kartlar sürüklenerek de bir sonraki aşamaya taşınabilir; tablette düğmeler kullanılabilir.
 - Üstteki arama alanıyla **plaka, müşteri adı veya iş emri numarası** ile pano filtrelenir.
+- Yaş filtresi (**Tümü / Bugün / Dünden / 2+ gün**) tek **Filtre** menüsündedir.
 - Telefonda pano **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmelerine ayrılır; aynı anda tek sütun görünür.
 - Tablet ve masaüstünde tüm sütunlar birlikte görünür.
 
@@ -243,7 +251,7 @@ Bakiye = Borç toplamı − Alacak toplamı
 1. **Tahsilatlar → Yeni Tahsilat**
 2. Müşteri seçin → **Açık Borçları Getir**
 3. Tarih, tutar, ödeme yöntemi (Nakit/Banka/Kart), açıklama girin.
-4. **Tek açık borç varsa tutar ve dağıtım otomatik doldurulur**; kontrol edip doğrudan kaydedebilirsiniz. Birden fazla borçta dağıtım satırlarını doldurun veya **Kalanı Dağıt** / **Tüm Açık Borcu Getir** düğmelerini kullanın.
+4. **Tek açık borç varsa tutar ve dağıtım otomatik doldurulur**; dağıtım tablosu gizlenir, yerine tek satırlık borç özeti gelir. Kontrol edip doğrudan kaydedebilirsiniz. Birden fazla borçta dağıtım tablosu görünür; satırları doldurun veya **Kalanı Dağıt** / **Tüm Açık Borcu Getir** düğmelerini kullanın.
 5. Ekranın altındaki özet, dağıtılan tutarı ve varsa avans olarak kalacak tutarı gösterir.
 6. Kaydedin.
 

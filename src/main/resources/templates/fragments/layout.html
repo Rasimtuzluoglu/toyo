@@ -34,25 +34,32 @@
 
     <nav class="sd-nav">
         <div class="sd-nav-label">İşletme</div>
-        <a class="sd-nav-link" th:classappend="${active == 'dashboard'} ? ' active'" th:href="@{/}">
-            <i class="bi bi-grid-1x2" aria-hidden="true"></i> Ana Panel
+        <a class="sd-nav-link" th:classappend="${active == 'dashboard'} ? ' active'" th:href="@{/}"
+           sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+            <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+            <span th:text="${currentUser != null and currentUser.role.name() == 'MUHASEBE' ? 'Özet' : 'Ana Panel'}">Ana Panel</span>
         </a>
         <a class="sd-nav-link" th:classappend="${active == 'board'} ? ' active'"
-           th:href="@{/work-orders/board}" data-shortcut-board aria-keyshortcuts="Alt+B">
-            <i class="bi bi-calendar2-check" aria-hidden="true"></i> Günlük İşler
+           th:href="@{/work-orders/board}" data-shortcut-board aria-keyshortcuts="Alt+B"
+           sec:authorize="hasAnyRole('PATRON','SERVIS')">
+            <i class="bi bi-calendar2-check" aria-hidden="true"></i>
+            <span th:text="${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'Bugün' : 'Günlük İşler'}">Günlük İşler</span>
         </a>
         <a class="sd-nav-link" th:classappend="${active == 'appointments'} ? ' active'"
-           th:href="@{/appointments}">
+           th:href="@{/appointments}" sec:authorize="hasAnyRole('PATRON','SERVIS')">
             <i class="bi bi-calendar3" aria-hidden="true"></i> Randevular
         </a>
-        <a class="sd-nav-link" th:classappend="${active == 'customers'} ? ' active'" th:href="@{/customers}">
+        <a class="sd-nav-link" th:classappend="${active == 'customers'} ? ' active'" th:href="@{/customers}"
+           sec:authorize="hasAnyRole('PATRON','SERVIS')">
             <i class="bi bi-people" aria-hidden="true"></i> Müşteriler
         </a>
-        <a class="sd-nav-link" th:classappend="${active == 'vehicles'} ? ' active'" th:href="@{/vehicles}">
+        <a class="sd-nav-link" th:classappend="${active == 'vehicles'} ? ' active'" th:href="@{/vehicles}"
+           sec:authorize="hasAnyRole('PATRON','SERVIS')">
             <i class="bi bi-car-front" aria-hidden="true"></i> Araçlar
         </a>
         <a class="sd-nav-link" th:classappend="${active == 'workorders'} ? ' active'" th:href="@{/work-orders}">
-            <i class="bi bi-clipboard-check" aria-hidden="true"></i> İş Emirleri
+            <i class="bi bi-clipboard-check" aria-hidden="true"></i>
+            <span th:text="${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'İşler' : 'İş Emirleri'}">İş Emirleri</span>
         </a>
 
         <div class="sd-nav-label" sec:authorize="hasAnyRole('PATRON','MUHASEBE')">Finans</div>
@@ -97,18 +104,14 @@
                aria-label="Genel arama" minlength="2">
     </form>
     <div class="sd-topbar-actions">
-        <button class="btn btn-outline-secondary btn-sm d-none d-md-inline-flex" type="button"
-                data-command-open aria-label="Hızlı komut" title="Hızlı komut (Ctrl+K)">
-            <i class="bi bi-command" aria-hidden="true"></i>
-        </button>
-        <button class="btn btn-outline-secondary btn-sm d-none d-md-inline-flex" type="button"
-                data-tour-start aria-label="Sunum turunu başlat" title="Sunum turu">
-            <i class="bi bi-play-circle" aria-hidden="true"></i>
-        </button>
         <a class="btn btn-primary btn-sm d-none d-sm-inline-flex" th:href="@{/work-orders/new}"
            sec:authorize="hasAnyRole('PATRON','SERVIS')"
            data-shortcut-new-order aria-keyshortcuts="Alt+N">
             <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Yeni İş Emri
+        </a>
+        <a class="btn btn-primary btn-sm d-none d-sm-inline-flex" th:href="@{/payments/new}"
+           sec:authorize="hasRole('MUHASEBE')">
+            <i class="bi bi-cash-coin me-1" aria-hidden="true"></i> Tahsilat Al
         </a>
         <div class="dropdown">
             <button class="sd-user dropdown-toggle" type="button" data-bs-toggle="dropdown"
@@ -123,6 +126,17 @@
             <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                 <li><span class="dropdown-item-text small text-muted"
                           th:text="${currentUser == null ? '' : '@' + currentUser.username}">@kullanici</span></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <button class="dropdown-item" type="button" data-command-open data-bs-dismiss="dropdown">
+                        <i class="bi bi-command me-2"></i>Hızlı komut
+                    </button>
+                </li>
+                <li sec:authorize="hasRole('PATRON')">
+                    <button class="dropdown-item" type="button" data-tour-start data-bs-dismiss="dropdown">
+                        <i class="bi bi-play-circle me-2"></i>Sunum turu
+                    </button>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item" th:href="@{/profile/password}">
@@ -207,6 +221,46 @@
 </span>
 
 <div th:fragment="scripts">
+    <nav class="sd-mobile-nav" data-mobile-nav aria-label="Mobil ana menü"
+         sec:authorize="isAuthenticated()">
+        <th:block sec:authorize="hasAnyRole('PATRON','SERVIS')">
+            <a th:href="@{/}"
+               th:attr="data-mobile-board-home=${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'true' : null}">
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+                <span th:text="${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'Bugün' : 'Panel'}">Panel</span>
+            </a>
+            <a th:href="${currentUser != null and currentUser.role.name() == 'SERVIS' ? '/work-orders' : '/work-orders/board'}">
+                <i class="bi bi-calendar2-check" aria-hidden="true"></i>
+                <span th:text="${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'İşler' : 'Pano'}">Pano</span>
+            </a>
+            <a class="mobile-nav-primary" th:href="@{/work-orders/new}" aria-label="Yeni iş emri">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            </a>
+            <a th:href="@{/customers}">
+                <i class="bi bi-people" aria-hidden="true"></i><span>Müşteriler</span>
+            </a>
+            <a th:href="@{/vehicles}">
+                <i class="bi bi-car-front" aria-hidden="true"></i><span>Araçlar</span>
+            </a>
+        </th:block>
+        <th:block sec:authorize="hasRole('MUHASEBE')">
+            <a th:href="@{/}">
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Finans</span>
+            </a>
+            <a th:href="@{/accounts}">
+                <i class="bi bi-journal-text" aria-hidden="true"></i><span>Cari</span>
+            </a>
+            <a class="mobile-nav-primary" th:href="@{/payments/new}" aria-label="Tahsilat al">
+                <i class="bi bi-cash-coin" aria-hidden="true"></i>
+            </a>
+            <a th:href="@{/reports}">
+                <i class="bi bi-graph-up-arrow" aria-hidden="true"></i><span>Raporlar</span>
+            </a>
+            <a th:href="@{/work-orders}">
+                <i class="bi bi-clipboard-check" aria-hidden="true"></i><span>İşler</span>
+            </a>
+        </th:block>
+    </nav>
     <div class="sd-sidebar-overlay" data-sidebar-overlay></div>
     <div id="commandPalette" class="command-palette" hidden>
         <div class="command-backdrop" data-command-close></div>
@@ -217,23 +271,33 @@
                        placeholder="Sayfa veya işlem ara… (ör. yeni iş emri)">
             </div>
             <div class="command-results" id="commandResults">
-                <a class="command-item" data-command-item data-keywords="ana panel dashboard kokpit" th:href="@{/}">
-                    <i class="bi bi-grid-1x2"></i><span>Ana Panel</span><kbd>G</kbd>
+                <a class="command-item" data-command-item data-keywords="ana panel finans dashboard kokpit" th:href="@{/}"
+                   sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span th:text="${currentUser != null and currentUser.role.name() == 'MUHASEBE' ? 'Özet' : 'Ana Panel'}">Ana Panel</span>
+                    <kbd>G</kbd>
                 </a>
-                <a class="command-item" data-command-item data-keywords="günlük işler pano kanban board" th:href="@{/work-orders/board}">
-                    <i class="bi bi-calendar2-check"></i><span>Günlük İşler</span><kbd>B</kbd>
+                <a class="command-item" data-command-item data-keywords="günlük işler bugün pano kanban board" th:href="@{/work-orders/board}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                    <i class="bi bi-calendar2-check"></i>
+                    <span th:text="${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'Bugün' : 'Günlük İşler'}">Günlük İşler</span>
+                    <kbd>B</kbd>
                 </a>
-                <a class="command-item" data-command-item data-keywords="randevu takvim appointment" th:href="@{/appointments}">
+                <a class="command-item" data-command-item data-keywords="randevu takvim appointment" th:href="@{/appointments}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
                     <i class="bi bi-calendar3"></i><span>Randevular</span>
                 </a>
-                <a class="command-item" data-command-item data-keywords="müşteri customer" th:href="@{/customers}">
+                <a class="command-item" data-command-item data-keywords="müşteri customer" th:href="@{/customers}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
                     <i class="bi bi-people"></i><span>Müşteriler</span>
                 </a>
-                <a class="command-item" data-command-item data-keywords="araç vehicle" th:href="@{/vehicles}">
+                <a class="command-item" data-command-item data-keywords="araç vehicle" th:href="@{/vehicles}"
+                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
                     <i class="bi bi-car-front"></i><span>Araçlar</span>
                 </a>
                 <a class="command-item" data-command-item data-keywords="iş emri work order" th:href="@{/work-orders}">
-                    <i class="bi bi-clipboard-check"></i><span>İş Emirleri</span>
+                    <i class="bi bi-clipboard-check"></i>
+                    <span th:text="${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'İşler' : 'İş Emirleri'}">İş Emirleri</span>
                 </a>
                 <a class="command-item" data-command-item data-keywords="cari hesap ekstre" th:href="@{/accounts}"
                    sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
@@ -271,7 +335,8 @@
                    sec:authorize="hasAnyRole('PATRON','SERVIS')">
                     <i class="bi bi-calendar-plus"></i><span>Yeni randevu</span>
                 </a>
-                <button type="button" class="command-item" data-command-item data-command-tour>
+                <button type="button" class="command-item" data-command-item data-command-tour
+                        sec:authorize="hasRole('PATRON')">
                     <i class="bi bi-play-circle"></i><span>Sunum turunu başlat</span>
                 </button>
                 <div class="command-empty" id="commandEmpty" hidden>Sonuç bulunamadı.</div>

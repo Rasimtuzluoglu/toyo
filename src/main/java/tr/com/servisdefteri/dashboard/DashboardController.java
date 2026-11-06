@@ -25,6 +25,9 @@ public class DashboardController {
                 || principal.getRole() == Role.MUHASEBE;
         model.addAttribute("view", dashboardService.load(financial));
         model.addAttribute("activeMenu", "dashboard");
+        if (principal.getRole() == Role.MUHASEBE) {
+            return "dashboard/finance";
+        }
         return "dashboard/index";
     }
 }

@@ -123,26 +123,38 @@
                                     <div class="action-row justify-content-end">
                                         <a class="btn btn-outline-secondary btn-sm"
                                            th:href="@{/customers/{id}(id=${customer.id})}">Detay</a>
-                                        <a class="btn btn-outline-secondary btn-sm"
-                                           sec:authorize="hasAnyRole('PATRON','SERVIS')"
-                                           th:href="@{/customers/{id}/edit(id=${customer.id})}">Düzenle</a>
-                                        <form sec:authorize="hasRole('PATRON')" th:if="${customer.active}"
-                                              th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
-                                              data-submit-once class="d-inline"
-                                              data-confirm="Müşteri pasife alınsın mı? Geçmiş kayıtlar korunur; müşteri ve araçları pasife alınır.">
-                                            <button class="btn btn-outline-danger btn-sm" type="submit"
-                                                    title="Müşteriyi pasife al" aria-label="Müşteriyi pasife al">
-                                                <i class="bi bi-archive" aria-hidden="true"></i>
+                                        <div class="dropdown" sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                                            <button class="btn btn-outline-secondary btn-sm btn-icon" type="button"
+                                                    data-bs-toggle="dropdown" aria-expanded="false"
+                                                    aria-label="Diğer işlemler">
+                                                <i class="bi bi-three-dots" aria-hidden="true"></i>
                                             </button>
-                                        </form>
-                                        <form sec:authorize="hasRole('PATRON')" th:if="${!customer.active}"
-                                              th:action="@{/customers/{id}/activate(id=${customer.id})}" method="post"
-                                              data-submit-once class="d-inline">
-                                            <button class="btn btn-outline-success btn-sm" type="submit"
-                                                    title="Müşteriyi geri al" aria-label="Müşteriyi geri al">
-                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-                                            </button>
-                                        </form>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                                                    <a class="dropdown-item"
+                                                       th:href="@{/customers/{id}/edit(id=${customer.id})}">
+                                                        <i class="bi bi-pencil me-2"></i>Düzenle
+                                                    </a>
+                                                </li>
+                                                <li sec:authorize="hasRole('PATRON')" th:if="${customer.active}">
+                                                    <form th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
+                                                          data-submit-once
+                                                          data-confirm="Müşteri pasife alınsın mı? Geçmiş kayıtlar korunur; müşteri ve araçları pasife alınır.">
+                                                        <button class="dropdown-item text-danger" type="submit">
+                                                            <i class="bi bi-archive me-2"></i>Pasife Al
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li sec:authorize="hasRole('PATRON')" th:if="${!customer.active}">
+                                                    <form th:action="@{/customers/{id}/activate(id=${customer.id})}" method="post"
+                                                          data-submit-once>
+                                                        <button class="dropdown-item text-success" type="submit">
+                                                            <i class="bi bi-arrow-counterclockwise me-2"></i>Geri Al
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

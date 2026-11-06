@@ -104,7 +104,21 @@
                             </div>
                         </div>
 
-                        <div class="sd-card">
+                        <div class="single-debt-note" th:if="${allocationViews.size() == 1}">
+                            <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                            <div>
+                                <strong>Tek açık borç otomatik dağıtılacak</strong>
+                                <span th:text="${allocationViews[0].debt.description + ' · Kalan ' + fmt.money(allocationViews[0].debt.remaining)}">Borç</span>
+                            </div>
+                            <input type="hidden" name="allocations[0].transactionId"
+                                   th:value="${allocationViews[0].debt.id}">
+                            <input type="hidden" name="allocations[0].amount"
+                                   th:value="${allocationViews[0].debt.remaining.toPlainString()}"
+                                   data-single-debt-allocation
+                                   th:attr="data-single-debt-remaining=${allocationViews[0].debt.remaining.toPlainString()}">
+                        </div>
+
+                        <div class="sd-card" th:if="${allocationViews.size() > 1}">
                             <div class="sd-card-header flex-wrap gap-2">
                                 <h2>3. Borç dağıtımı</h2>
                                 <div class="d-flex align-items-center gap-2">
@@ -167,6 +181,14 @@
                             </div>
                         </div>
 
+                        <div class="sd-card" th:if="${allocationViews.isEmpty()}">
+                            <div class="empty-state">
+                                <i class="bi bi-check2-circle"></i>
+                                <strong>Açık borç yok</strong>
+                                Tahsilat avans/alacak olarak cari hesaba işlenecek.
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-end gap-2">
                             <a class="btn btn-outline-secondary"
                                th:href="@{/payments/new(customerId=${paymentForm.customerId})}">Sıfırla</a>
@@ -175,20 +197,13 @@
                                 <i class="bi bi-check2 me-1"></i> Tahsilatı Kaydet
                             </button>
                         </div>
+                        <p class="record-meta mt-2 mb-0 text-end" th:if="${allocationViews.size() > 1}">
+                            Dağıtılmayan tutar varsa avans olarak cariye işlenir.
+                        </p>
                     </form>
                 </div>
 
                 <div class="col-xl-4">
-                    <div class="sd-card">
-                        <div class="sd-card-header">
-                            <h2><i class="bi bi-info-circle me-2"></i>Açıklama</h2>
-                        </div>
-                        <div class="sd-card-body">
-                            <p class="mb-2">Tahsilat kaydedildiğinde cari hesaba <strong>alacak</strong> hareketi işlenir.</p>
-                            <p class="mb-2">Borç dağıtımı, seçilen borç hareketlerinin kalan tutarını azaltır.</p>
-                            <p class="mb-0 text-muted-soft">Aynı formun tekrar gönderilmesi tek kullanımlık form belirteciyle engellenir.</p>
-                        </div>
-                    </div>
                     <div class="sd-card" th:if="${selectedCustomer != null}">
                         <div class="sd-card-header">
                             <h2>Müşteri özeti</h2>

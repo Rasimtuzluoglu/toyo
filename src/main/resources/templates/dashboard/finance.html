@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Finans')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('dashboard')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Finans</div>
+                    <h1 class="page-title">Finans</h1>
+                    <p class="page-subtitle">
+                        <span th:text="${fmt.date(view.today)}">01.01.2026</span>
+                        · Tahsilat ve cari özet
+                    </p>
+                </div>
+            </div>
+
+            <div class="stat-grid dashboard-kpis">
+                <div class="stat-card kpi-primary">
+                    <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(view.todayCollections)}">0,00 ₺</div>
+                    <div class="stat-label">Bugünkü tahsilat</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-wallet2"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(view.netReceivable)}">0,00 ₺</div>
+                    <div class="stat-label">Kalan net alacak</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-person-exclamation"></i></span>
+                    <div class="stat-value" th:text="${view.debtorCount}">0</div>
+                    <div class="stat-label">Borçlu müşteri</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-wallet2 me-2 text-danger"></i>Açık borçlar</h2>
+                            <a class="link-quiet" th:href="@{/accounts}">Tümünü gör</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!view.topDebtors.isEmpty()}">
+                            <div class="today-list">
+                                <div class="today-item" th:each="row : ${view.topDebtors}">
+                                    <a class="today-main" th:href="@{/accounts/customer/{id}(id=${row.customerId})}">
+                                        <strong th:text="${row.name}">Müşteri</strong>
+                                        <span th:text="${row.phone}">Telefon</span>
+                                    </a>
+                                    <span class="money money-debt" th:text="${fmt.money(row.balance)}">0,00 ₺</span>
+                                    <a class="btn btn-outline-secondary btn-sm"
+                                       th:href="@{/payments/new(customerId=${row.customerId})}">Tahsilat</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${view.topDebtors.isEmpty()}">
+                            <i class="bi bi-emoji-smile"></i>
+                            <strong>Açık borç yok</strong>
+                            Tüm cari hesaplar dengede görünüyor.
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card h-100">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-clock-history me-2"></i>Son tahsilatlar</h2>
+                            <a class="link-quiet" th:href="@{/payments}">Tümünü gör</a>
+                        </div>
+                        <div class="sd-card-body p-0" th:if="${!view.recentPayments.isEmpty()}">
+                            <div class="today-list">
+                                <div class="today-item" th:each="tx : ${view.recentPayments}">
+                                    <div class="today-main">
+                                        <strong th:text="${tx.customer.name}">Müşteri</strong>
+                                        <span th:text="${tx.description}">Açıklama</span>
+                                    </div>
+                                    <span class="money money-credit" th:text="${'−' + fmt.money(tx.amount)}">0,00 ₺</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="empty-state" th:if="${view.recentPayments.isEmpty()}">
+                            <i class="bi bi-journal"></i>
+                            <strong>Tahsilat kaydı yok</strong>
+                            Yeni tahsilatlar burada listelenir.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

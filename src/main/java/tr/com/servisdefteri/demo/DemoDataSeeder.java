@@ -89,11 +89,13 @@ public class DemoDataSeeder implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        User patron = demoUser();
+        demoRoleUser("servis", "Demo Servis", Role.SERVIS, "ServisPass1234");
+        demoRoleUser("muhasebe", "Demo Muhasebe", Role.MUHASEBE, "MuhasebePass1234");
         if (customerRepository.count() > 0) {
             log.info("Demo verisi atlandı: veritabanında zaten müşteri kaydı var.");
             return;
         }
-        User patron = demoUser();
         var authentication = new UsernamePasswordAuthenticationToken(
                 AppUserPrincipal.from(patron), patron.getPasswordHash(),
                 AppUserPrincipal.from(patron).getAuthorities());
@@ -207,12 +209,16 @@ public class DemoDataSeeder implements ApplicationRunner {
     }
 
     private User demoUser() {
-        User user = userRepository.findByUsernameIgnoreCase("demo").orElseGet(User::new);
-        user.setUsername("demo");
-        user.setFullName("Demo İşletme Sahibi");
-        user.setRole(Role.PATRON);
+        return demoRoleUser("demo", "Demo İşletme Sahibi", Role.PATRON, "DemoPass1234");
+    }
+
+    private User demoRoleUser(String username, String fullName, Role role, String password) {
+        User user = userRepository.findByUsernameIgnoreCase(username).orElseGet(User::new);
+        user.setUsername(username);
+        user.setFullName(fullName);
+        user.setRole(role);
         user.setEnabled(true);
-        user.setPasswordHash(passwordEncoder.encode("DemoPass1234"));
+        user.setPasswordHash(passwordEncoder.encode(password));
         if (user.getCreatedAt() == null) {
             user.setCreatedAt(LocalDateTime.now(clock));
         }

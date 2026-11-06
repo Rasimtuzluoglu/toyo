@@ -288,6 +288,71 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void singleOpenDebtPaymentPageUsesCompactAllocationSummary() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Tek Borç Kompakt", "0555 302 30 30");
+        Vehicle vehicle = createVehicle(customer, "34 KMP 001");
+        createCompletedOrder(customer, vehicle, "1200.00");
+
+        mockMvc.perform(get("/payments/new")
+                        .param("customerId", customer.getId().toString())
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tek açık borç")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Dağıtılacak"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("allocations[0].transactionId")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-single-debt-allocation")));
+    }
+
+    @Test
+    void muhasebeHomeIsFinanceFocusedAndSidebarStaysCompact() throws Exception {
+        User muhasebe = createUser("muhasebe", "Muhasebe Kullanıcısı", Role.MUHASEBE);
+        Customer customer = createCustomer("Finans Müşteri", "0555 300 30 30");
+        Vehicle vehicle = createVehicle(customer, "34 FNS 001");
+        createCompletedOrder(customer, vehicle, "900.00");
+
+        mockMvc.perform(get("/").with(user(principal(muhasebe))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Bugünkü tahsilat")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Açık borçlar")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tahsilat Al")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Bugünkü randevular"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("İş emri durumları"))));
+
+        mockMvc.perform(get("/payments").with(user(principal(muhasebe))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Günlük İşler"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString(">Randevular<"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("sd-mobile-nav")));
+    }
+
+    @Test
+    void servisBoardIsTodayFocusedWithoutFinanceLinks() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer customer = createCustomer("Servis Müşteri", "0555 301 30 30");
+        Vehicle vehicle = createVehicle(customer, "34 SVS 001");
+        createOpenOrder(customer, vehicle);
+
+        mockMvc.perform(get("/").with(user(principal(servis))))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/work-orders/board"));
+
+        mockMvc.perform(get("/work-orders/board").with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Bugün")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Cari Hesaplar"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Bugünkü tahsilat"))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("sd-mobile-nav")));
+    }
+
+    @Test
     void newWorkOrderPageIsSingleScreenAndOnlySaves() throws Exception {
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
 

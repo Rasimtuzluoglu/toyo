@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/layout :: head('Günlük İşler')}"></head>
+<head th:replace="~{fragments/layout :: head(${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'Bugün' : 'Günlük İşler'})}"></head>
 <body>
 <div class="sd-shell">
     <aside th:replace="~{fragments/layout :: sidebar('board')}"></aside>
@@ -13,13 +13,11 @@
             <div class="page-head">
                 <div>
                     <div class="page-eyebrow">Servis Operasyonu</div>
-                    <h1 class="page-title">Günlük İşler</h1>
-                    <p class="page-subtitle">
-                        Bitmemiş işler her gün burada görünmeye devam eder; tamamlanan veya teslim edilen işler
-                        ertesi gün listeden kalkar.
-                    </p>
+                    <h1 class="page-title"
+                        th:text="${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'Bugün' : 'Günlük İşler'}">Günlük İşler</h1>
+                    <p class="page-subtitle">Bugünün işleri; karttan durumu ilerletin.</p>
                 </div>
-                <div class="page-actions" sec:authorize="hasAnyRole('PATRON','SERVIS')">
+                <div class="page-actions d-none d-md-flex" sec:authorize="hasAnyRole('PATRON','SERVIS')">
                     <a class="btn btn-outline-secondary" th:href="@{/appointments}">
                         <i class="bi bi-calendar3 me-1"></i> Randevular
                     </a>
@@ -45,6 +43,23 @@
                            th:href="@{/work-orders/board(age=${age})}">Temizle</a>
                     </div>
                 </form>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-funnel me-1" aria-hidden="true"></i>
+                        <span th:text="${age == 'today' ? 'Bugün' : (age == 'yesterday' ? 'Dünden' : (age == 'old' ? '2+ gün' : 'Tümü'))}">Tümü</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:classappend="${age == null or age.isEmpty()} ? ' active'"
+                               th:href="@{/work-orders/board(q=${q})}">Tümü</a></li>
+                        <li><a class="dropdown-item" th:classappend="${age == 'today'} ? ' active'"
+                               th:href="@{/work-orders/board(q=${q}, age='today')}">Bugün</a></li>
+                        <li><a class="dropdown-item" th:classappend="${age == 'yesterday'} ? ' active'"
+                               th:href="@{/work-orders/board(q=${q}, age='yesterday')}">Dünden</a></li>
+                        <li><a class="dropdown-item" th:classappend="${age == 'old'} ? ' active'"
+                               th:href="@{/work-orders/board(q=${q}, age='old')}">2+ gün</a></li>
+                    </ul>
+                </div>
                 <button type="button" class="btn btn-outline-secondary btn-sm board-density"
                         data-kanban-density aria-pressed="true" title="Kompakt / normal kart görünümü">
                     <i class="bi bi-arrows-angle-contract me-1" aria-hidden="true"></i> Kompakt
@@ -71,34 +86,23 @@
                 </div>
             </div>
 
-            <div class="board-filters" role="group" aria-label="İş yaşı filtresi">
-                <a class="board-filter" th:classappend="${age == null or age.isEmpty()} ? ' is-active'"
-                   th:href="@{/work-orders/board(q=${q})}">Tümü</a>
-                <a class="board-filter" th:classappend="${age == 'today'} ? ' is-active'"
-                   th:href="@{/work-orders/board(q=${q}, age='today')}">Bugün</a>
-                <a class="board-filter" th:classappend="${age == 'yesterday'} ? ' is-active'"
-                   th:href="@{/work-orders/board(q=${q}, age='yesterday')}">Dünden</a>
-                <a class="board-filter" th:classappend="${age == 'old'} ? ' is-active'"
-                   th:href="@{/work-orders/board(q=${q}, age='old')}">2+ gün</a>
-            </div>
-
-            <div class="stat-grid">
-                <div class="stat-card">
-                    <span class="stat-icon amber"><i class="bi bi-hourglass-split"></i></span>
-                    <div class="stat-value" th:text="${openRows.size()}">0</div>
-                    <div class="stat-label">Devam eden iş</div>
-                    <div class="stat-hint">Bekleyen ve işlemdeki iş emirleri</div>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon green"><i class="bi bi-check2-circle"></i></span>
-                    <div class="stat-value" th:text="${finishedToday.size()}">0</div>
-                    <div class="stat-label">Bugün biten iş</div>
-                    <div class="stat-hint">Tamamlanan veya teslim edilen</div>
-                </div>
+            <div class="board-summary d-none d-md-flex" aria-label="İş özeti">
+                <a href="#board-bekliyor">
+                    <span class="status-dot dot-bekliyor" aria-hidden="true"></span>
+                    Bekleyen <strong th:text="${waitingRows.size()}">0</strong>
+                </a>
+                <a href="#board-islemde">
+                    <span class="status-dot dot-islemde" aria-hidden="true"></span>
+                    İşlemde <strong th:text="${inProgressRows.size()}">0</strong>
+                </a>
+                <a href="#board-tamamlandi">
+                    <span class="status-dot dot-tamamlandi" aria-hidden="true"></span>
+                    Teslimata hazır <strong th:text="${completedRows.size()}">0</strong>
+                </a>
             </div>
 
             <div class="kanban-board kanban-compact">
-                <section class="kanban-column" aria-label="Bekleyen işler" data-drop-status="BEKLIYOR">
+                <section class="kanban-column" id="board-bekliyor" aria-label="Bekleyen işler" data-drop-status="BEKLIYOR">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-bekliyor"></span>Bekliyor</h2>
                         <div class="kanban-header-actions">
@@ -117,7 +121,7 @@
                     </div>
                 </section>
 
-                <section class="kanban-column" aria-label="İşlemdeki işler" data-drop-status="ISLEMDE">
+                <section class="kanban-column" id="board-islemde" aria-label="İşlemdeki işler" data-drop-status="ISLEMDE">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-islemde"></span>İşlemde</h2>
                         <div class="kanban-header-actions">
@@ -136,7 +140,7 @@
                     </div>
                 </section>
 
-                <section class="kanban-column" aria-label="Bugün tamamlanan işler" data-drop-status="TAMAMLANDI">
+                <section class="kanban-column" id="board-tamamlandi" aria-label="Bugün tamamlanan işler" data-drop-status="TAMAMLANDI">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-tamamlandi"></span>Tamamlandı</h2>
                         <div class="kanban-header-actions">

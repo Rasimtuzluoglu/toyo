@@ -4,7 +4,7 @@ Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş em
 tahsilat ve randevu süreçlerini **tek bir yerel ağ uygulamasında** toplar. Veri işletmenin
 kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme gerekmez.
 
-> Güncel durum: üretim ve demo ortamı çalışıyor · **95 otomatik test** · yerel CI + Docker imaj doğrulaması
+> Güncel durum: üretim ve demo ortamı çalışıyor · **98 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Öne Çıkanlar
 
@@ -12,7 +12,8 @@ kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme
 - Günlük iş panosu: bitmemiş işler her gün devreder, bitenler ertesi gün listeden kalkar.
 - Kanban üzerinde sürükle-bırak veya tek tıkla durum ilerletme; plaka/müşteri araması.
 - Yoğun günler için kompakt kart, sabit yükseklikte kayan kolonlar, yaş filtreleri ve katlanabilir biten kolonları; fiş no kompakt kartta da görünür.
-- Telefonda **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmeleri.
+- Telefonda **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmeleri ve alt sabit menü.
+- Rol bazlı sade giriş: SERVIS doğrudan **Bugün** panosuna düşer ve finans görmez; MUHASEBE üç sayaçlı **Finans** özeti görür. Yaş filtresi tek menüde, ikinci istatistik kartları kaldırıldı.
 - Yeni İş Emri tek ekran: plaka, müşteri şikâyeti, yapılacak iş ve sorumlu kişi; müşteri/araç listesi ve gereksiz alanlar gizli.
 - Sıradaki fiş no önerisi, yazarken mükerrer kontrolü ve sade düzenleme ekranı.
 - Plaka ile hızlı iş emri: kayıtlı plakada müşteri/araç otomatik gelir; yeni plakada müşteri + araç + iş emri tek adımda oluşur.
@@ -20,12 +21,12 @@ kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme
 - Randevuyu otomatik “Geldi” yapıp plakası ön dolu yeni iş emrini açma.
 - Günlük ve haftalık randevu takvimi; bakım hatırlatmaları (180 gün / 10.000 km).
 - Ctrl+K komut paleti, 6 adımlık sunum turu, zorunlu manuel fiş numarası ve hazır kalem şablonları.
-- Müşteri ve araç **Pasife Al / Geri Al**: geçmiş korunur, listeler varsayılan olarak aktifleri gösterir.
+- Müşteri ve araç **Pasife Al / Geri Al**: geçmiş korunur, listeler varsayılan olarak aktifleri gösterir; ikincil işlemler tek **⋯** menüsünde.
 
 **Finans**
 - İş emri tamamlanınca otomatik cari borç; iptalde ters kayıt (silme yok).
 - Tamamla + tahsilat: **Cari / Nakit / Kart**.
-- Tek açık borçta tutar/dağıtım otomatik; çoklu borç dağıtımı, tahsilat iptali, cari ekstre ve yaşlandırma.
+- Tek açık borçta tutar/dağıtım otomatik ve dağıtım tablosu gizli; çoklu borç dağıtımı, tahsilat iptali, cari ekstre ve yaşlandırma.
 - Excel (.xlsx), CSV ve PDF çıktıları; dashboard ve raporlar.
 
 **Belgeler ve marka**
@@ -110,10 +111,11 @@ docker compose -f docker-compose.demo.yml up -d
 ```
 
 - Adres: `http://localhost:18081`
-- Kullanıcı: `demo` · Parola: `DemoPass1234`
+- Kullanıcılar: `demo / DemoPass1234` (PATRON) · `servis / ServisPass1234` (SERVIS) · `muhasebe / MuhasebePass1234` (MUHASEBE)
 - Veri: 12 müşteri, 12 Toyota araç, 12 iş emri, 5 tahsilat, 4 randevu.
+- Rol girişleri: SERVIS doğrudan **Bugün** panosuna, MUHASEBE **Finans** özetine düşer.
 - Demo verisi yalnızca `demo` profilinde ve boş veritabanında oluşturulur; üretim verisine dokunmaz.
-- Sıfırlama: `docker compose -f docker-compose.demo.yml down -v` → `... up -d`
+- Güvenli sıfırlama: `docker rm -f servisdefteri-demo-app servisdefteri-demo-db` → `docker volume rm servisdefteri-demo-pgdata` → `docker compose -f docker-compose.demo.yml up -d`
 
 ### 5 dakikalık sunum akışı
 
@@ -252,7 +254,7 @@ mükerrer borç/plaka/tahsilat kontrolleri, rol yetkileri, panonun devir/bitiş 
 plaka araması, yaş filtreleri, Flyway migration ve kısıtlar, CSRF/form belirteci,
 tüm ana sayfaların render’ı, PDF/Excel/CSV çıktıları, araç kabul/teslim ve randevu akışı.
 
-Son çalıştırma: **95 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
+Son çalıştırma: **98 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
 
 ### Yerel CI
 

@@ -7,6 +7,7 @@ import tr.com.servisdefteri.account.AccountService;
 import tr.com.servisdefteri.account.AccountTransaction;
 import tr.com.servisdefteri.account.AccountTransactionRepository;
 import tr.com.servisdefteri.account.CustomerBalance;
+import tr.com.servisdefteri.account.TransactionType;
 import tr.com.servisdefteri.appointment.Appointment;
 import tr.com.servisdefteri.appointment.AppointmentService;
 import tr.com.servisdefteri.customer.CustomerService;
@@ -68,6 +69,10 @@ public class DashboardService {
                 .toList();
         List<AccountTransaction> recent = financialVisible
                 ? transactionRepository.findRecent(PageRequest.of(0, 8)) : List.of();
+        List<AccountTransaction> recentPayments = recent.stream()
+                .filter(tx -> tx.getType() == TransactionType.ALACAK)
+                .limit(5)
+                .toList();
 
         Map<LocalDate, BigDecimal> collected = paymentService.summaryBetween(today.minusDays(6), today).stream()
                 .collect(Collectors.groupingBy(CollectionSummary::date,
@@ -99,6 +104,7 @@ public class DashboardService {
                 financialVisible ? debtorCount : 0,
                 financialVisible ? paymentService.todayTotal() : BigDecimal.ZERO,
                 recent,
+                recentPayments,
                 topDebtors,
                 workOrderService.openWorkOrders(8),
                 workOrderService.finishedToday(),

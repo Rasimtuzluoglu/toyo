@@ -124,23 +124,32 @@
                                         <a class="btn btn-outline-secondary btn-sm"
                                            sec:authorize="hasAnyRole('PATRON','SERVIS')"
                                            th:href="@{/work-orders/new(customerId=${vehicle.customer.id},vehicleId=${vehicle.id})}">İş Emri</a>
-                                        <form sec:authorize="hasRole('PATRON')" th:if="${vehicle.active}"
-                                              th:action="@{/vehicles/{id}/delete(id=${vehicle.id})}" method="post"
-                                              data-submit-once class="d-inline"
-                                              data-confirm="Araç pasife alınsın mı? Geçmiş iş emirleri ve finans kayıtları korunur; araç pasife alınır.">
-                                            <button class="btn btn-outline-danger btn-sm" type="submit"
-                                                    title="Aracı pasife al" aria-label="Aracı pasife al">
-                                                <i class="bi bi-archive" aria-hidden="true"></i>
+                                        <div class="dropdown" sec:authorize="hasRole('PATRON')">
+                                            <button class="btn btn-outline-secondary btn-sm btn-icon" type="button"
+                                                    data-bs-toggle="dropdown" aria-expanded="false"
+                                                    aria-label="Diğer işlemler">
+                                                <i class="bi bi-three-dots" aria-hidden="true"></i>
                                             </button>
-                                        </form>
-                                        <form sec:authorize="hasRole('PATRON')" th:if="${!vehicle.active}"
-                                              th:action="@{/vehicles/{id}/activate(id=${vehicle.id})}" method="post"
-                                              data-submit-once class="d-inline">
-                                            <button class="btn btn-outline-success btn-sm" type="submit"
-                                                    title="Aracı geri al" aria-label="Aracı geri al">
-                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-                                            </button>
-                                        </form>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li th:if="${vehicle.active}">
+                                                    <form th:action="@{/vehicles/{id}/delete(id=${vehicle.id})}" method="post"
+                                                          data-submit-once
+                                                          data-confirm="Araç pasife alınsın mı? Geçmiş iş emirleri ve finans kayıtları korunur; araç pasife alınır.">
+                                                        <button class="dropdown-item text-danger" type="submit">
+                                                            <i class="bi bi-archive me-2"></i>Pasife Al
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                                <li th:if="${!vehicle.active}">
+                                                    <form th:action="@{/vehicles/{id}/activate(id=${vehicle.id})}" method="post"
+                                                          data-submit-once>
+                                                        <button class="dropdown-item text-success" type="submit">
+                                                            <i class="bi bi-arrow-counterclockwise me-2"></i>Geri Al
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

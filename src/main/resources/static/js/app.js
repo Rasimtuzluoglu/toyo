@@ -80,12 +80,26 @@
             });
             updateSummary();
         };
+        var singleDebtAllocation = form.querySelector('[data-single-debt-allocation]');
+        var syncSingleDebtAllocation = function () {
+            if (!singleDebtAllocation) {
+                return;
+            }
+            var remaining = parseFloat(singleDebtAllocation.getAttribute('data-single-debt-remaining') || '0');
+            var amount = parseAmount(amountInput ? amountInput.value : 0);
+            var allocated = Math.max(0, Math.min(amount, remaining));
+            singleDebtAllocation.value = allocated > 0 ? allocated.toFixed(2) : '0';
+        };
         if (amountInput) {
-            amountInput.addEventListener('input', updateSummary);
+            amountInput.addEventListener('input', function () {
+                syncSingleDebtAllocation();
+                updateSummary();
+            });
         }
         rows.forEach(function (input) {
             input.addEventListener('input', updateSummary);
         });
+        syncSingleDebtAllocation();
         form.querySelectorAll('[data-allocate-remaining]').forEach(function (button) {
             button.addEventListener('click', function () {
                 allocate(false);
@@ -136,6 +150,27 @@
                 closeSidebar();
             }
         });
+
+        var mobileNav = document.querySelector('[data-mobile-nav]');
+        if (mobileNav) {
+            var path = window.location.pathname;
+            mobileNav.querySelectorAll('a[href]').forEach(function (link) {
+                var href = link.getAttribute('href');
+                var active = false;
+                if (href === '/') {
+                    active = path === '/';
+                } else if (href && (path === href || path.indexOf(href + '/') === 0)) {
+                    active = true;
+                }
+                if (link.hasAttribute('data-mobile-board-home')
+                    && path.indexOf('/work-orders/board') === 0) {
+                    active = true;
+                }
+                if (active && !link.classList.contains('mobile-nav-primary')) {
+                    link.classList.add('is-active');
+                }
+            });
+        }
 
         document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
             button.addEventListener('click', function () {
