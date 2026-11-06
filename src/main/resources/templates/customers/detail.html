@@ -32,6 +32,15 @@
                        th:href="@{/customers/{id}/edit(id=${customer.id})}">
                         <i class="bi bi-pencil me-1"></i> Düzenle
                     </a>
+                    <form sec:authorize="hasRole('PATRON')" th:if="${customer.active}"
+                          th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
+                          data-submit-once
+                          data-confirm="Müşteri silinsin mi? Geçmiş iş emirleri ve finans kayıtları korunur; müşteri ve araçları pasife alınır."
+                          class="d-inline">
+                        <button class="btn btn-outline-danger" type="submit">
+                            <i class="bi bi-trash me-1"></i> Sil
+                        </button>
+                    </form>
                     <a class="btn btn-outline-secondary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
                        th:href="@{/vehicles/new(customerId=${customer.id})}">
                         <i class="bi bi-car-front me-1"></i> Araç Ekle

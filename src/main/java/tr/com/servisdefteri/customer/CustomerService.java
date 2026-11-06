@@ -9,6 +9,8 @@ import tr.com.servisdefteri.common.NotFoundException;
 import tr.com.servisdefteri.common.PhoneNormalizer;
 import tr.com.servisdefteri.common.SearchNormalizer;
 import tr.com.servisdefteri.security.CurrentUserService;
+import tr.com.servisdefteri.vehicle.Vehicle;
+import tr.com.servisdefteri.vehicle.VehicleRepository;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -18,13 +20,16 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final VehicleRepository vehicleRepository;
     private final AuditService auditService;
     private final CurrentUserService currentUserService;
     private final Clock clock;
 
-    public CustomerService(CustomerRepository customerRepository, AuditService auditService,
+    public CustomerService(CustomerRepository customerRepository, VehicleRepository vehicleRepository,
+                           AuditService auditService,
                            CurrentUserService currentUserService, Clock clock) {
         this.customerRepository = customerRepository;
+        this.vehicleRepository = vehicleRepository;
         this.auditService = auditService;
         this.currentUserService = currentUserService;
         this.clock = clock;
@@ -96,6 +101,29 @@ public class CustomerService {
         auditService.record(AuditAction.CUSTOMER_UPDATED, "Müşteri", saved.getId(),
                 "Müşteri güncellendi: " + saved.getName() + ", aktif=" + saved.isActive());
         return saved;
+    }
+
+    /**
+     * Finansal/geçmiş kayıtları silmeden müşteriyi ve araçlarını pasife alır.
+     */
+    @Transactional
+    public void deactivate(Long id) {
+        Customer customer = findById(id);
+        if (!customer.isActive()) {
+            return;
+        }
+        customer.setActive(false);
+        customerRepository.save(customer);
+
+        List<Vehicle> vehicles = vehicleRepository.findByCustomerIdOrderByPlateAsc(id);
+        for (Vehicle vehicle : vehicles) {
+            vehicle.setActive(false);
+        }
+        vehicleRepository.saveAll(vehicles);
+
+        auditService.record(AuditAction.CUSTOMER_DELETED, "Müşteri", customer.getId(),
+                "Müşteri silindi (pasife alındı): " + customer.getName()
+                        + ", araç sayısı=" + vehicles.size());
     }
 
     @Transactional

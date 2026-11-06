@@ -55,7 +55,7 @@
                         <div>
                             <label class="form-label" for="customerId">Müşteri</label>
                             <select class="form-select" id="customerId" name="customerId">
-                                <option value="">Tümü</option>
+                                <option value="all" th:selected="${active == 'all'}">Tümü</option>
                                 <option th:each="c : ${customers}" th:value="${c.id}" th:text="${c.name}"
                                         th:selected="${customerId != null and customerId == c.id}"></option>
                             </select>
@@ -124,6 +124,15 @@
                                         <a class="btn btn-outline-secondary btn-sm"
                                            sec:authorize="hasAnyRole('PATRON','SERVIS')"
                                            th:href="@{/work-orders/new(customerId=${vehicle.customer.id},vehicleId=${vehicle.id})}">İş Emri</a>
+                                        <form sec:authorize="hasRole('PATRON')" th:if="${vehicle.active}"
+                                              th:action="@{/vehicles/{id}/delete(id=${vehicle.id})}" method="post"
+                                              data-submit-once class="d-inline"
+                                              data-confirm="Araç silinsin mi? Geçmiş iş emirleri ve finans kayıtları korunur; araç pasife alınır.">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit"
+                                                    title="Aracı sil" aria-label="Aracı sil">
+                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

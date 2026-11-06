@@ -15,7 +15,7 @@
                     <div class="page-eyebrow">İş Emri</div>
                     <h1 class="page-title">Yeni İş Emri</h1>
                     <p class="page-subtitle">
-                        Plakayı yazın, müşteri ve araç otomatik gelsin. Kayıt için plaka, şikâyet ve yapılacak iş yeterli.
+                        Plakayı yazın, müşteri ve araç otomatik gelsin. Kayıt için fiş no, plaka, şikâyet ve yapılacak iş yeterli.
                     </p>
                 </div>
                 <div class="page-actions">
@@ -40,14 +40,14 @@
                     </div>
                     <div class="sd-card-body">
                         <div class="quick-plate">
-                            <label class="form-label" for="quickPlate">Plaka <span class="required">*</span></label>
+                            <label class="form-label" for="quickPlate">Plaka, müşteri veya telefon <span class="required">*</span></label>
                             <div class="quick-plate-row">
                                 <input class="form-control quick-plate-input" id="quickPlate" type="text"
                                        th:field="*{plate}"
                                        th:classappend="${#fields.hasErrors('plate')} ? 'is-invalid'"
-                                       th:attr="data-lookup-url=@{/vehicles/lookup}"
+                                       th:attr="data-lookup-url=@{/vehicles/lookup},data-suggest-url=@{/vehicles/suggest}"
                                        data-quick-plate
-                                       maxlength="20" placeholder="34 ABC 123" autocomplete="off"
+                                       maxlength="20" placeholder="34 ABC 123, müşteri veya telefon" autocomplete="off"
                                        autocapitalize="characters" autofocus aria-describedby="quickPlateStatus"
                                        required>
                                 <span class="quick-plate-hint">
@@ -57,6 +57,7 @@
                             <div class="form-text quick-status" id="quickPlateStatus"
                                  data-quick-status aria-live="polite"></div>
                             <div class="invalid-feedback d-block" th:errors="*{plate}"></div>
+                            <div class="plate-suggestions" data-quick-suggestions hidden></div>
 
                             <div class="quick-match" data-quick-match hidden>
                                 <span class="quick-match-icon"><i class="bi bi-check2-circle"></i></span>
@@ -114,6 +115,28 @@
                     </div>
                     <div class="sd-card-body">
                         <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="quickOrderNo">
+                                    Fiş numarası <span class="required">*</span>
+                                </label>
+                                <input class="form-control" id="quickOrderNo" type="text"
+                                       th:field="*{orderNo}"
+                                       th:classappend="${#fields.hasErrors('orderNo')} ? 'is-invalid'"
+                                       maxlength="30" placeholder="Örn. 2026-1001" required>
+                                <div class="form-text">Her iş emri için benzersiz olmalıdır.</div>
+                                <div class="invalid-feedback" th:errors="*{orderNo}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="assignedUserId">Kim ilgileniyor?</label>
+                                <select class="form-select" id="assignedUserId" th:field="*{assignedUserId}"
+                                        th:classappend="${#fields.hasErrors('assignedUserId')} ? 'is-invalid'">
+                                    <option value="">Seçilmedi</option>
+                                    <option th:each="u : ${users}" th:value="${u.id}"
+                                            th:text="${u.fullName}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{assignedUserId}"></div>
+                            </div>
+
                             <div class="col-12">
                                 <label class="form-label" for="quickComplaint">
                                     Müşteri ne dedi? <span class="required">*</span>
@@ -157,31 +180,11 @@
                                 <div class="invalid-feedback" th:errors="*{serviceDescription}"></div>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label" for="assignedUserId">Kim ilgileniyor?</label>
-                                <select class="form-select" id="assignedUserId" th:field="*{assignedUserId}"
-                                        th:classappend="${#fields.hasErrors('assignedUserId')} ? 'is-invalid'">
-                                    <option value="">Seçilmedi</option>
-                                    <option th:each="u : ${users}" th:value="${u.id}"
-                                            th:text="${u.fullName}"></option>
-                                </select>
-                                <div class="invalid-feedback" th:errors="*{assignedUserId}"></div>
-                            </div>
-
                             <div class="col-12">
                                 <details class="quick-advanced"
-                                         th:open="${#fields.hasErrors('orderNo') or #fields.hasErrors('mileage') or #fields.hasErrors('notes')}">
+                                         th:open="${#fields.hasErrors('mileage') or #fields.hasErrors('notes')}">
                                     <summary><i class="bi bi-sliders me-1"></i>Gelişmiş alanlar</summary>
                                     <div class="row g-3 mt-1">
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="quickOrderNo">Fiş numarası</label>
-                                            <input class="form-control" id="quickOrderNo" type="text"
-                                                   th:field="*{orderNo}"
-                                                   th:classappend="${#fields.hasErrors('orderNo')} ? 'is-invalid'"
-                                                   maxlength="30" placeholder="Boş bırakılırsa otomatik">
-                                            <div class="form-text">Kendi numaranızı kullanmıyorsanız boş bırakın.</div>
-                                            <div class="invalid-feedback d-block" th:errors="*{orderNo}"></div>
-                                        </div>
                                         <div class="col-md-4">
                                             <label class="form-label" for="quickMileage">Kilometre</label>
                                             <input class="form-control" id="quickMileage" type="number" min="0"
@@ -190,7 +193,7 @@
                                                    placeholder="0">
                                             <div class="invalid-feedback" th:errors="*{mileage}"></div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-8">
                                             <label class="form-label" for="quickNotes">Ekip notu</label>
                                             <input class="form-control" id="quickNotes" type="text"
                                                    th:field="*{notes}"

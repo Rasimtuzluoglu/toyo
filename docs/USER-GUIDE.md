@@ -75,9 +75,12 @@ Telefon numarası normalize edilir (boşluk/tire/`+90`/`0` farkları giderilir).
 - Son iş emirleri
 - PATRON/MUHASEBE için cari bakiye, açık borç, cari ekstre, tahsilat ve manuel borç bağlantıları
 
-### Aktif/pasif
+### Aktif/pasif ve silme
 
-Pasif müşteriye yeni araç veya yeni iş emri açılamaz. Mevcut kayıtlar ve cari hareketler korunur. Durum değişikliği yalnızca PATRON yetkisindedir. Yeni müşteri/araç kaydı PATRON ve SERVIS tarafından açılabilir; MUHASEBE yalnızca görüntüler.
+- Pasif müşteriye yeni araç veya yeni iş emri açılamaz. Mevcut kayıtlar ve cari hareketler korunur.
+- Müşteri veya araç detayında **PATRON** için **Sil** düğmesi vardır. Silme, finansal kayıtları yok etmez; kaydı ve bağlı araçları **pasife alır**. Geçmiş iş emirleri, tahsilatlar ve cari hareketler korunur.
+- Listeler varsayılan olarak yalnızca **aktif** kayıtları gösterir. Silinenleri görmek için **Durum → Tümü** veya **Pasif** seçin.
+- Durum değişikliği yalnızca PATRON yetkisindedir. Yeni müşteri/araç kaydı PATRON ve SERVIS tarafından açılabilir; MUHASEBE yalnızca görüntüler.
 
 ## Araçlar
 
@@ -106,14 +109,15 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 ### Yeni iş emri (tek ekran)
 
 1. **İş Emirleri → Yeni İş Emri**
-2. **Plaka** alanına plakayı yazın. Kayıtlı plakada müşteri ve araç kartı otomatik gelir.
-3. Plaka kayıtlı değilse **ad soyad** ve **telefon** alanları açılır; marka/model opsiyoneldir.
-4. **Müşteri ne dedi?** alanına şikâyeti yazın.
-5. **Yapılacak iş** alanına işlemi yazın veya hazır seçeneklerden birine basın.
-6. **Kim ilgileniyor?** alanından sorumlu kişiyi seçin (varsayılan: işlemi açan kullanıcı).
-7. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır.
+2. **Plaka, müşteri veya telefon** alanına plakayı yazın; müşteri adı/telefonu da yazabilirsiniz. Eşleşen araçlar tahmin listesinde çıkar.
+3. Kayıtlı plakada müşteri ve araç kartı otomatik gelir. Plaka kayıtlı değilse **ad soyad** ve **telefon** alanları açılır; marka/model opsiyoneldir.
+4. **Fiş numarası** alanını girin. Bu alan **zorunludur**; aynı numara ikinci kez kullanılamaz.
+5. **Müşteri ne dedi?** alanına şikâyeti yazın.
+6. **Yapılacak iş** alanına işlemi yazın veya hazır seçeneklerden birine basın.
+7. **Kim ilgileniyor?** alanından sorumlu kişiyi seçin (varsayılan: işlemi açan kullanıcı).
+8. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır.
 
-- **Fiş numarası**, **kilometre** ve **ekip notu** isteğe bağlıdır; **Gelişmiş alanlar** bölümündedir. Fiş numarası boş bırakılırsa otomatik üretilir.
+- **Kilometre** ve **ekip notu** isteğe bağlıdır; **Gelişmiş alanlar** bölümündedir.
 - “Tespit edilen arıza”, “yapılan işlemler” ve işçilik/parça kalemleri kayıttan sonra detay ekranında girilir.
 - “Yapılacak iş” iş emrine hizmet kalemi olarak eklenir; fiyatı detaydan güncellenir.
 - Plaka daha önce açılmışsa mevcut müşteri ve araç yeniden kullanılır; mükerrer kayıt açılmaz.
@@ -122,18 +126,17 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 
 **İş Emirleri → Hızlı İş** ekranı, işi hemen bitirmek içindir:
 
-1. Plakayı yazın. Kayıtlı plakada müşteri ve araç kartı otomatik gelir; yeni müşteri alanları gizlenir.
-2. Yeni plakada ad soyad ve telefon alanları açılır; bu iki alan zorunludur.
-3. Hazır işlem düğmelerinden birini seçin veya yapılan işlemi yazın; tutarı girin.
-4. **Kaydet** veya **Kaydet ve Tamamla** deyin.
-
-Fiş numarası varsayılan olarak otomatik üretilir. Kendi numaranızı kullanacaksanız **Gelişmiş: iş emri numarası** bölümünü açın.
+1. **Fiş numarasını** girin; zorunludur.
+2. **Plaka, müşteri veya telefon** alanına plakayı yazın; eşleşen araçlar tahmin listesinde çıkar.
+3. Yeni plakada ad soyad ve telefon alanları açılır; bu iki alan zorunludur.
+4. Hazır işlem düğmelerinden birini seçin veya yapılan işlemi yazın; tutarı girin.
+5. **Kaydet** veya **Kaydet ve Tamamla** deyin.
 
 **Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Kayıt sonrası ekranda **Tahsilat Al**, **Teslim Tutanağı**, **Yeni İş Emri** ve **Yazdır** düğmeleri görünür.
 
-### Manuel iş emri numarası
+### İş emri numarası
 
-Yeni iş emrinde **Gelişmiş alanlar → Fiş numarası** manuel doldurulabilir. Boş bırakılırsa sistem otomatik numara üretir. Aynı numara ikinci kez kullanılamaz. Borçlandırılmış iş emrinin numarası değiştirilemez.
+Yeni iş emrinde **Fiş numarası** zorunludur. Aynı numara ikinci kez kullanılamaz. Borçlandırılmış iş emrinin numarası değiştirilemez.
 
 > Müşteri ile aracın sahibi aynı olmalıdır. Farklı müşterinin aracıyla iş emri açılamaz.
 

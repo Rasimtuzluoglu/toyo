@@ -13,6 +13,7 @@ import tr.com.servisdefteri.common.validation.ValidPlate;
 @Setter
 public class QuickWorkOrderForm {
 
+    @NotBlank(message = "İş emri numarası zorunludur.")
     @Size(max = 30, message = "İş emri numarası en fazla 30 karakter olabilir.")
     private String orderNo;
 

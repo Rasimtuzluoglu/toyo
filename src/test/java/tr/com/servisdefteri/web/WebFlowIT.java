@@ -142,6 +142,7 @@ class WebFlowIT extends BusinessTestSupport {
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
         MvcResult result = mockMvc.perform(post("/work-orders").session(session).with(csrf())
                         .param("formToken", token)
+                        .param("orderNo", "WEB-" + System.nanoTime())
                         .param("customerId", customerId.toString())
                         .param("vehicleId", vehicleId.toString())
                         .param("openedAt", openedAt)

@@ -154,6 +154,86 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void vehicleSuggestionsMatchPlateCustomerAndPhone() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer customer = createCustomer("Tahmin Müşteri", "0555 197 97 97");
+        createVehicle(customer, "34 SUG 001");
+
+        mockMvc.perform(get("/vehicles/suggest").param("q", "SUG")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/json"))
+                .andExpect(jsonPath("$[0].plate").value("34SUG001"))
+                .andExpect(jsonPath("$[0].customerName").value("Tahmin Müşteri"));
+
+        mockMvc.perform(get("/vehicles/suggest").param("q", "0555 197")
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].plate").value("34SUG001"));
+    }
+
+    @Test
+    void newWorkOrderWithoutOrderNumberIsRejected() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        MockHttpSession session = new MockHttpSession();
+        String token = formTokenService.issue(session);
+        long before = count("select count(*) from work_orders");
+
+        mockMvc.perform(post("/work-orders/new")
+                        .session(session)
+                        .with(user(principal(servis)))
+                        .with(csrf())
+                        .param("formToken", token)
+                        .param("plate", "34 NON 001")
+                        .param("customerName", "Numarasız Müşteri")
+                        .param("phone", "0555 198 98 98")
+                        .param("complaint", "Kontrol")
+                        .param("serviceDescription", "Kontrol / İnceleme"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "İş emri numarası zorunludur.")));
+
+        assertThat(count("select count(*) from work_orders")).isEqualTo(before);
+    }
+
+    @Test
+    void patronCanSoftDeleteCustomerAndItsVehicles() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Silinecek Müşteri", "0555 199 99 99");
+        Vehicle vehicle = createVehicle(customer, "34 DEL 001");
+
+        mockMvc.perform(post("/customers/{id}/delete", customer.getId())
+                        .with(user(principal(patron)))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/customers?active=true"));
+
+        assertThat(customerService.findById(customer.getId()).isActive()).isFalse();
+        assertThat(vehicleService.findById(vehicle.getId()).isActive()).isFalse();
+
+        mockMvc.perform(get("/customers").with(user(principal(patron))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Silinecek Müşteri"))));
+        mockMvc.perform(get("/customers").param("active", "all").with(user(principal(patron))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Silinecek Müşteri")));
+    }
+
+    @Test
+    void patronCanSoftDeleteVehicle() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Araç Silme Müşteri", "0555 200 00 00");
+        Vehicle vehicle = createVehicle(customer, "34 DEL 002");
+
+        mockMvc.perform(post("/vehicles/{id}/delete", vehicle.getId())
+                        .with(user(principal(patron)))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/vehicles?active=true"));
+
+        assertThat(vehicleService.findById(vehicle.getId()).isActive()).isFalse();
+    }
+
+    @Test
     void newWorkOrderPageIsSingleScreenAndOnlySaves() throws Exception {
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
 
@@ -179,6 +259,7 @@ class UsabilityIT extends BusinessTestSupport {
                         .with(user(principal(servis)))
                         .with(csrf())
                         .param("formToken", token)
+                        .param("orderNo", "YNI-2026-001")
                         .param("plate", "34 YNI 001")
                         .param("customerName", "Yeni Akış Müşteri")
                         .param("phone", "0555 196 96 96")

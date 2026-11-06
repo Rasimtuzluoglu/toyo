@@ -167,6 +167,21 @@ public class VehicleService {
         return saved;
     }
 
+    /**
+     * İş emri ve finans geçmişini silmeden aracı pasife alır.
+     */
+    @Transactional
+    public void deactivate(Long id) {
+        Vehicle vehicle = findById(id);
+        if (!vehicle.isActive()) {
+            return;
+        }
+        vehicle.setActive(false);
+        Vehicle saved = vehicleRepository.save(vehicle);
+        auditService.record(AuditAction.VEHICLE_DELETED, "Araç", saved.getId(),
+                "Araç silindi (pasife alındı): " + saved.getPlate());
+    }
+
     @Transactional(readOnly = true)
     public long activeCount() {
         return vehicleRepository.countByActiveTrue();

@@ -2471,6 +2471,53 @@ body.command-open {
     color: var(--sd-muted);
 }
 
+.plate-suggestions {
+    margin-top: 6px;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-sm);
+    background: #fff;
+    box-shadow: var(--sd-shadow-soft);
+    overflow: hidden;
+}
+
+.plate-suggestions[hidden] {
+    display: none;
+}
+
+.plate-suggestion {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--sd-border);
+    background: #fff;
+    color: var(--sd-text);
+    text-align: left;
+}
+
+.plate-suggestion:last-child {
+    border-bottom: 0;
+}
+
+.plate-suggestion:hover,
+.plate-suggestion:focus {
+    background: #faf6f6;
+}
+
+.plate-suggestion strong {
+    font-size: 0.88rem;
+    letter-spacing: 0.03em;
+}
+
+.plate-suggestion span {
+    color: var(--sd-muted);
+    font-size: 0.74rem;
+    text-align: right;
+}
+
 .quick-match {
     display: flex;
     align-items: center;

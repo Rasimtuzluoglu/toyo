@@ -61,17 +61,31 @@ public class CustomerController {
                        @RequestParam(required = false) String type,
                        @RequestParam(defaultValue = "0") int page,
                        Model model) {
-        Boolean activeFilter = parseBoolean(active);
+        String activeValue = normalizeActiveFilter(active);
+        Boolean activeFilter = "all".equals(activeValue) ? null : Boolean.valueOf(activeValue);
         CustomerType typeFilter = parseType(type);
         Page<Customer> customers = customerService.search(q, activeFilter, typeFilter,
                 PageRequest.of(Math.max(page, 0), 20, Sort.by("name").ascending()));
         model.addAttribute("customers", customers);
         model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("active", active == null ? "" : active);
+        model.addAttribute("active", activeValue);
         model.addAttribute("type", type == null ? "" : type);
         model.addAttribute("types", CustomerType.values());
         model.addAttribute("activeMenu", "customers");
         return "customers/list";
+    }
+
+    @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('PATRON')")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            customerService.deactivate(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Müşteri silindi. Geçmiş iş emri ve finans kayıtları korunuyor.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/customers?active=true";
     }
 
     @GetMapping("/export.csv")
@@ -192,6 +206,16 @@ public class CustomerController {
             model.addAttribute("activeMenu", "customers");
             return "customers/form";
         }
+    }
+
+    private String normalizeActiveFilter(String value) {
+        if ("all".equalsIgnoreCase(value)) {
+            return "all";
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return "false";
+        }
+        return "true";
     }
 
     private Boolean parseBoolean(String value) {

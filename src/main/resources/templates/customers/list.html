@@ -63,7 +63,7 @@
                         <div>
                             <label class="form-label" for="active">Durum</label>
                             <select class="form-select" id="active" name="active">
-                                <option value="" th:selected="${active == ''}">Tümü</option>
+                                <option value="all" th:selected="${active == 'all'}">Tümü</option>
                                 <option value="true" th:selected="${active == 'true'}">Aktif</option>
                                 <option value="false" th:selected="${active == 'false'}">Pasif</option>
                             </select>
@@ -126,6 +126,15 @@
                                         <a class="btn btn-outline-secondary btn-sm"
                                            sec:authorize="hasAnyRole('PATRON','SERVIS')"
                                            th:href="@{/customers/{id}/edit(id=${customer.id})}">Düzenle</a>
+                                        <form sec:authorize="hasRole('PATRON')" th:if="${customer.active}"
+                                              th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
+                                              data-submit-once class="d-inline"
+                                              data-confirm="Müşteri silinsin mi? Geçmiş kayıtlar korunur; müşteri ve araçları pasife alınır.">
+                                            <button class="btn btn-outline-danger btn-sm" type="submit"
+                                                    title="Müşteriyi sil" aria-label="Müşteriyi sil">
+                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

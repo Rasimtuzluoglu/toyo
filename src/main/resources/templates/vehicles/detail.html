@@ -32,6 +32,15 @@
                        th:href="@{/vehicles/{id}/edit(id=${vehicle.id})}">
                         <i class="bi bi-pencil me-1"></i> Düzenle
                     </a>
+                    <form sec:authorize="hasRole('PATRON')" th:if="${vehicle.active}"
+                          th:action="@{/vehicles/{id}/delete(id=${vehicle.id})}" method="post"
+                          data-submit-once
+                          data-confirm="Araç silinsin mi? Geçmiş iş emirleri ve finans kayıtları korunur; araç pasife alınır."
+                          class="d-inline">
+                        <button class="btn btn-outline-danger" type="submit">
+                            <i class="bi bi-trash me-1"></i> Sil
+                        </button>
+                    </form>
                     <a class="btn btn-primary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
                        th:href="@{/work-orders/new(customerId=${vehicle.customer.id},vehicleId=${vehicle.id})}">
                         <i class="bi bi-clipboard-plus me-1"></i> İş Emri Aç

@@ -61,11 +61,13 @@ public class VehicleController {
                        @RequestParam(required = false) Long customerId,
                        @RequestParam(defaultValue = "0") int page,
                        Model model) {
-        Page<Vehicle> vehicles = vehicleService.search(q, parseBoolean(active), customerId,
+        String activeValue = normalizeActiveFilter(active);
+        Boolean activeFilter = "all".equals(activeValue) ? null : Boolean.valueOf(activeValue);
+        Page<Vehicle> vehicles = vehicleService.search(q, activeFilter, customerId,
                 PageRequest.of(Math.max(page, 0), 20, Sort.by("plate").ascending()));
         model.addAttribute("vehicles", vehicles);
         model.addAttribute("q", q == null ? "" : q);
-        model.addAttribute("active", active == null ? "" : active);
+        model.addAttribute("active", activeValue);
         model.addAttribute("customerId", customerId);
         model.addAttribute("customers", customerService.activeCustomers());
         model.addAttribute("activeMenu", "vehicles");
@@ -91,6 +93,38 @@ public class VehicleController {
 
     public record VehicleLookup(boolean found, Long vehicleId, String plate, Long customerId,
                                 String customerName, String brand, String model, Integer mileage) {
+    }
+
+    @GetMapping(value = "/suggest", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<VehicleSuggestion> suggest(@RequestParam(required = false) String q) {
+        if (q == null || q.trim().length() < 2) {
+            return List.of();
+        }
+        return vehicleService.search(q, true, null,
+                        PageRequest.of(0, 8, Sort.by("plate").ascending()))
+                .getContent().stream()
+                .map(vehicle -> new VehicleSuggestion(vehicle.getId(), vehicle.getPlate(),
+                        vehicle.getCustomer().getName(), vehicle.getBrand(), vehicle.getModel(),
+                        vehicle.getCurrentMileage()))
+                .toList();
+    }
+
+    public record VehicleSuggestion(Long id, String plate, String customerName,
+                                    String brand, String model, Integer mileage) {
+    }
+
+    @PostMapping("/{id}/delete")
+    @PreAuthorize("hasRole('PATRON')")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            vehicleService.deactivate(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Araç silindi. Geçmiş iş emri ve finans kayıtları korunuyor.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/vehicles?active=true";
     }
 
     @GetMapping("/export.csv")
@@ -223,6 +257,16 @@ public class VehicleController {
         } catch (RuntimeException ex) {
             return "Silinmiş müşteri #" + customerId;
         }
+    }
+
+    private String normalizeActiveFilter(String value) {
+        if ("all".equalsIgnoreCase(value)) {
+            return "all";
+        }
+        if ("false".equalsIgnoreCase(value)) {
+            return "false";
+        }
+        return "true";
     }
 
     private Boolean parseBoolean(String value) {

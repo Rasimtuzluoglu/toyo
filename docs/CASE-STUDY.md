@@ -18,7 +18,7 @@ tahsilat, randevu ve belge süreçlerini tek bir yerel ağ uygulamasında toplar
 
 | Alan | Çözüm |
 |---|---|
-| Operasyon | Plaka ile hızlı iş emri, manuel/otomatik iş emri no, tek tıkla tamamlama |
+| Operasyon | Plaka ile hızlı iş emri, zorunlu manuel fiş numarası, tek tıkla tamamlama |
 | Günlük akış | Kanban iş panosu, tek tık durum geçişi, sürükle-bırak |
 | Finans | İş emrinden otomatik cari borç, tahsilat dağıtımı, cari ekstre, yaşlandırma |
 | Randevu | Günlük ve haftalık takvim, randevudan iş emri açma |
@@ -33,7 +33,7 @@ tahsilat, randevu ve belge süreçlerini tek bir yerel ağ uygulamasında toplar
 - Flyway migration (V16), Spring Security, Bean Validation
 - Apache POI (Excel), OpenPDF (PDF), Noto Sans (Türkçe karakter)
 - Docker / Docker Compose, yerel ağda çalışır
-- 86 otomatik test (Testcontainers ile gerçek PostgreSQL)
+- 93 otomatik test (Testcontainers ile gerçek PostgreSQL)
 - Modüler monolit; katmanlı servis/repository yapısı
 - White-label: işletme adı, slogan, ana renk ve logo ayarlanabilir
 

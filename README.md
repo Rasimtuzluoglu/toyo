@@ -4,7 +4,7 @@ Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş em
 tahsilat ve randevu süreçlerini **tek bir yerel ağ uygulamasında** toplar. Veri işletmenin
 kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme gerekmez.
 
-> Güncel durum: üretim ve demo ortamı çalışıyor · **89 otomatik test** · yerel CI + Docker imaj doğrulaması
+> Güncel durum: üretim ve demo ortamı çalışıyor · **93 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Öne Çıkanlar
 
@@ -18,7 +18,8 @@ kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme
 - Hazır işlem düğmeleri, tek ekranda **Kaydet ve Tamamla**.
 - Randevuyu otomatik “Geldi” yapıp plakası ön dolu yeni iş emrini açma.
 - Günlük ve haftalık randevu takvimi; bakım hatırlatmaları (180 gün / 10.000 km).
-- Ctrl+K komut paleti, 6 adımlık sunum turu, manuel/otomatik iş emri no ve hazır kalem şablonları.
+- Ctrl+K komut paleti, 6 adımlık sunum turu, zorunlu manuel fiş numarası ve hazır kalem şablonları.
+- Müşteri ve araç silme: kayıtlar geçmişi bozmadan pasife alınır; listeler varsayılan olarak aktifleri gösterir.
 
 **Finans**
 - İş emri tamamlanınca otomatik cari borç; iptalde ters kayıt (silme yok).
@@ -249,7 +250,7 @@ mükerrer borç/plaka/tahsilat kontrolleri, rol yetkileri, panonun devir/bitiş 
 plaka araması, yaş filtreleri, Flyway migration ve kısıtlar, CSRF/form belirteci,
 tüm ana sayfaların render’ı, PDF/Excel/CSV çıktıları, araç kabul/teslim ve randevu akışı.
 
-Son çalıştırma: **89 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
+Son çalıştırma: **93 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
 
 ### Yerel CI
 

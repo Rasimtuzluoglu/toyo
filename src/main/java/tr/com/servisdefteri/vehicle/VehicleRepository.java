@@ -20,7 +20,9 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
                    or lower(v.plateNormalized) like :q
                    or lower(function('translate', v.brand, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                    or lower(function('translate', v.model, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
-                   or lower(function('translate', c.name, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q)
+                   or lower(function('translate', c.name, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
+                   or lower(c.phone) like :q
+                   or c.phoneNormalized like :q)
               and (cast(:active as boolean) is null or v.active = :active)
               and (cast(:customerId as long) is null or c.id = :customerId)
             """,
@@ -31,7 +33,9 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
                            or lower(v.plateNormalized) like :q
                            or lower(function('translate', v.brand, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
                            or lower(function('translate', v.model, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
-                           or lower(function('translate', c.name, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q)
+                           or lower(function('translate', c.name, 'İIıŞşĞğÜüÖöÇç', 'iiissgguuoocc')) like :q
+                           or lower(c.phone) like :q
+                           or c.phoneNormalized like :q)
                       and (cast(:active as boolean) is null or v.active = :active)
                       and (cast(:customerId as long) is null or c.id = :customerId)
                     """)

@@ -853,8 +853,10 @@
         var quickPlate = document.querySelector('[data-quick-plate]');
         if (quickPlate) {
             var quickLookupUrl = quickPlate.getAttribute('data-lookup-url');
+            var quickSuggestUrl = quickPlate.getAttribute('data-suggest-url');
             var quickStatus = document.querySelector('[data-quick-status]');
             var quickMatch = document.querySelector('[data-quick-match]');
+            var quickSuggestions = document.querySelector('[data-quick-suggestions]');
             var quickNewCustomer = document.querySelector('[data-quick-new-customer]');
             var quickMileageInput = document.getElementById('quickMileage');
             var quickTimer = null;
@@ -898,15 +900,79 @@
                     }
                 }
             };
-            var lookupQuickPlate = function () {
+            var isLikelyPlate = function (value) {
+                var normalized = (value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+                return /^[0-9]{2}[A-Z]{1,4}[0-9]{2,5}$/.test(normalized);
+            };
+            var hideQuickSuggestions = function () {
+                if (quickSuggestions) {
+                    quickSuggestions.hidden = true;
+                    quickSuggestions.textContent = '';
+                }
+            };
+            var loadQuickSuggestions = function () {
+                if (!quickSuggestions || !quickSuggestUrl) {
+                    return;
+                }
+                var query = quickPlate.value.trim();
+                if (query.length < 2) {
+                    hideQuickSuggestions();
+                    return;
+                }
+                fetch(quickSuggestUrl + '?q=' + encodeURIComponent(query), {
+                    headers: { Accept: 'application/json' },
+                    credentials: 'same-origin'
+                }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('suggest failed');
+                    }
+                    return response.json();
+                }).then(function (items) {
+                    quickSuggestions.textContent = '';
+                    if (!Array.isArray(items) || items.length === 0) {
+                        quickSuggestions.hidden = true;
+                        return;
+                    }
+                    items.forEach(function (item) {
+                        var button = document.createElement('button');
+                        button.type = 'button';
+                        button.className = 'plate-suggestion';
+                        var plate = document.createElement('strong');
+                        plate.textContent = item.plate || '';
+                        var meta = document.createElement('span');
+                        meta.textContent = [item.customerName, item.brand, item.model]
+                            .filter(Boolean).join(' · ');
+                        button.appendChild(plate);
+                        button.appendChild(meta);
+                        button.addEventListener('mousedown', function (event) {
+                            event.preventDefault();
+                            quickPlate.value = item.plate || '';
+                            hideQuickSuggestions();
+                            lookupQuickPlate(true);
+                            quickPlate.focus();
+                        });
+                        quickSuggestions.appendChild(button);
+                    });
+                    quickSuggestions.hidden = false;
+                }).catch(hideQuickSuggestions);
+            };
+            var lookupQuickPlate = function (force) {
                 var plate = quickPlate.value.trim();
                 if (!plate) {
                     lastPlate = '';
                     showQuickMatch(false);
                     showQuickNewCustomer(false);
                     setQuickStatus('');
+                    hideQuickSuggestions();
                     return;
                 }
+                if (!force && !isLikelyPlate(plate)) {
+                    showQuickMatch(false);
+                    showQuickNewCustomer(false);
+                    setQuickStatus('');
+                    return;
+                }
+                hideQuickSuggestions();
                 setQuickStatus('Aranıyor…');
                 fetch(quickLookupUrl + '?plate=' + encodeURIComponent(plate), {
                     headers: { Accept: 'application/json' },
@@ -945,20 +1011,45 @@
 
             showQuickNewCustomer(false);
             if (quickPlate.value.trim()) {
-                lookupQuickPlate();
+                lookupQuickPlate(true);
             }
             quickPlate.addEventListener('input', function () {
                 lastPlate = '';
                 showQuickMatch(false);
+                showQuickNewCustomer(false);
+                hideQuickSuggestions();
                 setQuickStatus('');
                 if (quickTimer) {
                     clearTimeout(quickTimer);
                 }
-                quickTimer = setTimeout(lookupQuickPlate, 400);
+                quickTimer = setTimeout(function () {
+                    var value = quickPlate.value.trim();
+                    if (!value) {
+                        return;
+                    }
+                    if (isLikelyPlate(value) && value.replace(/\s/g, '').length >= 7) {
+                        lookupQuickPlate();
+                    } else {
+                        loadQuickSuggestions();
+                    }
+                }, 350);
             });
             quickPlate.addEventListener('blur', function () {
-                if (quickPlate.value.trim() && quickPlate.value.trim() !== lastPlate) {
-                    lookupQuickPlate();
+                setTimeout(function () {
+                    hideQuickSuggestions();
+                    if (quickPlate.value.trim() && quickPlate.value.trim() !== lastPlate
+                            && isLikelyPlate(quickPlate.value)) {
+                        lookupQuickPlate();
+                    }
+                }, 150);
+            });
+            quickPlate.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' && quickSuggestions && !quickSuggestions.hidden) {
+                    var first = quickSuggestions.querySelector('.plate-suggestion');
+                    if (first) {
+                        event.preventDefault();
+                        first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+                    }
                 }
             });
 

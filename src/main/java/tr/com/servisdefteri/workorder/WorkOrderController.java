@@ -306,6 +306,10 @@ public class WorkOrderController {
         } catch (BusinessRuleException ex) {
             bindingResult.reject("form.token", ex.getMessage());
         }
+        if (form.getOrderNo() == null || form.getOrderNo().isBlank()) {
+            bindingResult.rejectValue("orderNo", "orderNo.required",
+                    "İş emri numarası zorunludur.");
+        }
         if (bindingResult.hasErrors()) {
             addFormOptions(model, false);
             model.addAttribute("formToken", formTokenService.issue(session));
