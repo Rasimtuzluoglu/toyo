@@ -197,6 +197,10 @@ mvn clean package
 | [Yedekleme ve Geri Yükleme](docs/BACKUP-RESTORE.md) | Yedek alma, geri yükleme tatbikatı, felaket senaryosu |
 | [Case Study](docs/CASE-STUDY.md) | Problem, çözüm, teknik yapı ve pilot metrikleri |
 
+## Dağıtım
+
+Kaynak kod içermeyen Docker imajı ve Windows kurulum paketi için [dağıtım notları](distribution/OKUBENI.md).
+
 ## Kapsam dışı
 
 E-fatura, banka/kart ödeme kuruluşu entegrasyonu, otomatik SMS/WhatsApp, bulut dış erişim, çok işletmeli SaaS, tam stok/depo, native mobil uygulama ve tam muhasebe sistemi bu sürümün kapsamı dışındadır.

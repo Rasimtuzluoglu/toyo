@@ -25,3 +25,8 @@ logs/
 
 .DS_Store
 Thumbs.db
+
+# Dağıtım paketi imajları (büyük dosyalar)
+distribution/*.tar
+distribution/.env
+distribution/ToyotaServis-Yeni.tar
