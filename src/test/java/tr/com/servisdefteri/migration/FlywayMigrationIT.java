@@ -15,8 +15,8 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     @Test
     void allMigrationsAreAppliedAndExpectedTablesExist() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("16");
-        assertThat(flyway.info().applied()).hasSize(16);
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("17");
+        assertThat(flyway.info().applied()).hasSize(17);
 
         Long tables = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.tables
@@ -44,6 +44,13 @@ class FlywayMigrationIT extends IntegrationTestSupport {
                   and column_name = 'active_debit'
                 """, Long.class);
         assertThat(activeDebitColumn).isEqualTo(1L);
+
+        Long assignedNameColumn = jdbcTemplate.queryForObject("""
+                select count(*) from information_schema.columns
+                where table_schema = 'public' and table_name = 'work_orders'
+                  and column_name = 'assigned_name'
+                """, Long.class);
+        assertThat(assignedNameColumn).isEqualTo(1L);
 
         Long plateUnique = jdbcTemplate.queryForObject(
                 "select count(*) from pg_indexes where schemaname = 'public' "

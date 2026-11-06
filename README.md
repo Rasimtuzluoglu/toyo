@@ -15,7 +15,8 @@ kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme
 - Telefonda **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmeleri ve alt sabit menü.
 - Rol bazlı sade giriş: SERVIS doğrudan **Bugün** panosuna düşer ve finans görmez; MUHASEBE üç sayaçlı **Finans** özeti görür. Yaş filtresi tek menüde, ikinci istatistik kartları kaldırıldı.
 - Yeni İş Emri tek ekran: plaka, müşteri şikâyeti, yapılacak iş ve sorumlu kişi; müşteri/araç listesi ve gereksiz alanlar gizli.
-- Sıradaki fiş no önerisi, yazarken mükerrer kontrolü ve sade düzenleme ekranı.
+- Manuel fiş no girişi, yazarken mükerrer kontrolü ve sade düzenleme ekranı.
+- **İlgilenen kişi** serbest metin olarak yazılır; kullanıcı hesabı seçimi gerekmez.
 - Plaka ile hızlı iş emri: kayıtlı plakada müşteri/araç otomatik gelir; yeni plakada müşteri + araç + iş emri tek adımda oluşur.
 - Hazır işlem düğmeleri, tek ekranda **Kaydet ve Tamamla**.
 - Randevuyu otomatik “Geldi” yapıp plakası ön dolu yeni iş emrini açma.

@@ -105,6 +105,7 @@ class ServisDefteriFlowIT extends BusinessTestSupport {
         Vehicle secondVehicle = createVehicle(second, "34JKL012");
 
         WorkOrderForm form = new WorkOrderForm();
+        form.setOrderNo("TST-" + System.nanoTime());
         form.setCustomerId(first.getId());
         form.setVehicleId(secondVehicle.getId());
         form.setOpenedAt(LocalDateTime.now().minusMinutes(5));

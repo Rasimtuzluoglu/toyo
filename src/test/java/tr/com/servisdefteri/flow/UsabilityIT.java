@@ -83,7 +83,7 @@ class UsabilityIT extends BusinessTestSupport {
 
         WorkOrder order = quickWorkOrderService.create(form);
 
-        assertThat(order.getOrderNo()).startsWith("IS-");
+        assertThat(order.getOrderNo()).isEqualTo(form.getOrderNo());
         assertThat(order.getCustomer().getName()).isEqualTo("Ayşe Kaya");
         assertThat(order.getCustomer().getPhoneNormalized()).isEqualTo("5551112233");
         assertThat(order.getVehicle().getPlateNormalized()).isEqualTo("34ABC123");
@@ -356,7 +356,7 @@ class UsabilityIT extends BusinessTestSupport {
     void newWorkOrderPageIsSingleScreenAndOnlySaves() throws Exception {
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
 
-        mockMvc.perform(get("/work-orders/new").with(user(principal(servis))))
+        MvcResult result = mockMvc.perform(get("/work-orders/new").with(user(principal(servis))))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Müşteri ne dedi?")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Yapılacak iş")))
@@ -364,11 +364,16 @@ class UsabilityIT extends BusinessTestSupport {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Gelişmiş alanlar")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Kaydet")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
-                        org.hamcrest.Matchers.containsString("Kaydet ve Tamamla"))));
+                        org.hamcrest.Matchers.containsString("Kaydet ve Tamamla"))))
+                .andReturn();
+
+        QuickWorkOrderForm form = (QuickWorkOrderForm) result.getModelAndView()
+                .getModel().get("quickForm");
+        assertThat(form.getOrderNo()).isNull();
     }
 
     @Test
-    void newWorkOrderSavesAssignedUserAndServiceWithoutCompleting() throws Exception {
+    void newWorkOrderSavesAssignedNameAndServiceWithoutCompleting() throws Exception {
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
         MockHttpSession session = new MockHttpSession();
         String token = formTokenService.issue(session);
@@ -384,7 +389,7 @@ class UsabilityIT extends BusinessTestSupport {
                         .param("phone", "0555 196 96 96")
                         .param("complaint", "Fren yaparken ses geliyor")
                         .param("serviceDescription", "Fren bakımı")
-                        .param("assignedUserId", servis.getId().toString())
+                        .param("assignedName", "Servis Kullanıcısı")
                         .param("notes", "Ekip notu")
                         .param("completeNow", "true"))
                 .andExpect(status().is3xxRedirection());
@@ -398,7 +403,7 @@ class UsabilityIT extends BusinessTestSupport {
         WorkOrder order = workOrderService.findById(orderId);
 
         assertThat(order.getStatus().name()).isEqualTo("BEKLIYOR");
-        assertThat(order.getAssignedUser().getId()).isEqualTo(servis.getId());
+        assertThat(order.getAssignedName()).isEqualTo("Servis Kullanıcısı");
         assertThat(order.getComplaint()).isEqualTo("Fren yaparken ses geliyor");
         assertThat(order.getNotes()).isEqualTo("Ekip notu");
         assertThat(order.getItems()).anySatisfy(item ->
@@ -500,6 +505,7 @@ class UsabilityIT extends BusinessTestSupport {
         Vehicle oldVehicle = createVehicle(oldCustomer, "34 OLD 001");
         tr.com.servisdefteri.workorder.WorkOrderForm oldForm =
                 new tr.com.servisdefteri.workorder.WorkOrderForm();
+        oldForm.setOrderNo("TST-OLD-" + System.nanoTime());
         oldForm.setCustomerId(oldCustomer.getId());
         oldForm.setVehicleId(oldVehicle.getId());
         oldForm.setOpenedAt(LocalDateTime.now().minusDays(3));
@@ -861,6 +867,7 @@ class UsabilityIT extends BusinessTestSupport {
 
     private QuickWorkOrderForm quickForm(String plate, String customerName, String phone) {
         QuickWorkOrderForm form = new QuickWorkOrderForm();
+        form.setOrderNo("TST-" + System.nanoTime());
         form.setPlate(plate);
         form.setCustomerName(customerName);
         form.setPhone(phone);

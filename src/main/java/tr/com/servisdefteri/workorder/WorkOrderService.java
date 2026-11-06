@@ -18,8 +18,6 @@ import tr.com.servisdefteri.payment.Payment;
 import tr.com.servisdefteri.payment.PaymentMethod;
 import tr.com.servisdefteri.payment.PaymentService;
 import tr.com.servisdefteri.security.CurrentUserService;
-import tr.com.servisdefteri.security.User;
-import tr.com.servisdefteri.security.UserRepository;
 import tr.com.servisdefteri.vehicle.Vehicle;
 import tr.com.servisdefteri.vehicle.VehicleRepository;
 
@@ -30,7 +28,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -45,7 +42,6 @@ public class WorkOrderService {
     private final WorkOrderRepository workOrderRepository;
     private final CustomerRepository customerRepository;
     private final VehicleRepository vehicleRepository;
-    private final UserRepository userRepository;
     private final AccountService accountService;
     private final PaymentService paymentService;
     private final AuditService auditService;
@@ -55,7 +51,6 @@ public class WorkOrderService {
     public WorkOrderService(WorkOrderRepository workOrderRepository,
                             CustomerRepository customerRepository,
                             VehicleRepository vehicleRepository,
-                            UserRepository userRepository,
                             AccountService accountService,
                             PaymentService paymentService,
                             AuditService auditService,
@@ -64,7 +59,6 @@ public class WorkOrderService {
         this.workOrderRepository = workOrderRepository;
         this.customerRepository = customerRepository;
         this.vehicleRepository = vehicleRepository;
-        this.userRepository = userRepository;
         this.accountService = accountService;
         this.paymentService = paymentService;
         this.auditService = auditService;
@@ -177,13 +171,16 @@ public class WorkOrderService {
 
         WorkOrder order = new WorkOrder();
         String requestedOrderNo = blankToNull(form.getOrderNo());
-        if (requestedOrderNo != null && workOrderRepository.existsByOrderNoIgnoreCase(requestedOrderNo)) {
+        if (requestedOrderNo == null) {
+            throw new BusinessRuleException("İş emri numarası zorunludur.");
+        }
+        if (workOrderRepository.existsByOrderNoIgnoreCase(requestedOrderNo)) {
             throw new BusinessRuleException("Bu iş emri numarası zaten kullanılıyor: " + requestedOrderNo);
         }
-        order.setOrderNo(requestedOrderNo != null ? requestedOrderNo : nextOrderNo(form.getOpenedAt()));
+        order.setOrderNo(requestedOrderNo);
         order.setCustomer(customer);
         order.setVehicle(vehicle);
-        order.setAssignedUser(resolveAssignedUser(form.getAssignedUserId()));
+        order.setAssignedName(blankToNull(form.getAssignedName()));
         order.setOpenedAt(form.getOpenedAt());
         order.setStatus(WorkOrderStatus.BEKLIYOR);
         order.setCreatedAt(LocalDateTime.now(clock));
@@ -234,7 +231,7 @@ public class WorkOrderService {
 
         order.setCustomer(customer);
         order.setVehicle(vehicle);
-        order.setAssignedUser(resolveAssignedUser(form.getAssignedUserId()));
+        order.setAssignedName(blankToNull(form.getAssignedName()));
         order.setOpenedAt(form.getOpenedAt());
         applyDescriptiveFields(order, form);
         syncVehicleMileage(vehicle, form.getMileage());
@@ -373,11 +370,6 @@ public class WorkOrderService {
         return saved;
     }
 
-    @Transactional
-    public String suggestOrderNo() {
-        return nextOrderNo(LocalDateTime.now(clock));
-    }
-
     @Transactional(readOnly = true)
     public boolean isOrderNoAvailable(String orderNo) {
         if (orderNo == null || orderNo.isBlank()) {
@@ -402,7 +394,7 @@ public class WorkOrderService {
         form.setOrderNo(order.getOrderNo());
         form.setCustomerId(order.getCustomer().getId());
         form.setVehicleId(order.getVehicle().getId());
-        form.setAssignedUserId(order.getAssignedUser() == null ? null : order.getAssignedUser().getId());
+        form.setAssignedName(order.getAssigneeDisplay());
         form.setOpenedAt(order.getOpenedAt());
         form.setComplaint(order.getComplaint());
         form.setDiagnosis(order.getDiagnosis());
@@ -494,18 +486,6 @@ public class WorkOrderService {
         }
     }
 
-    private User resolveAssignedUser(Long userId) {
-        if (userId == null) {
-            return null;
-        }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> NotFoundException.of("Kullanıcı", userId));
-        if (!user.isEnabled()) {
-            throw new BusinessRuleException("Pasif kullanıcı sorumlu olarak atanamaz.");
-        }
-        return user;
-    }
-
     private void validateOpenedAt(LocalDateTime openedAt) {
         if (openedAt == null) {
             throw new BusinessRuleException("Açılış tarihi zorunludur.");
@@ -513,12 +493,6 @@ public class WorkOrderService {
         if (openedAt.isAfter(LocalDateTime.now(clock).plusMinutes(5))) {
             throw new BusinessRuleException("İş emri açılış tarihi gelecekte olamaz.");
         }
-    }
-
-    private String nextOrderNo(LocalDateTime openedAt) {
-        Long sequence = workOrderRepository.nextOrderSequence();
-        int year = openedAt == null ? LocalDate.now(clock).getYear() : openedAt.getYear();
-        return "IS-" + year + "-" + String.format(Locale.ROOT, "%06d", sequence);
     }
 
     private String like(String value) {

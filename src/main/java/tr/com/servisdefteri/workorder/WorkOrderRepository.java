@@ -16,9 +16,6 @@ import java.util.Optional;
 
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
-    @Query(value = "select nextval('work_order_no_seq')", nativeQuery = true)
-    Long nextOrderSequence();
-
     @Query(value = """
             select w from WorkOrder w join fetch w.customer c join fetch w.vehicle v
             left join fetch w.assignedUser

@@ -177,12 +177,12 @@
                                 <div class="form-text">Liste seçilen müşteriye göre filtrelenir.</div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label" for="assignedUserId">Sorumlu çalışan</label>
-                                <select class="form-select" id="assignedUserId" th:field="*{assignedUserId}">
-                                    <option value="">Atanmadı</option>
-                                    <option th:each="u : ${users}" th:value="${u.id}"
-                                            th:text="${u.fullName + ' · ' + u.role.label}"></option>
-                                </select>
+                                <label class="form-label" for="assignedName">Sorumlu çalışan</label>
+                                <input class="form-control" id="assignedName" type="text"
+                                       th:field="*{assignedName}"
+                                       th:classappend="${#fields.hasErrors('assignedName')} ? 'is-invalid'"
+                                       maxlength="100" placeholder="Örn. Ahmet Usta">
+                                <div class="invalid-feedback" th:errors="*{assignedName}"></div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label" for="openedAt">Açılış tarihi <span class="required">*</span></label>

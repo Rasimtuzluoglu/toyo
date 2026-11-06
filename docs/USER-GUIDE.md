@@ -123,7 +123,7 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 4. **Fiş numarası** alanını girin. Bu alan **zorunludur**; aynı numara ikinci kez kullanılamaz.
 5. **Müşteri ne dedi?** alanına şikâyeti yazın.
 6. **Yapılacak iş** alanına işlemi yazın veya hazır seçeneklerden birine basın.
-7. **Kim ilgileniyor?** alanından sorumlu kişiyi seçin (varsayılan: işlemi açan kullanıcı).
+7. **Kim ilgileniyor?** alanına sorumlu kişinin adını yazın.
 8. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır.
 
 - **Kilometre** ve **ekip notu** isteğe bağlıdır; **Gelişmiş alanlar** bölümündedir.
@@ -139,14 +139,15 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 1. **Fiş numarasını** girin; zorunludur.
 2. **Plaka, müşteri veya telefon** alanına plakayı yazın; eşleşen araçlar tahmin listesinde çıkar.
 3. Yeni plakada ad soyad ve telefon alanları açılır; bu iki alan zorunludur.
-4. Hazır işlem düğmelerinden birini seçin veya yapılan işlemi yazın; tutarı girin.
-5. **Kaydet** veya **Kaydet ve Tamamla** deyin.
+4. **Kim ilgileniyor?** alanına sorumlu kişinin adını yazın.
+5. Hazır işlem düğmelerinden birini seçin veya yapılan işlemi yazın; tutarı girin.
+6. **Kaydet** veya **Kaydet ve Tamamla** deyin.
 
 **Kaydet ve Tamamla**, iş emrini oluşturur, işlemi ekler, durumu `Tamamlandı` yapar ve tutar varsa cari borcu otomatik oluşturur. Kayıt sonrası ekranda **Tahsilat Al**, **Teslim Tutanağı**, **Yeni İş Emri** ve **Yazdır** düğmeleri görünür.
 
 ### İş emri numarası
 
-Yeni iş emrinde **Fiş numarası** zorunludur. Aynı numara ikinci kez kullanılamaz. Borçlandırılmış iş emrinin numarası değiştirilemez.
+Yeni iş emrinde **Fiş numarası** zorunludur ve **otomatik üretilmez**; numarayı Excel’den kopyalayıp yapıştırabilirsiniz. Aynı numara ikinci kez kullanılamaz. Borçlandırılmış iş emrinin numarası değiştirilemez.
 
 > Müşteri ile aracın sahibi aynı olmalıdır. Farklı müşterinin aracıyla iş emri açılamaz.
 

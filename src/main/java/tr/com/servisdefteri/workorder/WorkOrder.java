@@ -52,6 +52,16 @@ public class WorkOrder {
     @JoinColumn(name = "assigned_user_id")
     private User assignedUser;
 
+    @Column(name = "assigned_name", length = 100)
+    private String assignedName;
+
+    public String getAssigneeDisplay() {
+        if (assignedName != null && !assignedName.isBlank()) {
+            return assignedName;
+        }
+        return assignedUser == null ? null : assignedUser.getFullName();
+    }
+
     @Column(name = "opened_at", nullable = false)
     private LocalDateTime openedAt;
 

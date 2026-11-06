@@ -51,6 +51,14 @@
                                 <div class="form-text" data-order-no-status></div>
                                 <div class="invalid-feedback" th:errors="*{orderNo}"></div>
                             </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="quickAssignedName">Kim ilgileniyor?</label>
+                                <input class="form-control" id="quickAssignedName" type="text"
+                                       th:field="*{assignedName}"
+                                       th:classappend="${#fields.hasErrors('assignedName')} ? 'is-invalid'"
+                                       maxlength="100" placeholder="Örn. Ahmet Usta">
+                                <div class="invalid-feedback" th:errors="*{assignedName}"></div>
+                            </div>
                         </div>
 
                         <div class="quick-plate">

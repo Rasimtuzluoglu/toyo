@@ -42,7 +42,8 @@ public class QuickWorkOrderForm {
     @Size(max = 2000, message = "Şikâyet en fazla 2000 karakter olabilir.")
     private String complaint;
 
-    private Long assignedUserId;
+    @Size(max = 100, message = "İlgilenen kişi en fazla 100 karakter olabilir.")
+    private String assignedName;
 
     @Size(max = 2000, message = "Ekip notu en fazla 2000 karakter olabilir.")
     private String notes;

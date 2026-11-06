@@ -31,8 +31,6 @@ import tr.com.servisdefteri.payment.PaymentMethod;
 import tr.com.servisdefteri.pdf.PdfService;
 import tr.com.servisdefteri.security.AppUserPrincipal;
 import tr.com.servisdefteri.security.Role;
-import tr.com.servisdefteri.security.User;
-import tr.com.servisdefteri.security.UserService;
 import tr.com.servisdefteri.settings.BusinessSettingsService;
 import tr.com.servisdefteri.vehicle.VehicleService;
 
@@ -53,7 +51,6 @@ public class WorkOrderController {
     private final WorkOrderService workOrderService;
     private final CustomerService customerService;
     private final VehicleService vehicleService;
-    private final UserService userService;
     private final BusinessSettingsService businessSettingsService;
     private final FormTokenService formTokenService;
     private final Clock clock;
@@ -65,7 +62,7 @@ public class WorkOrderController {
     private final VehicleDocumentService documentService;
 
     public WorkOrderController(WorkOrderService workOrderService, CustomerService customerService,
-                               VehicleService vehicleService, UserService userService,
+                               VehicleService vehicleService,
                                BusinessSettingsService businessSettingsService,
                                FormTokenService formTokenService, Clock clock,
                                ExportService exportService,
@@ -77,7 +74,6 @@ public class WorkOrderController {
         this.workOrderService = workOrderService;
         this.customerService = customerService;
         this.vehicleService = vehicleService;
-        this.userService = userService;
         this.businessSettingsService = businessSettingsService;
         this.formTokenService = formTokenService;
         this.clock = clock;
@@ -192,8 +188,6 @@ public class WorkOrderController {
         } else if (vehicleId != null) {
             quickForm.setPlate(vehicleService.findById(vehicleId).getPlate());
         }
-        quickForm.setAssignedUserId(principal == null ? null : principal.getId());
-        quickForm.setOrderNo(workOrderService.suggestOrderNo());
         return newOrderView(quickForm, session, model);
     }
 
@@ -202,7 +196,6 @@ public class WorkOrderController {
     public String createNewOrder(@Valid @ModelAttribute("quickForm") QuickWorkOrderForm quickForm,
                                  BindingResult bindingResult,
                                  @RequestParam(name = "formToken", required = false) String formToken,
-                                 @AuthenticationPrincipal AppUserPrincipal principal,
                                  HttpSession session,
                                  Model model,
                                  RedirectAttributes redirectAttributes) {
@@ -210,9 +203,6 @@ public class WorkOrderController {
             formTokenService.consume(session, formToken);
         } catch (BusinessRuleException ex) {
             bindingResult.reject("form.token", ex.getMessage());
-        }
-        if (quickForm.getAssignedUserId() == null && principal != null) {
-            quickForm.setAssignedUserId(principal.getId());
         }
         if (quickForm.getComplaint() == null || quickForm.getComplaint().isBlank()) {
             bindingResult.rejectValue("complaint", "complaint.required",
@@ -240,7 +230,6 @@ public class WorkOrderController {
 
     private String newOrderView(QuickWorkOrderForm quickForm, HttpSession session, Model model) {
         model.addAttribute("quickForm", quickForm);
-        model.addAttribute("users", userService.findAll().stream().filter(User::isEnabled).toList());
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/new";
@@ -290,7 +279,6 @@ public class WorkOrderController {
         if (plate != null && !plate.isBlank()) {
             quickForm.setPlate(plate.trim());
         }
-        quickForm.setOrderNo(workOrderService.suggestOrderNo());
         model.addAttribute("quickForm", quickForm);
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "workorders");
@@ -623,12 +611,10 @@ public class WorkOrderController {
     }
 
     private void addFormOptions(Model model, boolean includeInactive) {
-        List<User> users = userService.findAll().stream().filter(User::isEnabled).toList();
         model.addAttribute("customers", includeInactive ? customerService.allCustomers()
                 : customerService.activeCustomers());
         model.addAttribute("vehicles", includeInactive ? vehicleService.allVehicles()
                 : vehicleService.activeVehicles());
-        model.addAttribute("users", users);
     }
 
     private String quickFormView(QuickWorkOrderForm quickForm, String source,

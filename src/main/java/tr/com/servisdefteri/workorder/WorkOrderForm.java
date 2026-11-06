@@ -2,6 +2,7 @@ package tr.com.servisdefteri.workorder;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 public class WorkOrderForm {
 
+    @NotBlank(message = "İş emri numarası zorunludur.")
     @Size(max = 30, message = "İş emri numarası en fazla 30 karakter olabilir.")
     private String orderNo;
 
@@ -23,7 +25,8 @@ public class WorkOrderForm {
     @NotNull(message = "Araç seçilmelidir.")
     private Long vehicleId;
 
-    private Long assignedUserId;
+    @Size(max = 100, message = "İlgilenen kişi en fazla 100 karakter olabilir.")
+    private String assignedName;
 
     @NotNull(message = "Açılış tarihi zorunludur.")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")

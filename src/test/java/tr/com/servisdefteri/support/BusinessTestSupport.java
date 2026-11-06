@@ -74,6 +74,7 @@ public abstract class BusinessTestSupport extends IntegrationTestSupport {
 
     protected WorkOrder createOpenOrder(Customer customer, Vehicle vehicle) {
         WorkOrderForm form = new WorkOrderForm();
+        form.setOrderNo("TST-" + System.nanoTime());
         form.setCustomerId(customer.getId());
         form.setVehicleId(vehicle.getId());
         form.setOpenedAt(LocalDateTime.now().minusHours(2));
