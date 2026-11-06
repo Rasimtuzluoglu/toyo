@@ -179,7 +179,19 @@ public class VehicleService {
         vehicle.setActive(false);
         Vehicle saved = vehicleRepository.save(vehicle);
         auditService.record(AuditAction.VEHICLE_DELETED, "Araç", saved.getId(),
-                "Araç silindi (pasife alındı): " + saved.getPlate());
+                "Araç pasife alındı: " + saved.getPlate());
+    }
+
+    @Transactional
+    public void activate(Long id) {
+        Vehicle vehicle = findById(id);
+        if (vehicle.isActive()) {
+            return;
+        }
+        vehicle.setActive(true);
+        Vehicle saved = vehicleRepository.save(vehicle);
+        auditService.record(AuditAction.VEHICLE_RESTORED, "Araç", saved.getId(),
+                "Araç geri alındı: " + saved.getPlate());
     }
 
     @Transactional(readOnly = true)

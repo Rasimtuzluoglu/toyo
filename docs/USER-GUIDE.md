@@ -78,8 +78,9 @@ Telefon numarası normalize edilir (boşluk/tire/`+90`/`0` farkları giderilir).
 ### Aktif/pasif ve silme
 
 - Pasif müşteriye yeni araç veya yeni iş emri açılamaz. Mevcut kayıtlar ve cari hareketler korunur.
-- Müşteri veya araç detayında **PATRON** için **Sil** düğmesi vardır. Silme, finansal kayıtları yok etmez; kaydı ve bağlı araçları **pasife alır**. Geçmiş iş emirleri, tahsilatlar ve cari hareketler korunur.
-- Listeler varsayılan olarak yalnızca **aktif** kayıtları gösterir. Silinenleri görmek için **Durum → Tümü** veya **Pasif** seçin.
+- Müşteri veya araç detayında **PATRON** için **Pasife Al** düğmesi vardır. İşlem finansal kayıtları yok etmez; kaydı ve bağlı araçları pasife alır. Geçmiş iş emirleri, tahsilatlar ve cari hareketler korunur.
+- Pasif kayıt detayında **Geri Al** düğmesiyle müşteri/araç yeniden aktifleştirilir; müşteri geri alınınca araçları da geri alınır.
+- Listeler varsayılan olarak yalnızca **aktif** kayıtları gösterir. Pasifleri görmek için **Durum → Tümü** veya **Pasif** seçin.
 - Durum değişikliği yalnızca PATRON yetkisindedir. Yeni müşteri/araç kaydı PATRON ve SERVIS tarafından açılabilir; MUHASEBE yalnızca görüntüler.
 
 ## Araçlar
@@ -118,6 +119,7 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 8. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır.
 
 - **Kilometre** ve **ekip notu** isteğe bağlıdır; **Gelişmiş alanlar** bölümündedir.
+- **Düzenle** ekranı da sadeleştirildi: fiş no, sorumlu, şikâyet ve yapılan işlemler ana bölümde; müşteri/araç, açılış tarihi, tespit ve ekip notu **Gelişmiş alanlar** altında.
 - “Tespit edilen arıza”, “yapılan işlemler” ve işçilik/parça kalemleri kayıttan sonra detay ekranında girilir.
 - “Yapılacak iş” iş emrine hizmet kalemi olarak eklenir; fiyatı detaydan güncellenir.
 - Plaka daha önce açılmışsa mevcut müşteri ve araç yeniden kullanılır; mükerrer kayıt açılmaz.
@@ -241,7 +243,7 @@ Bakiye = Borç toplamı − Alacak toplamı
 1. **Tahsilatlar → Yeni Tahsilat**
 2. Müşteri seçin → **Açık Borçları Getir**
 3. Tarih, tutar, ödeme yöntemi (Nakit/Banka/Kart), açıklama girin.
-4. Açık borç satırlarına dağıtım tutarlarını yazın veya **Kalanı Dağıt** düğmesini kullanın. **Tüm Açık Borcu Getir** düğmesi tahsilat tutarını tüm açık borç toplamına ayarlar.
+4. **Tek açık borç varsa tutar ve dağıtım otomatik doldurulur**; kontrol edip doğrudan kaydedebilirsiniz. Birden fazla borçta dağıtım satırlarını doldurun veya **Kalanı Dağıt** / **Tüm Açık Borcu Getir** düğmelerini kullanın.
 5. Ekranın altındaki özet, dağıtılan tutarı ve varsa avans olarak kalacak tutarı gösterir.
 6. Kaydedin.
 
@@ -318,6 +320,7 @@ Sağ üstteki **oynat** simgesi 6 adımlık sunum turunu başlatır: kokpit → 
 - **İşletme bilgileri:** işletme adı, slogan, telefon, e-posta, adres, vergi dairesi/no ve ana renk. Bu bilgiler giriş ekranı, menü, iş emri, makbuz ve ekstre çıktılarında görünür.
 - **Logo:** PNG/JPEG/WebP, en fazla 2 MB. Yüklenen logo giriş ekranı, menü, belgeler ve PDF’lerde kullanılır; kaldırılabilir.
 - Yedek klasörü, saklama süresi ve cron bilgisi
+- Bilgisayar 02:00'de kapalıysa sonraki açılışta **telafi yedeği** alınır
 - **Sunucuda Yedekle** ve **Yedek Al ve İndir** (tarayıcıda istediğiniz klasörü seçerek kaydetme)
 - Geçmiş yedekleri **İndir** ile bilgisayara alma
 - Son denetim kayıtları

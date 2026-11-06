@@ -81,11 +81,23 @@ public class CustomerController {
         try {
             customerService.deactivate(id);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Müşteri silindi. Geçmiş iş emri ve finans kayıtları korunuyor.");
+                    "Müşteri pasife alındı. Geçmiş iş emri ve finans kayıtları korunuyor.");
         } catch (BusinessRuleException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/customers?active=true";
+    }
+
+    @PostMapping("/{id}/activate")
+    @PreAuthorize("hasRole('PATRON')")
+    public String activate(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            customerService.activate(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Müşteri ve araçları geri alındı.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/customers?active=all";
     }
 
     @GetMapping("/export.csv")

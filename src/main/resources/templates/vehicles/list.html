@@ -127,10 +127,18 @@
                                         <form sec:authorize="hasRole('PATRON')" th:if="${vehicle.active}"
                                               th:action="@{/vehicles/{id}/delete(id=${vehicle.id})}" method="post"
                                               data-submit-once class="d-inline"
-                                              data-confirm="Araç silinsin mi? Geçmiş iş emirleri ve finans kayıtları korunur; araç pasife alınır.">
+                                              data-confirm="Araç pasife alınsın mı? Geçmiş iş emirleri ve finans kayıtları korunur; araç pasife alınır.">
                                             <button class="btn btn-outline-danger btn-sm" type="submit"
-                                                    title="Aracı sil" aria-label="Aracı sil">
-                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                                    title="Aracı pasife al" aria-label="Aracı pasife al">
+                                                <i class="bi bi-archive" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                        <form sec:authorize="hasRole('PATRON')" th:if="${!vehicle.active}"
+                                              th:action="@{/vehicles/{id}/activate(id=${vehicle.id})}" method="post"
+                                              data-submit-once class="d-inline">
+                                            <button class="btn btn-outline-success btn-sm" type="submit"
+                                                    title="Aracı geri al" aria-label="Aracı geri al">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                                             </button>
                                         </form>
                                     </div>

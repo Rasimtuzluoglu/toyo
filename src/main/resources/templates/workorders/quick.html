@@ -45,7 +45,10 @@
                                 </label>
                                 <input class="form-control" id="quickOrderNo" type="text" th:field="*{orderNo}"
                                        th:classappend="${#fields.hasErrors('orderNo')} ? 'is-invalid'"
+                                       th:attr="data-order-no-check-url=@{/work-orders/order-no/available}"
+                                       data-order-no
                                        maxlength="30" placeholder="Örn. 2026-1001" required>
+                                <div class="form-text" data-order-no-status></div>
                                 <div class="invalid-feedback" th:errors="*{orderNo}"></div>
                             </div>
                         </div>

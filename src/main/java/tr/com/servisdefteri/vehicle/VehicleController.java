@@ -120,11 +120,23 @@ public class VehicleController {
         try {
             vehicleService.deactivate(id);
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Araç silindi. Geçmiş iş emri ve finans kayıtları korunuyor.");
+                    "Araç pasife alındı. Geçmiş iş emri ve finans kayıtları korunuyor.");
         } catch (BusinessRuleException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
         return "redirect:/vehicles?active=true";
+    }
+
+    @PostMapping("/{id}/activate")
+    @PreAuthorize("hasRole('PATRON')")
+    public String activate(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            vehicleService.activate(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Araç geri alındı.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/vehicles?active=all";
     }
 
     @GetMapping("/export.csv")

@@ -4,27 +4,28 @@ Toyota Plaza Öztoprak için geliştirilen bu uygulama; müşteri, araç, iş em
 tahsilat ve randevu süreçlerini **tek bir yerel ağ uygulamasında** toplar. Veri işletmenin
 kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme gerekmez.
 
-> Güncel durum: üretim ve demo ortamı çalışıyor · **93 otomatik test** · yerel CI + Docker imaj doğrulaması
+> Güncel durum: üretim ve demo ortamı çalışıyor · **95 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Öne Çıkanlar
 
 **Operasyon**
 - Günlük iş panosu: bitmemiş işler her gün devreder, bitenler ertesi gün listeden kalkar.
 - Kanban üzerinde sürükle-bırak veya tek tıkla durum ilerletme; plaka/müşteri araması.
-- Yoğun günler için kompakt kart, sabit yükseklikte kayan kolonlar, yaş filtreleri ve katlanabilir biten kolonları.
+- Yoğun günler için kompakt kart, sabit yükseklikte kayan kolonlar, yaş filtreleri ve katlanabilir biten kolonları; fiş no kompakt kartta da görünür.
 - Telefonda **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmeleri.
 - Yeni İş Emri tek ekran: plaka, müşteri şikâyeti, yapılacak iş ve sorumlu kişi; müşteri/araç listesi ve gereksiz alanlar gizli.
+- Sıradaki fiş no önerisi, yazarken mükerrer kontrolü ve sade düzenleme ekranı.
 - Plaka ile hızlı iş emri: kayıtlı plakada müşteri/araç otomatik gelir; yeni plakada müşteri + araç + iş emri tek adımda oluşur.
 - Hazır işlem düğmeleri, tek ekranda **Kaydet ve Tamamla**.
 - Randevuyu otomatik “Geldi” yapıp plakası ön dolu yeni iş emrini açma.
 - Günlük ve haftalık randevu takvimi; bakım hatırlatmaları (180 gün / 10.000 km).
 - Ctrl+K komut paleti, 6 adımlık sunum turu, zorunlu manuel fiş numarası ve hazır kalem şablonları.
-- Müşteri ve araç silme: kayıtlar geçmişi bozmadan pasife alınır; listeler varsayılan olarak aktifleri gösterir.
+- Müşteri ve araç **Pasife Al / Geri Al**: geçmiş korunur, listeler varsayılan olarak aktifleri gösterir.
 
 **Finans**
 - İş emri tamamlanınca otomatik cari borç; iptalde ters kayıt (silme yok).
 - Tamamla + tahsilat: **Cari / Nakit / Kart**.
-- Tahsilatları birden fazla borca dağıtma, tahsilat iptali, cari ekstre ve yaşlandırma.
+- Tek açık borçta tutar/dağıtım otomatik; çoklu borç dağıtımı, tahsilat iptali, cari ekstre ve yaşlandırma.
 - Excel (.xlsx), CSV ve PDF çıktıları; dashboard ve raporlar.
 
 **Belgeler ve marka**
@@ -37,7 +38,8 @@ kendi bilgisayarında kalır; bulut hesabı, dış servis veya port yönlendirme
 - CSRF, BCrypt (strength 12), oturum sabitleme, 5 hatalı girişte 15 dakika kilit.
 - İşlem denetim kaydı: kullanıcı, zaman, IP ve detay.
 - Tek seferlik kurulum; kullanıcılar silinse bile `/setup` yeniden açılmaz.
-- Günlük otomatik yedek + güncelleme öncesi yedek; yedek indirme ve geri yükleme tatbikatı.
+- Günlük otomatik yedek + güncelleme öncesi yedek; kaçırılan yedek açılışta telafi edilir.
+- Yedek indirme, geri yükleme tatbikatı ve otomatik yeniden başlayan güncelleme ajanı.
 - Ayarlar → GitHub son commit kontrolü ve host ajanıyla Docker üzerinden güncelleme.
 
 Kapsam dışı: e-fatura, banka/kart ödeme kuruluşu entegrasyonu, otomatik SMS/WhatsApp,
@@ -250,7 +252,7 @@ mükerrer borç/plaka/tahsilat kontrolleri, rol yetkileri, panonun devir/bitiş 
 plaka araması, yaş filtreleri, Flyway migration ve kısıtlar, CSRF/form belirteci,
 tüm ana sayfaların render’ı, PDF/Excel/CSV çıktıları, araç kabul/teslim ve randevu akışı.
 
-Son çalıştırma: **93 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
+Son çalıştırma: **95 test, 0 hata** (`mvn clean package`). Rapor: `target/surefire-reports/`.
 
 ### Yerel CI
 

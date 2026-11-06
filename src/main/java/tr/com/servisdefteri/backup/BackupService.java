@@ -2,6 +2,8 @@ package tr.com.servisdefteri.backup;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -61,6 +63,30 @@ public class BackupService {
             runBackup("ZAMANLANMIS");
         } catch (RuntimeException ex) {
             log.error("Zamanlanmış yedekleme başarısız oldu: {}", ex.getMessage());
+        }
+    }
+
+    /**
+     * Bilgisayar 02:00'de kapalıysa veya uygulama çalışmıyorsa, açılışta
+     * son başarılı yedeğin üzerinden 36 saatten fazla geçmişse yedeği telafi eder.
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void catchUpMissedBackup() {
+        if (!properties.isEnabled()) {
+            return;
+        }
+        try {
+            LocalDateTime threshold = LocalDateTime.now(clock).minusHours(36);
+            boolean due = backupRunRepository
+                    .findFirstByStatusOrderByStartedAtDesc(BackupStatus.BASARILI)
+                    .map(run -> run.getStartedAt().isBefore(threshold))
+                    .orElse(true);
+            if (due) {
+                log.info("Kaçırılmış yedek tespit edildi; açılış telafi yedeği alınıyor.");
+                runBackup("TELAFI");
+            }
+        } catch (RuntimeException ex) {
+            log.error("Açılış telafi yedeği alınamadı: {}", ex.getMessage());
         }
     }
 

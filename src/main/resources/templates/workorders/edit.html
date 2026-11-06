@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('İş Emrini Düzenle')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('workorders')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">İş Emri · <span th:text="${order.orderNo}">IS-0000</span></div>
+                    <h1 class="page-title">
+                        İş Emrini Düzenle
+                        <span class="sd-badge ms-2"
+                              th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                              th:text="${order.status.label}">Durum</span>
+                    </h1>
+                    <p class="page-subtitle">
+                        <span th:text="${order.customer.name}">Müşteri</span>
+                        <span class="mx-1">·</span>
+                        <span th:text="${order.vehicle.plate}">34ABC123</span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}(id=${order.id})}">
+                        <i class="bi bi-arrow-left me-1"></i> İş Emrine Dön
+                    </a>
+                </div>
+            </div>
+
+            <form method="post" th:action="@{/work-orders/{id}(id=${order.id})}"
+                  th:object="${workOrderForm}" data-submit-once>
+                <div th:replace="~{fragments/layout :: globalErrors}"></div>
+
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>İş bilgileri</h2>
+                        <span class="record-meta">Günlük kullanılan alanlar</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label" for="orderNo">Fiş numarası <span class="required">*</span></label>
+                                <input class="form-control" id="orderNo" type="text" th:field="*{orderNo}"
+                                       th:classappend="${#fields.hasErrors('orderNo')} ? 'is-invalid'"
+                                       th:readonly="${order.debited}" maxlength="30" required>
+                                <div class="form-text" th:if="${order.debited}">Borçlandırılmış iş emrinin numarası değiştirilemez.</div>
+                                <div class="invalid-feedback" th:errors="*{orderNo}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="assignedUserId">Kim ilgileniyor?</label>
+                                <select class="form-select" id="assignedUserId" th:field="*{assignedUserId}">
+                                    <option value="">Seçilmedi</option>
+                                    <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.fullName}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{assignedUserId}"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="mileage">Kilometre</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="mileage" type="number" min="0" th:field="*{mileage}"
+                                           th:classappend="${#fields.hasErrors('mileage')} ? 'is-invalid'"
+                                           placeholder="Araç kilometresi">
+                                    <span class="input-group-text">km</span>
+                                </div>
+                                <div class="invalid-feedback d-block" th:errors="*{mileage}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="complaint">Müşteri ne dedi?</label>
+                                <textarea class="form-control" id="complaint" rows="2" th:field="*{complaint}"
+                                          th:classappend="${#fields.hasErrors('complaint')} ? 'is-invalid'"
+                                          maxlength="2000" placeholder="Araç hangi şikâyetle geldi?"></textarea>
+                                <div class="invalid-feedback" th:errors="*{complaint}"></div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label" for="workDone">Yapılan işlemler</label>
+                                <textarea class="form-control" id="workDone" rows="2" th:field="*{workDone}"
+                                          th:classappend="${#fields.hasErrors('workDone')} ? 'is-invalid'"
+                                          maxlength="2000" placeholder="Yapılan işlemler"></textarea>
+                                <div class="invalid-feedback" th:errors="*{workDone}"></div>
+                            </div>
+
+                            <div class="col-12">
+                                <details class="quick-advanced"
+                                         th:open="${#fields.hasErrors('customerId') or #fields.hasErrors('vehicleId')
+                                             or #fields.hasErrors('openedAt') or #fields.hasErrors('diagnosis')
+                                             or #fields.hasErrors('notes')}">
+                                    <summary><i class="bi bi-sliders me-1"></i>Gelişmiş alanlar</summary>
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="customerSelect">Müşteri</label>
+                                            <select class="form-select" id="customerSelect" th:field="*{customerId}"
+                                                    th:disabled="${order.debited}"
+                                                    th:classappend="${#fields.hasErrors('customerId')} ? 'is-invalid'">
+                                                <option value="">Müşteri seçin</option>
+                                                <option th:each="c : ${customers}" th:value="${c.id}"
+                                                        th:text="${c.name}"></option>
+                                            </select>
+                                            <input type="hidden" th:if="${order.debited}" th:field="*{customerId}">
+                                            <div class="invalid-feedback" th:errors="*{customerId}"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="vehicleSelect">Araç</label>
+                                            <select class="form-select" id="vehicleSelect" th:field="*{vehicleId}"
+                                                    th:disabled="${order.debited}"
+                                                    th:classappend="${#fields.hasErrors('vehicleId')} ? 'is-invalid'">
+                                                <option value="" data-empty>Önce müşteri seçin</option>
+                                                <option th:each="v : ${vehicles}" th:value="${v.id}"
+                                                        th:attr="data-customer=${v.customer.id},data-mileage=${v.currentMileage}"
+                                                        th:text="${v.plate + ' · ' + (v.brand == null ? '' : v.brand) + ' ' + (v.model == null ? '' : v.model)}"></option>
+                                            </select>
+                                            <input type="hidden" th:if="${order.debited}" th:field="*{vehicleId}">
+                                            <div class="invalid-feedback" th:errors="*{vehicleId}"></div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="openedAt">Açılış tarihi</label>
+                                            <input class="form-control" id="openedAt" type="datetime-local" th:field="*{openedAt}"
+                                                   th:classappend="${#fields.hasErrors('openedAt')} ? 'is-invalid'">
+                                            <div class="invalid-feedback" th:errors="*{openedAt}"></div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label" for="diagnosis">Ustanın tespiti</label>
+                                            <input class="form-control" id="diagnosis" type="text" th:field="*{diagnosis}"
+                                                   th:classappend="${#fields.hasErrors('diagnosis')} ? 'is-invalid'"
+                                                   maxlength="2000" placeholder="Tespit edilen arıza / not">
+                                            <div class="invalid-feedback" th:errors="*{diagnosis}"></div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label" for="notes">Ekip notu (müşteri görmez)</label>
+                                            <textarea class="form-control" id="notes" rows="2" th:field="*{notes}"
+                                                      th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid'"
+                                                      maxlength="2000"></textarea>
+                                            <div class="invalid-feedback" th:errors="*{notes}"></div>
+                                        </div>
+                                    </div>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/work-orders/{id}(id=${order.id})}">Vazgeç</a>
+                    <button class="btn btn-primary" type="submit">
+                        <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                        <i class="bi bi-check2-circle me-1"></i> Kaydet
+                    </button>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

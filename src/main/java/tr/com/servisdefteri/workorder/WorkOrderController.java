@@ -3,6 +3,7 @@ package tr.com.servisdefteri.workorder;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.CsvUtil;
@@ -191,6 +193,7 @@ public class WorkOrderController {
             quickForm.setPlate(vehicleService.findById(vehicleId).getPlate());
         }
         quickForm.setAssignedUserId(principal == null ? null : principal.getId());
+        quickForm.setOrderNo(workOrderService.suggestOrderNo());
         return newOrderView(quickForm, session, model);
     }
 
@@ -287,10 +290,22 @@ public class WorkOrderController {
         if (plate != null && !plate.isBlank()) {
             quickForm.setPlate(plate.trim());
         }
+        quickForm.setOrderNo(workOrderService.suggestOrderNo());
         model.addAttribute("quickForm", quickForm);
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/quick";
+    }
+
+    @GetMapping(value = "/order-no/available", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public OrderNoCheck orderNoAvailable(@RequestParam(required = false) String orderNo) {
+        boolean available = workOrderService.isOrderNoAvailable(orderNo);
+        return new OrderNoCheck(available,
+                available ? "Bu numara kullanılabilir." : "Bu numara kullanılıyor veya boş.");
+    }
+
+    public record OrderNoCheck(boolean available, String message) {
     }
 
     @PostMapping
@@ -348,7 +363,7 @@ public class WorkOrderController {
         model.addAttribute("workOrderForm", workOrderService.toForm(order));
         addFormOptions(model, true);
         model.addAttribute("activeMenu", "workorders");
-        return "workorders/form";
+        return "workorders/edit";
     }
 
     @PostMapping("/{id}")
@@ -363,7 +378,7 @@ public class WorkOrderController {
             model.addAttribute("order", order);
             addFormOptions(model, true);
             model.addAttribute("activeMenu", "workorders");
-            return "workorders/form";
+            return "workorders/edit";
         }
         try {
             workOrderService.update(id, form);
@@ -374,7 +389,7 @@ public class WorkOrderController {
             model.addAttribute("order", order);
             addFormOptions(model, true);
             model.addAttribute("activeMenu", "workorders");
-            return "workorders/form";
+            return "workorders/edit";
         }
     }
 

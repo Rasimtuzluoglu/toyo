@@ -101,7 +101,7 @@ Tek seferlik kurulum:
 powershell -ExecutionPolicy Bypass -File .\scripts\install-update-agent.ps1
 ```
 
-Bu betik ajanı Startup klasörüne ekler ve hemen başlatır. Ajan her 10 saniyede `updates/agent.status` dosyasına heartbeat yazar; Ayarlar ekranında **Ajan hazır** görünür.
+Bu betik ajanı **Windows Görev Zamanlayıcı**'ya ekler ve hemen başlatır. Görev oturum açılışında çalışır; ajan beklenmedik şekilde kapanırsa Windows 1 dakika içinde yeniden başlatır. Ajan her 10 saniyede `updates/agent.status` dosyasına heartbeat yazar; Ayarlar ekranında **Ajan hazır** görünür.
 
 - **Manuel güncelleme:** Ayarlar → **Kontrol Et** → **Güncelle ve Yeniden Başlat**. Uygulama 1-3 dakika erişilemez olabilir ve oturumlar kapanır.
 - **Otomatik güncelleme:** Ajanı `UPDATE_AUTO=true` ortam değişkeniyle başlatırsanız 5 dakikada bir GitHub kontrol edilir ve yeni commit otomatik uygulanır. Canlı kullanımda mesai saatleri dışında tercih edin.

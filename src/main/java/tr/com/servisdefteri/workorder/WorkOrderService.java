@@ -373,6 +373,19 @@ public class WorkOrderService {
         return saved;
     }
 
+    @Transactional
+    public String suggestOrderNo() {
+        return nextOrderNo(LocalDateTime.now(clock));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isOrderNoAvailable(String orderNo) {
+        if (orderNo == null || orderNo.isBlank()) {
+            return false;
+        }
+        return !workOrderRepository.existsByOrderNoIgnoreCase(orderNo.trim());
+    }
+
     @Transactional(readOnly = true)
     public WorkOrderItemForm toItemForm(WorkOrderItem item) {
         WorkOrderItemForm form = new WorkOrderItemForm();

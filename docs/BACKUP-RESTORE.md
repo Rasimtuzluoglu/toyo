@@ -10,6 +10,7 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 - Konum: Ayarlar’daki **Yedek klasörü** alanı; boşsa `BACKUP_DIR` (Docker'da `/app/backups`)
 - Saklama: varsayılan 14 gün (`BACKUP_RETENTION_DAYS`); süresi dolan `.dump` dosyaları silinir, veritabanındaki `backup_runs` kayıtları kalır
 - Sonuçlar `backup_runs` tablosuna ve denetim kaydına yazılır
+- Bilgisayar 02:00'de kapalıysa, sonraki açılışta son başarılı yedek 36 saatten eskiyse **telafi yedeği** otomatik alınır
 - Yedek dosyaları web kökünde değildir; indirme yalnızca PATRON oturumuyla yapılır
 
 > **Önemli:** Otomatik yedek alınması, geri yüklemenin başarılı olduğunu kanıtlamaz. Aşağıdaki geri yükleme testi düzenli olarak yapılmalıdır.

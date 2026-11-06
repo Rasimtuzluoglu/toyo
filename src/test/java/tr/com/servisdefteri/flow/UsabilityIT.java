@@ -221,6 +221,15 @@ class UsabilityIT extends BusinessTestSupport {
                         org.hamcrest.Matchers.containsString("Silinecek Müşteri"))));
         mockMvc.perform(get("/customers").param("active", "all").with(user(principal(patron))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Silinecek Müşteri")));
+
+        mockMvc.perform(post("/customers/{id}/activate", customer.getId())
+                        .with(user(principal(patron)))
+                        .with(csrf()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/customers?active=all"));
+
+        assertThat(customerService.findById(customer.getId()).isActive()).isTrue();
+        assertThat(vehicleService.findById(vehicle.getId()).isActive()).isTrue();
     }
 
     @Test
@@ -236,6 +245,46 @@ class UsabilityIT extends BusinessTestSupport {
                 .andExpect(redirectedUrl("/vehicles?active=true"));
 
         assertThat(vehicleService.findById(vehicle.getId()).isActive()).isFalse();
+    }
+
+    @Test
+    void orderNumberAvailabilityEndpointDetectsDuplicates() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Numara Kontrol Müşteri", "0555 201 01 01");
+        Vehicle vehicle = createVehicle(customer, "34 AVL 001");
+        tr.com.servisdefteri.workorder.WorkOrderForm form =
+                new tr.com.servisdefteri.workorder.WorkOrderForm();
+        form.setOrderNo("AVL-2026-001");
+        form.setCustomerId(customer.getId());
+        form.setVehicleId(vehicle.getId());
+        form.setOpenedAt(LocalDateTime.now().minusMinutes(5));
+        workOrderService.create(form);
+
+        mockMvc.perform(get("/work-orders/order-no/available")
+                        .param("orderNo", "avl-2026-001")
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(false));
+
+        mockMvc.perform(get("/work-orders/order-no/available")
+                        .param("orderNo", "AVL-2026-002")
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true));
+    }
+
+    @Test
+    void singleOpenDebtIsPrefilledOnPaymentPage() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Tek Borç Müşteri", "0555 202 02 02");
+        Vehicle vehicle = createVehicle(customer, "34 PAY 001");
+        createCompletedOrder(customer, vehicle, "1200.00");
+
+        mockMvc.perform(get("/payments/new")
+                        .param("customerId", customer.getId().toString())
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("value=\"1200.00\"")));
     }
 
     @Test

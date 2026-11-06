@@ -124,9 +124,34 @@ public class PaymentController {
         form.setPaymentDate(LocalDate.now(clock));
         model.addAttribute("paymentForm", form);
         prepare(form, model);
+        applySingleDebtDefaults(form);
         model.addAttribute("formToken", formTokenService.issue(session));
         model.addAttribute("activeMenu", "payments");
         return "payments/form";
+    }
+
+    /**
+     * Tek açık borç varsa tutarı ve dağıtımı hazırlar; kullanıcı yalnızca Kaydet'e basar.
+     */
+    private void applySingleDebtDefaults(PaymentForm form) {
+        if (form.getCustomerId() == null || form.getAmount() != null) {
+            return;
+        }
+        List<OpenDebt> debts = paymentService.openDebts(form.getCustomerId());
+        if (debts.size() != 1) {
+            return;
+        }
+        BigDecimal remaining = debts.get(0).getRemaining();
+        if (remaining == null || remaining.signum() <= 0) {
+            return;
+        }
+        form.setAmount(remaining);
+        if (form.getAllocations().isEmpty()) {
+            AllocationForm allocation = new AllocationForm();
+            allocation.setTransactionId(debts.get(0).id());
+            form.getAllocations().add(allocation);
+        }
+        form.getAllocations().get(0).setAmount(remaining);
     }
 
     @PostMapping

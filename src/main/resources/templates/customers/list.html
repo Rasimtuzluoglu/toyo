@@ -129,10 +129,18 @@
                                         <form sec:authorize="hasRole('PATRON')" th:if="${customer.active}"
                                               th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
                                               data-submit-once class="d-inline"
-                                              data-confirm="Müşteri silinsin mi? Geçmiş kayıtlar korunur; müşteri ve araçları pasife alınır.">
+                                              data-confirm="Müşteri pasife alınsın mı? Geçmiş kayıtlar korunur; müşteri ve araçları pasife alınır.">
                                             <button class="btn btn-outline-danger btn-sm" type="submit"
-                                                    title="Müşteriyi sil" aria-label="Müşteriyi sil">
-                                                <i class="bi bi-trash" aria-hidden="true"></i>
+                                                    title="Müşteriyi pasife al" aria-label="Müşteriyi pasife al">
+                                                <i class="bi bi-archive" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                        <form sec:authorize="hasRole('PATRON')" th:if="${!customer.active}"
+                                              th:action="@{/customers/{id}/activate(id=${customer.id})}" method="post"
+                                              data-submit-once class="d-inline">
+                                            <button class="btn btn-outline-success btn-sm" type="submit"
+                                                    title="Müşteriyi geri al" aria-label="Müşteriyi geri al">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
                                             </button>
                                         </form>
                                     </div>

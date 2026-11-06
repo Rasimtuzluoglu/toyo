@@ -850,6 +850,51 @@
             }
         });
 
+        var orderNoInput = document.querySelector('[data-order-no]');
+        if (orderNoInput) {
+            var orderNoCheckUrl = orderNoInput.getAttribute('data-order-no-check-url');
+            var orderNoStatus = document.querySelector('[data-order-no-status]');
+            var orderNoTimer = null;
+            var checkOrderNo = function () {
+                var value = orderNoInput.value.trim();
+                if (!orderNoStatus) {
+                    return;
+                }
+                if (!value) {
+                    orderNoStatus.textContent = '';
+                    orderNoStatus.className = 'form-text';
+                    return;
+                }
+                orderNoStatus.textContent = 'Kontrol ediliyor…';
+                orderNoStatus.className = 'form-text';
+                fetch(orderNoCheckUrl + '?orderNo=' + encodeURIComponent(value), {
+                    headers: { Accept: 'application/json' },
+                    credentials: 'same-origin'
+                }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('check failed');
+                    }
+                    return response.json();
+                }).then(function (data) {
+                    orderNoStatus.textContent = data.message || '';
+                    orderNoStatus.className = 'form-text ' + (data.available ? 'text-success' : 'text-danger');
+                }).catch(function () {
+                    orderNoStatus.textContent = '';
+                    orderNoStatus.className = 'form-text';
+                });
+            };
+            if (orderNoInput.value.trim()) {
+                checkOrderNo();
+            }
+            orderNoInput.addEventListener('input', function () {
+                if (orderNoTimer) {
+                    clearTimeout(orderNoTimer);
+                }
+                orderNoTimer = setTimeout(checkOrderNo, 400);
+            });
+            orderNoInput.addEventListener('blur', checkOrderNo);
+        }
+
         var quickPlate = document.querySelector('[data-quick-plate]');
         if (quickPlate) {
             var quickLookupUrl = quickPlate.getAttribute('data-lookup-url');

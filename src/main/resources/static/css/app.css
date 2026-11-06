@@ -816,7 +816,9 @@ a:hover {
 }
 
 .kanban-compact .kanban-order {
-    display: none;
+    margin-top: 0;
+    color: var(--sd-muted);
+    font-size: 0.7rem;
 }
 
 .kanban-compact .kanban-plate {

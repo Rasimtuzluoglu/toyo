@@ -122,7 +122,30 @@ public class CustomerService {
         vehicleRepository.saveAll(vehicles);
 
         auditService.record(AuditAction.CUSTOMER_DELETED, "Müşteri", customer.getId(),
-                "Müşteri silindi (pasife alındı): " + customer.getName()
+                "Müşteri pasife alındı: " + customer.getName()
+                        + ", araç sayısı=" + vehicles.size());
+    }
+
+    /**
+     * Pasife alınmış müşteriyi ve araçlarını yeniden aktifleştirir.
+     */
+    @Transactional
+    public void activate(Long id) {
+        Customer customer = findById(id);
+        if (customer.isActive()) {
+            return;
+        }
+        customer.setActive(true);
+        customerRepository.save(customer);
+
+        List<Vehicle> vehicles = vehicleRepository.findByCustomerIdOrderByPlateAsc(id);
+        for (Vehicle vehicle : vehicles) {
+            vehicle.setActive(true);
+        }
+        vehicleRepository.saveAll(vehicles);
+
+        auditService.record(AuditAction.CUSTOMER_RESTORED, "Müşteri", customer.getId(),
+                "Müşteri geri alındı: " + customer.getName()
                         + ", araç sayısı=" + vehicles.size());
     }
 
