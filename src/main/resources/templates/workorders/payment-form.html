@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Tahsilat Al')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('workorders')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Tahsilat</div>
+                    <h1 class="page-title">Tahsilat Al</h1>
+                    <p class="page-subtitle">
+                        <span th:text="${order.orderNo}">IS-0000</span>
+                        <span class="mx-1">·</span>
+                        <span th:text="${order.customer.name}">Müşteri</span>
+                        <span class="mx-1">·</span>
+                        <span th:text="${order.vehicle.plate}">34ABC123</span>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/work-orders/{id}(id=${order.id})}">
+                        <i class="bi bi-arrow-left me-1"></i> İş Emrine Dön
+                    </a>
+                </div>
+            </div>
+
+            <div class="stat-grid dashboard-kpis">
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-receipt"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(debt.amount)}">0,00 ₺</div>
+                    <div class="stat-label">İş emri borcu</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-check2-circle"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(debt.paid)}">0,00 ₺</div>
+                    <div class="stat-label">Tahsil edilen</div>
+                </div>
+                <div class="stat-card kpi-primary">
+                    <span class="stat-icon red"><i class="bi bi-wallet2"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(debt.remaining)}">0,00 ₺</div>
+                    <div class="stat-label">Kalan</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-cash-coin me-2"></i>Tahsilat bilgileri</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <form method="post" th:action="@{/work-orders/{id}/payment(id=${order.id})}"
+                                  data-submit-once>
+                                <input type="hidden" name="formToken" th:value="${formToken}">
+                                <div class="row g-3">
+                                    <div class="col-md-5">
+                                        <label class="form-label" for="amount">
+                                            Tahsilat tutarı <span class="required">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input class="form-control" id="amount" name="amount"
+                                                   type="number" step="0.01" min="0.01"
+                                                   th:max="${debt.remaining}" th:value="${amountValue}"
+                                                   required>
+                                            <span class="input-group-text">₺</span>
+                                        </div>
+                                        <div class="form-text">
+                                            En fazla kalan tutar kadar; kısmi tahsilat yapabilirsiniz.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <label class="form-label" for="method">
+                                            Ödeme yöntemi <span class="required">*</span>
+                                        </label>
+                                        <select class="form-select" id="method" name="method" required>
+                                            <option th:each="m : ${methods}"
+                                                    th:value="${m.name()}"
+                                                    th:text="${m.label}"
+                                                    th:selected="${m.name() == 'NAKIT'}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="description">Açıklama</label>
+                                        <input class="form-control" id="description" name="description"
+                                               type="text" maxlength="500"
+                                               th:value="${descriptionValue}"
+                                               placeholder="Örn. Teslimde nakit tahsilat">
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a class="btn btn-outline-secondary"
+                                       th:href="@{/work-orders/{id}(id=${order.id})}">Vazgeç</a>
+                                    <button class="btn btn-success" type="submit">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none"
+                                              aria-hidden="true"></span>
+                                        <i class="bi bi-check2-circle me-1"></i> Tahsilatı Kaydet
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-info-circle me-2"></i>Nasıl çalışır?</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <p class="mb-2">
+                                Servis, müşteriden bu iş emri için kısmi veya tam tahsilat alabilir.
+                            </p>
+                            <p class="mb-2">
+                                Tahsilat yalnızca bu iş emrinin borcuna işlenir; müşterinin diğer
+                                borçları bu ekranda görünmez.
+                            </p>
+                            <p class="mb-0 text-muted-soft">
+                                Kalan borç, muhasebe tarafından daha sonra Tahsilatlar ekranından
+                                tahsil edilebilir.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

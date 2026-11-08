@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Günlük Döküm')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('daily-report')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Rapor</div>
+                    <h1 class="page-title">Günlük Döküm</h1>
+                    <p class="page-subtitle">Seçilen günde açılan tüm iş emirleri; durum, tutar ve kalan borç.</p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/daily-report/export.xlsx(date=${selectedDate})}">
+                        <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                    </a>
+                    <a class="btn btn-outline-secondary"
+                       th:href="@{/daily-report/export.pdf(date=${selectedDate})}">
+                        <i class="bi bi-filetype-pdf me-1"></i> PDF
+                    </a>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-body">
+                    <form method="get" th:action="@{/daily-report}" class="filter-bar">
+                        <div>
+                            <label class="form-label" for="reportDate">Tarih</label>
+                            <input class="form-control" id="reportDate" type="date" name="date"
+                                   th:value="${selectedDate}" required>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-navy" type="submit">
+                                <i class="bi bi-calendar3 me-1"></i> Göster
+                            </button>
+                            <a class="btn btn-outline-secondary" th:href="@{/daily-report}">Bugün</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="stat-grid dashboard-kpis">
+                <div class="stat-card">
+                    <span class="stat-icon navy"><i class="bi bi-clipboard-check"></i></span>
+                    <div class="stat-value" th:text="${report.rows.size()}">0</div>
+                    <div class="stat-label">Açılan iş</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon amber"><i class="bi bi-cash-stack"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(report.totalAmount)}">0,00 ₺</div>
+                    <div class="stat-label">Toplam tutar</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon green"><i class="bi bi-check2-circle"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(report.totalPaid)}">0,00 ₺</div>
+                    <div class="stat-label">Tahsilat</div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon red"><i class="bi bi-wallet2"></i></span>
+                    <div class="stat-value money" th:text="${fmt.money(report.totalRemaining)}">0,00 ₺</div>
+                    <div class="stat-label">Kalan</div>
+                </div>
+            </div>
+
+            <div class="sd-card">
+                <div class="sd-card-header">
+                    <h2><i class="bi bi-calendar3-range me-2 text-danger"></i>Günlük işler</h2>
+                    <span class="record-meta" th:text="${fmt.date(selectedDate)}">01.01.2026</span>
+                </div>
+                <div class="sd-card-body p-0" th:if="${!report.rows.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>Fiş No</th>
+                                <th>Saat</th>
+                                <th>Müşteri</th>
+                                <th>Araç</th>
+                                <th>Yapılan iş</th>
+                                <th>İlgilenen</th>
+                                <th>Durum</th>
+                                <th class="text-end">Toplam</th>
+                                <th class="text-end">Tahsilat</th>
+                                <th class="text-end">Kalan</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="row : ${report.rows}">
+                                <td>
+                                    <a class="fw-semibold"
+                                       th:href="@{/work-orders/{id}(id=${row.orderId})}"
+                                       th:text="${row.orderNo}">IS-0000</a>
+                                </td>
+                                <td class="record-meta" th:text="${fmt.time(row.openedAt)}">09:00</td>
+                                <td>
+                                    <div th:text="${row.customerName}">Müşteri</div>
+                                    <div class="record-meta" th:text="${row.phone}">Telefon</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${row.plate}">34ABC123</div>
+                                    <div class="record-meta" th:text="${row.vehicle}">Toyota Corolla</div>
+                                </td>
+                                <td>
+                                    <div th:text="${row.workDone}">Yapılan iş</div>
+                                    <div class="record-meta" th:if="${row.complaint != null and !row.complaint.isEmpty()}"
+                                         th:text="${row.complaint}">Şikâyet</div>
+                                </td>
+                                <td th:text="${row.assignedName}">—</td>
+                                <td><span class="sd-badge sd-badge-neutral" th:text="${row.statusLabel}">Bekliyor</span></td>
+                                <td class="text-end money" th:text="${fmt.money(row.total)}">0,00 ₺</td>
+                                <td class="text-end money text-success" th:text="${fmt.money(row.paid)}">0,00 ₺</td>
+                                <td class="text-end money money-debt" th:text="${fmt.money(row.remaining)}">0,00 ₺</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="empty-state" th:if="${report.rows.isEmpty()}">
+                    <i class="bi bi-calendar3"></i>
+                    <strong>Bu tarihte iş emri yok</strong>
+                    Başka bir tarih seçin veya yeni iş emri oluşturun.
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

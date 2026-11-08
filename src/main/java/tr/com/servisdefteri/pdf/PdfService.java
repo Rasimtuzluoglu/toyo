@@ -20,6 +20,8 @@ import tr.com.servisdefteri.common.CsvUtil;
 import tr.com.servisdefteri.payment.Payment;
 import tr.com.servisdefteri.payment.PaymentAllocation;
 import tr.com.servisdefteri.payment.PaymentService;
+import tr.com.servisdefteri.report.DailyReportRow;
+import tr.com.servisdefteri.report.DailyReportView;
 import tr.com.servisdefteri.settings.BusinessSettings;
 import tr.com.servisdefteri.settings.BusinessSettingsService;
 import tr.com.servisdefteri.workorder.WorkOrder;
@@ -51,6 +53,7 @@ public class PdfService {
     private static final Color LIGHT = new Color(246, 248, 251);
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
     private static final String FONT_PATH = "fonts/NotoSans-Regular.ttf";
 
     private final BusinessSettingsService businessSettingsService;
@@ -236,6 +239,83 @@ public class PdfService {
             return output.toByteArray();
         } catch (DocumentException | IOException ex) {
             throw new IllegalStateException("Tahsilat makbuzu PDF'i oluşturulamadı.", ex);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] dailyReportPdf(DailyReportView report) {
+        BusinessSettings business = businessSettingsService.get();
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            Document document = new Document(PageSize.A4.rotate(), 28, 28, 28, 28);
+            PdfWriter.getInstance(document, output);
+            document.open();
+
+            BaseFont baseFont = createBaseFont();
+            Font normal = new Font(baseFont, 7.5f, Font.NORMAL, Color.DARK_GRAY);
+            Font small = new Font(baseFont, 7f, Font.NORMAL, MUTED);
+            Font bold = new Font(baseFont, 8f, Font.BOLD, NAVY);
+
+            addHeader(document, business, "GÜNLÜK İŞ DÖKÜMÜ", DATE.format(report.date()),
+                    report.rows().size() + " iş", "", baseFont);
+
+            Paragraph summary = new Paragraph(
+                    "Toplam tutar: " + money(report.totalAmount())
+                            + "   ·   Tahsilat: " + money(report.totalPaid())
+                            + "   ·   Kalan: " + money(report.totalRemaining()),
+                    bold);
+            summary.setSpacingAfter(6);
+            document.add(summary);
+
+            PdfPTable table = new PdfPTable(new float[]{1.1f, 0.7f, 1.0f, 1.6f, 2.9f,
+                    1.1f, 0.9f, 1.0f, 1.0f, 1.0f});
+            table.setWidthPercentage(100);
+            table.setHeaderRows(1);
+            addHeaderCell(table, "Fiş No", baseFont);
+            addHeaderCell(table, "Saat", baseFont);
+            addHeaderCell(table, "Plaka", baseFont);
+            addHeaderCell(table, "Müşteri", baseFont);
+            addHeaderCell(table, "Yapılan İş", baseFont);
+            addHeaderCell(table, "İlgilenen", baseFont);
+            addHeaderCell(table, "Durum", baseFont);
+            addHeaderCell(table, "Toplam", baseFont);
+            addHeaderCell(table, "Tahsilat", baseFont);
+            addHeaderCell(table, "Kalan", baseFont);
+
+            int index = 0;
+            for (DailyReportRow row : report.rows()) {
+                boolean shaded = index++ % 2 == 1;
+                addBodyCell(table, row.orderNo(), normal, Element.ALIGN_LEFT, shaded);
+                addBodyCell(table, row.openedAt() == null ? "" : TIME.format(row.openedAt()),
+                        normal, Element.ALIGN_LEFT, shaded);
+                addBodyCell(table, row.plate(), normal, Element.ALIGN_LEFT, shaded);
+                addBodyCell(table, row.customerName(), normal, Element.ALIGN_LEFT, shaded);
+                addBodyCell(table, row.workDone(), normal, Element.ALIGN_LEFT, shaded);
+                addBodyCell(table, row.assignedName(), normal, Element.ALIGN_LEFT, shaded);
+                addBodyCell(table, row.statusLabel(), normal, Element.ALIGN_LEFT, shaded);
+                addBodyCell(table, money(row.total()), normal, Element.ALIGN_RIGHT, shaded);
+                addBodyCell(table, money(row.paid()), normal, Element.ALIGN_RIGHT, shaded);
+                addBodyCell(table, money(row.remaining()), normal, Element.ALIGN_RIGHT, shaded);
+            }
+            if (report.rows().isEmpty()) {
+                PdfPCell empty = new PdfPCell(new Phrase("Bu tarihte açılan iş emri yok.", normal));
+                empty.setColspan(10);
+                empty.setHorizontalAlignment(Element.ALIGN_CENTER);
+                empty.setPadding(10);
+                table.addCell(empty);
+            }
+            document.add(table);
+
+            Paragraph note = new Paragraph("Bu döküm " + safe(business.getName())
+                    + " tarafından " + DATE.format(report.date())
+                    + " tarihinde açılan iş emirlerini içerir. Tutarlar iş emri ve cari kayıtlarından alınmıştır.",
+                    small);
+            note.setSpacingBefore(12);
+            document.add(note);
+
+            document.close();
+            return output.toByteArray();
+        } catch (DocumentException | IOException ex) {
+            throw new IllegalStateException("Günlük döküm PDF'i oluşturulamadı.", ex);
         }
     }
 

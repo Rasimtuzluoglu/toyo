@@ -216,6 +216,28 @@ public class AccountService {
         return debt == null ? null : debt.getId();
     }
 
+    /**
+     * İş emrinin aktif borcunu, tahsil edilen tutarı ve kalanı döndürür.
+     * Borç yoksa null döner; tamamen ödenmiş borçta kalan 0 olur.
+     */
+    @Transactional(readOnly = true)
+    public WorkOrderDebt workOrderDebt(Long workOrderId) {
+        AccountTransaction debt = activeWorkOrderDebt(workOrderId);
+        if (debt == null) {
+            return null;
+        }
+        BigDecimal paid = allocationRepository.activeAllocatedAmount(debt.getId(), PaymentStatus.AKTIF);
+        if (paid == null) {
+            paid = ZERO;
+        }
+        BigDecimal remaining = debt.getAmount().subtract(paid).setScale(2, RoundingMode.HALF_UP);
+        if (remaining.signum() < 0) {
+            remaining = ZERO;
+        }
+        return new WorkOrderDebt(debt.getId(), debt.getAmount().setScale(2, RoundingMode.HALF_UP),
+                paid.setScale(2, RoundingMode.HALF_UP), remaining);
+    }
+
     private AccountTransaction activeWorkOrderDebt(Long workOrderId) {
         List<AccountTransaction> debts = transactionRepository
                 .findActiveWorkOrderDebts(workOrderId, TransactionType.BORC);

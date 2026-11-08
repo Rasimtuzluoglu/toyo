@@ -19,7 +19,7 @@
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ve demo ortamı çalışıyor · **104 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ve demo ortamı çalışıyor · **116 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Bir bakışta
 
@@ -49,6 +49,7 @@
 - Tamamlamadan sonra 10 dakika içinde **Geri Al**; borç varsa ters kayıt oluşur.
 - Yoğun günler için kompakt kart, katlanabilir kolonlar ve yaş filtresi.
 - Müşteri ve araç **Pasife Al / Geri Al**: geçmiş iş emri ve finans kayıtları korunur.
+- **PATRON kalıcı silme**: iş emri, tahsilat, müşteri ve araç; yazılı onay ve zincirleme temizlik.
 
 **📥 Excel dostu iş emri girişi**
 - **Manuel fiş no**: otomatik üretilmez; Excel'den kopyalayıp yapıştırabilirsiniz.
@@ -61,7 +62,12 @@
 - İş emri tamamlanınca otomatik cari borç; iptalde ters kayıt.
 - Tamamla + tahsilat: **Cari / Nakit / Kart**.
 - Tek açık borçta tutar ve dağıtım otomatik; dağıtım tablosu yalnızca çoklu borçta görünür.
+- **Servis tahsilatı**: SERVIS iş emri ekranında kısmi veya tam tahsilat alabilir; kalanı MUHASEBE sonradan tahsil eder.
 - Cari ekstre, yaşlandırma, tahsilat iptali ve PDF makbuz.
+
+**📊 Raporlar**
+- **Günlük Döküm**: seçilen günde açılan tüm iş emirleri; durum, tutar, tahsilat ve kalan.
+- Excel ve PDF indirme; PATRON, MUHASEBE ve SERVIS erişimi.
 
 **📄 Belgeler ve marka**
 - Araç kabul formu, teslim tutanağı, iş emri ve tahsilat makbuzu; PDF ve ıslak/dijital imza.
@@ -180,7 +186,7 @@ docker compose -f docker-compose.demo.yml up -d
 mvn clean package
 ```
 
-- **104 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
+- **116 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
 - Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
 - Pre-push hook: `scripts/install-ci-hook.ps1`.

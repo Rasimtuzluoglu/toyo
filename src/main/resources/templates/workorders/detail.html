@@ -44,6 +44,16 @@
                        th:if="${canOperate and order.status.name() != 'IPTAL'}">
                         <i class="bi bi-pencil me-1"></i> Düzenle
                     </a>
+                    <a class="btn btn-success"
+                       sec:authorize="hasAnyRole('PATRON','MUHASEBE','SERVIS')"
+                       th:if="${workOrderDebt != null and workOrderDebt.remaining.signum() > 0 and order.status.completed}"
+                       th:href="@{/work-orders/{id}/payment(id=${order.id})}">
+                        <i class="bi bi-cash-coin me-1"></i> Tahsilat Al
+                    </a>
+                    <a class="btn btn-outline-danger" sec:authorize="hasRole('PATRON')"
+                       th:href="@{/purge/work-order/{id}(id=${order.id})}">
+                        <i class="bi bi-trash3 me-1"></i> Kalıcı Sil
+                    </a>
                 </div>
             </div>
 
@@ -116,6 +126,16 @@
                             <strong class="money"
                                     th:classappend="${customerBalance.signum() > 0} ? 'text-danger'"
                                     th:text="${fmt.money(customerBalance)}">0,00 ₺</strong>
+                        </div>
+                        <div class="summary-item" th:if="${workOrderDebt != null}">
+                            <span>Tahsil edilen</span>
+                            <strong class="money text-success"
+                                    th:text="${fmt.money(workOrderDebt.paid)}">0,00 ₺</strong>
+                        </div>
+                        <div class="summary-item" th:if="${workOrderDebt != null}">
+                            <span>Kalan</span>
+                            <strong class="money text-danger"
+                                    th:text="${fmt.money(workOrderDebt.remaining)}">0,00 ₺</strong>
                         </div>
                         <div class="summary-item ms-auto">
                             <span>Genel Toplam</span>

@@ -6,7 +6,7 @@
 |---|---|
 | **PATRON (İşletme Sahibi)** | Tüm modüller: müşteri/araç/iş emri, günlük işler, cari hesaplar, tahsilat, raporlar, kullanıcı yönetimi, ayarlar, yedekleme ve denetim kaydı |
 | **MUHASEBE** | Tahsilat, cari hesap ve raporlar; müşteri/araç/iş emri kayıtlarını görüntüler, iş emri iptal edebilir; yeni müşteri/araç/iş emri oluşturamaz, durum ilerletemez |
-| **SERVIS** | Müşteri, araç, iş emri ve kalem işlemleri, durum geçişleri ve günlük iş panosu; cari/tahsilat/rapor ekranlarına erişemez, iptal yapamaz |
+| **SERVIS** | Müşteri, araç, iş emri ve kalem işlemleri, durum geçişleri ve günlük iş panosu; iş emri ekranında kalan borcu tahsil edebilir ve günlük dökümü görebilir; genel cari/tahsilat/rapor ekranlarına erişemez, iptal yapamaz |
 
 Yetkiler sunucuda kontrol edilir. Menüde görünmeyen bir adrese doğrudan gidilirse erişim reddedilir.
 
@@ -53,6 +53,16 @@ Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla 
 - Telefonda pano **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmelerine ayrılır; aynı anda tek sütun görünür.
 - Tablet ve masaüstünde tüm sütunlar birlikte görünür.
 
+## Günlük Döküm
+
+**Günlük Döküm** ekranı, seçilen günde açılan tüm iş emirlerini tek listede gösterir.
+
+- Tarih seçici varsayılan olarak bugünü gösterir.
+- Durumdan bağımsız olarak o gün açılan işler listelenir: fiş no, saat, müşteri, telefon, plaka, araç, yapılan iş, ilgilenen, durum, toplam, tahsilat ve kalan.
+- Üstte toplam iş sayısı, toplam tutar, tahsil edilen ve kalan özeti bulunur.
+- **Excel** ve **PDF** düğmeleriyle döküm indirilir.
+- PATRON, MUHASEBE ve SERVIS erişebilir.
+
 ## Randevular
 
 **Randevular** ekranı günlük planı gösterir; önceki/sonraki gün ve **Bugün** düğmeleriyle gezinilir.
@@ -90,6 +100,15 @@ Telefon numarası normalize edilir (boşluk/tire/`+90`/`0` farkları giderilir).
 - Pasif kayıt detayında **Geri Al** düğmesiyle müşteri/araç yeniden aktifleştirilir; müşteri geri alınınca araçları da geri alınır.
 - Listeler varsayılan olarak yalnızca **aktif** kayıtları gösterir. Pasifleri görmek için **Durum → Tümü** veya **Pasif** seçin.
 - Durum değişikliği yalnızca PATRON yetkisindedir. Yeni müşteri/araç kaydı PATRON ve SERVIS tarafından açılabilir; MUHASEBE yalnızca görüntüler.
+
+### Kalıcı silme (PATRON)
+
+- Müşteri, araç, iş emri ve tahsilat detayında **PATRON** için **Kalıcı Sil** bağlantısı vardır.
+- Onay ekranında müşteri adı, plaka, fiş no veya makbuz no yazılarak işlem doğrulanır.
+- **Geri alınamaz.** Müşteri/araç silinirse bağlı iş emirleri, tahsilatlar, cari hareketler ve belgeler de silinir.
+- İş emri silinirse ona bağlı tahsilatlar da koşulsuz silinir; tahsilat başka işlere dağıtılmışsa o dağıtımlar da kaldırılır.
+- Tahsilat silinirse iş emri borcu yeniden açılır.
+- Silme işlemi denetim kaydına yazılır.
 
 ## Araçlar
 
@@ -277,6 +296,16 @@ Kurallar:
 - Aynı formun tekrar gönderilmesi tek kullanımlık form belirteciyle engellenir.
 - Gelecek tarihli tahsilat kabul edilmez.
 
+### Servis tahsilatı
+
+1. SERVIS, iş emri detayında **Tahsilat Al** düğmesine basar. Düğme yalnızca iş **Tamamlandı** veya **Teslim Edildi** ve kalan borç varsa görünür.
+2. Ekranda yalnızca o iş emrinin borcu, tahsil edilen ve kalan tutar görünür.
+3. Tutar kalandan fazla olamaz; **kısmi tahsilat** yapılabilir.
+4. Ödeme yöntemi Nakit/Banka/Kart seçilir; açıklama isteğe bağlıdır.
+5. Kaydedilince tahsilat yalnızca bu iş emrinin borcuna dağıtılır.
+6. Kalan borç, MUHASEBE tarafından daha sonra **Tahsilatlar** ekranından tahsil edilir.
+7. SERVIS genel cari/tahsilat ekranlarına erişemez; yalnızca iş emri tahsilatını görür.
+
 ### Tahsilat iptali
 
 - Yalnızca PATRON/MUHASEBE.
@@ -302,6 +331,8 @@ Tahsilat detayında **Makbuz** ile yazdırılabilir. Makbuzda müşteri, tutar, 
 | Araç servis geçmişi | Araç + tarih aralığı, son servis tarihi; CSV + Excel |
 
 Raporlar gerçek veritabanı kayıtlarından üretilir; sabit/sahte veri yoktur.
+
+> **Günlük Döküm** ayrı bir ekrandır; PATRON, MUHASEBE ve SERVIS tarafından kullanılabilir.
 
 Tarih filtrelerinde **Bugün / Bu Hafta / Bu Ay / Geçen Ay** ön ayarları tek tıkla uygulanır.
 

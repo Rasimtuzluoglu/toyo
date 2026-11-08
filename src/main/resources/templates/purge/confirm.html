@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Kalıcı Sil')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar(${activeMenu})}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Kalıcı Silme</div>
+                    <h1 class="page-title" th:text="${summary.title}">Kaydı Kalıcı Sil</h1>
+                    <p class="page-subtitle">
+                        <strong th:text="${summary.reference}">Kayıt</strong>
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="${backUrl}">
+                        <i class="bi bi-arrow-left me-1"></i> Vazgeç
+                    </a>
+                </div>
+            </div>
+
+            <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill mt-1" aria-hidden="true"></i>
+                <div>
+                    <strong>Bu işlem geri alınamaz.</strong><br>
+                    <span th:text="${summary.warning}">Bağlı kayıtlar kalıcı silinir.</span>
+                </div>
+            </div>
+            <div class="alert alert-danger" th:if="${confirmationError}" role="alert"
+                 th:text="${confirmationError}">Onay metni hatalı.</div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Silinecek kayıtlar</h2>
+                        </div>
+                        <div class="sd-card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Kayıt</th>
+                                        <th class="text-end">Adet</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="entry : ${summary.counts}">
+                                        <td th:text="${entry.key}">Kayıt</td>
+                                        <td class="text-end fw-semibold" th:text="${entry.value}">0</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="sd-card">
+                        <div class="sd-card-header">
+                            <h2>Onay</h2>
+                        </div>
+                        <div class="sd-card-body">
+                            <form method="post"
+                                  th:action="@{/purge/{type}/{id}(type=${summary.kind()},id=${summary.id()})}"
+                                  data-submit-once>
+                                <label class="form-label" for="confirmation">
+                                    Onay için <strong th:text="${summary.reference}">kayıt</strong> yazın
+                                    <span class="required">*</span>
+                                </label>
+                                <input class="form-control" id="confirmation" name="confirmation"
+                                       type="text" autocomplete="off" autofocus required
+                                       th:classappend="${confirmationError != null} ? 'is-invalid'">
+                                <div class="form-text">
+                                    Büyük/küçük harf farkı önemsenmez; yazımın doğru olması gerekir.
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a class="btn btn-outline-secondary" th:href="${backUrl}">Vazgeç</a>
+                                    <button class="btn btn-danger" type="submit">
+                                        <i class="bi bi-trash3 me-1"></i> Kalıcı Sil
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

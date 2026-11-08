@@ -48,6 +48,10 @@
                             <i class="bi bi-arrow-counterclockwise me-1"></i> Geri Al
                         </button>
                     </form>
+                    <a class="btn btn-outline-danger" sec:authorize="hasRole('PATRON')"
+                       th:href="@{/purge/vehicle/{id}(id=${vehicle.id})}">
+                        <i class="bi bi-trash3 me-1"></i> Kalıcı Sil
+                    </a>
                     <a class="btn btn-primary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
                        th:href="@{/work-orders/new(customerId=${vehicle.customer.id},vehicleId=${vehicle.id})}">
                         <i class="bi bi-clipboard-plus me-1"></i> İş Emri Aç

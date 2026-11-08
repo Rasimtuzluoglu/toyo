@@ -153,6 +153,12 @@
                                                         </button>
                                                     </form>
                                                 </li>
+                                                <li sec:authorize="hasRole('PATRON')">
+                                                    <a class="dropdown-item text-danger"
+                                                       th:href="@{/purge/customer/{id}(id=${customer.id})}">
+                                                        <i class="bi bi-trash3 me-2"></i>Kalıcı Sil
+                                                    </a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>

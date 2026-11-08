@@ -642,6 +642,7 @@ public class WorkOrderController {
         if (canCancel) {
             model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
         }
+        model.addAttribute("workOrderDebt", accountService.workOrderDebt(order.getId()));
         String shareText = "Toyota Plaza Öztoprak - " + order.getOrderNo() + " iş emri. "
                 + "Araç: " + order.getVehicle().getPlate() + ". "
                 + "Durum: " + order.getStatus().getLabel() + ". "

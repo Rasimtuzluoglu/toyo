@@ -16,6 +16,17 @@ import java.util.Optional;
 
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
+    @Query("""
+            select w from WorkOrder w
+            join fetch w.customer c
+            join fetch w.vehicle v
+            left join fetch w.assignedUser
+            where w.openedAt >= :start and w.openedAt < :end
+            order by w.openedAt asc, w.id asc
+            """)
+    List<WorkOrder> findOpenedBetween(@Param("start") LocalDateTime start,
+                                      @Param("end") LocalDateTime end);
+
     @Query(value = """
             select assigned_name from work_orders
             where assigned_name is not null and trim(assigned_name) <> ''
