@@ -113,11 +113,7 @@ docker compose --project-directory "%INSTALL_DIR%" --env-file "%ENVFILE%" -f "%C
 goto fail
 
 :healthy
-echo [6/6] Ag erisimi ve kisayollar hazirlaniyor...
-netsh advfirewall firewall add rule name="Toyota Servis %APP_PORT%" dir=in action=allow protocol=TCP localport=%APP_PORT% >nul 2>&1
-
-set "LANIP="
-for /f "usebackq delims=" %%I in (`powershell -NoProfile -Command "(Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne $null}).IPv4Address.IPAddress | Select-Object -First 1"`) do set "LANIP=%%I"
+echo [6/6] Kisayollar hazirlaniyor...
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws=New-Object -ComObject WScript.Shell; $desktop=[Environment]::GetFolderPath('Desktop'); $s=$ws.CreateShortcut((Join-Path $desktop 'Toyota Servis.url')); $s.TargetPath='http://localhost:%APP_PORT%'; $s.Save(); $startup=[Environment]::GetFolderPath('Startup'); $l=$ws.CreateShortcut((Join-Path $startup 'Toyota Servis.lnk')); $l.TargetPath='%INSTALL_DIR%\ToyotaServis-Baslat.cmd'; $l.WorkingDirectory='%INSTALL_DIR%'; $l.WindowStyle=7; $l.Save()"
 
@@ -126,7 +122,6 @@ echo ============================================
 echo  KURULUM TAMAMLANDI
 echo ============================================
 echo  Yerel adres : http://localhost:%APP_PORT%
-if defined LANIP echo  Ag adresi   : http://%LANIP%:%APP_PORT%
 echo  Ilk kurulum : http://localhost:%APP_PORT%/setup
 echo  Giris       : http://localhost:%APP_PORT%/login
 echo.
