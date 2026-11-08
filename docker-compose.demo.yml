@@ -40,6 +40,7 @@ services:
       DB_USERNAME: servisdefteri
       DB_PASSWORD: demo-local-password
       SESSION_COOKIE_SECURE: "false"
+      FORWARD_HEADERS_STRATEGY: none
       DB_HOST: demo-db
       DB_PORT: 5432
       DB_NAME: servisdefteri_demo

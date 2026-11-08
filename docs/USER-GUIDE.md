@@ -37,7 +37,7 @@ Sol menü role göre kısalır:
 
 Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla geçilir. SERVIS alt menüsünde **Döküm** kısayolu bulunur. Sunum turu ve hızlı komut, sağ üstteki kullanıcı menüsündedir.
 
-> **Ağ güvenliği:** Uygulama yerel ağda HTTP olarak çalışır. Güvenilmeyen Wi‑Fi/ağlarda doğrudan açmayın. Tablet/telefon erişimi için TLS sonlandıran bir reverse proxy kullanın ve `SESSION_COOKIE_SECURE=true` yapın. Yalnızca bu bilgisayardan erişim için `APP_BIND_ADDRESS=127.0.0.1` ayarlayın.
+> **Ağ güvenliği:** Uygulama yerel ağda HTTP olarak çalışır. Güvenilmeyen Wi‑Fi/ağlarda doğrudan açmayın. Tablet/telefon erişimi için TLS sonlandıran bir reverse proxy kullanın, `SESSION_COOKIE_SECURE=true` ve güvenilen proxy arkasında `FORWARD_HEADERS_STRATEGY=framework` yapın. Yalnızca bu bilgisayardan erişim için `APP_BIND_ADDRESS=127.0.0.1` ayarlayın.
 
 ## Günlük İşler / Bugün
 

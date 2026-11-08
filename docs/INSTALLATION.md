@@ -246,7 +246,7 @@ Ayrıntılar güvenlik nedeniyle gizlenir. Uygulama container'ı, veritabanı `h
 
 - Uygulama yerel ağ için HTTP üzerinde çalışır. İnternete açmayın.
 - Dış erişim gerekiyorsa HTTPS sonlandıran bir ters proxy arkasında ve güvenlik duvarı kurallarıyla kullanın.
-- TLS arkasında `SESSION_COOKIE_SECURE=true` ayarlayın.
+- TLS arkasında `SESSION_COOKIE_SECURE=true` ve güvenilen ters proxy kullanıyorsanız `FORWARD_HEADERS_STRATEGY=framework` ayarlayın.
 - `APP_PORT` yalnızca gerekli arayüzlere açılmalıdır.
 - PostgreSQL portunu yayınlamayın.
 - `.env` dosya izinlerini kısıtlayın.
