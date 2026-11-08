@@ -31,11 +31,13 @@ Uygulama açıldığında rolünüze göre sade bir ekran gelir:
 
 Sol menü role göre kısalır:
 
-- **SERVIS:** Bugün, Randevular, Müşteriler, Araçlar, İşler
-- **MUHASEBE:** Özet, İş Emirleri, Cari Hesaplar, Tahsilatlar, Raporlar
+- **SERVIS:** Bugün, Randevular, Müşteriler, Araçlar, İşler, Günlük Döküm
+- **MUHASEBE:** Özet, İş Emirleri, Günlük Döküm, Cari Hesaplar, Tahsilatlar, Raporlar
 - **PATRON:** tüm modüller
 
-Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla geçilir. Sunum turu ve hızlı komut, sağ üstteki kullanıcı menüsündedir.
+Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla geçilir. SERVIS alt menüsünde **Döküm** kısayolu bulunur. Sunum turu ve hızlı komut, sağ üstteki kullanıcı menüsündedir.
+
+> **Ağ güvenliği:** Uygulama yerel ağda HTTP olarak çalışır. Güvenilmeyen Wi‑Fi/ağlarda doğrudan açmayın. Tablet/telefon erişimi için TLS sonlandıran bir reverse proxy kullanın ve `SESSION_COOKIE_SECURE=true` yapın. Yalnızca bu bilgisayardan erişim için `APP_BIND_ADDRESS=127.0.0.1` ayarlayın.
 
 ## Günlük İşler / Bugün
 
@@ -364,6 +366,7 @@ Sağ üstteki **oynat** simgesi 6 adımlık sunum turunu başlatır: kokpit → 
 - Rapor ve ekstre ekranlarında hem **CSV** hem **Excel** düğmesi bulunur.
 - İş emri ve tahsilat makbuzu ekranlarında **PDF İndir** ile belge doğrudan PDF olarak kaydedilir.
 - Dışa aktarma yetkisi ekranın yetkisiyle aynıdır: tahsilat/rapor dosyaları yalnızca PATRON ve MUHASEBE tarafından indirilebilir.
+- Müşteri ve araç listelerinin toplu CSV/Excel dışa aktarımı da PATRON ve MUHASEBE ile sınırlıdır.
 
 ## Kullanıcılar (PATRON)
 

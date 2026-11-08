@@ -11,7 +11,8 @@ RUN mvn -B -q -DskipTests package
 # ---- Runtime stage ----
 FROM eclipse-temurin:21-jre-alpine
 
-RUN apk add --no-cache tzdata wget postgresql16-client \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache tzdata wget postgresql16-client \
     && addgroup -S app && adduser -S app -G app
 
 WORKDIR /app

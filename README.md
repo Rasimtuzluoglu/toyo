@@ -15,11 +15,11 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
-  <img alt="123 test" src="https://img.shields.io/badge/tests-123%20passing-brightgreen">
+  <img alt="131 test" src="https://img.shields.io/badge/tests-131%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ve demo ortamı çalışıyor · **123 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ve demo ortamı çalışıyor · **131 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Bir bakışta
 
@@ -77,10 +77,14 @@
 
 **🔐 Güvenlik, veri ve bakım**
 - PATRON / MUHASEBE / SERVIS rolleri; yetkiler sunucu tarafında uygulanır.
-- CSRF, BCrypt (strength 12), oturum sabitleme, 5 hatalı girişte 15 dakika kilit.
+- CSRF, BCrypt (strength 12), oturum sabitleme, IP + kullanıcı bazlı giriş denemesi sınırı.
+- CSP, `X-Frame-Options: DENY`, `SameSite=Lax` oturum çerezi; TLS arkasında `Secure` çerez desteği.
+- CSV formül enjeksiyonuna karşı hücre temizliği; müşteri/araç toplu dışa aktarımı PATRON/MUHASEBE ile sınırlı.
 - İşlem denetim kaydı: kullanıcı, zaman, IP ve detay.
 - Günlük otomatik yedek; kaçırılan yedek açılışta telafi edilir.
 - Güncelleme öncesi yedek, GitHub son commit kontrolü ve host ajanıyla Docker güncellemesi.
+
+> **Ağ notu:** Uygulama yerel ağa HTTP olarak açılabilir. Güvenilmeyen ağlarda doğrudan açmayın; TLS sonlandıran bir reverse proxy kullanın ve `SESSION_COOKIE_SECURE=true` yapın. Sadece bu bilgisayardan erişim için `APP_BIND_ADDRESS=127.0.0.1` ayarlayın.
 
 ## Mimari
 
@@ -188,7 +192,7 @@ docker compose -f docker-compose.demo.yml up -d
 mvn clean package
 ```
 
-- **123 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
+- **131 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
 - Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
 - Pre-push hook: `scripts/install-ci-hook.ps1`.

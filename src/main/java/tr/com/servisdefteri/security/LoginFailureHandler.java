@@ -30,7 +30,7 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         if (username != null && username.length() > 50) {
             username = username.substring(0, 50);
         }
-        loginAttemptService.failure(username);
+        loginAttemptService.failure(username, request.getRemoteAddr());
         auditService.recordAs(null, username == null ? "bilinmiyor" : username, AuditAction.LOGIN_FAILURE,
                 "Oturum", null, "Başarısız giriş denemesi");
         String target = exception instanceof LockedException ? "/login?locked" : "/login?error";

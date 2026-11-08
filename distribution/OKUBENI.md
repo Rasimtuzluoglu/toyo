@@ -57,6 +57,11 @@ Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlat�
 Kurulum sonunda yerel ağ IP'si ekranda gösterilir. Telefon/tablet aynı Wi-Fi veya
 kablolu ağa bağlıysa bu adresi kullanabilir.
 
+> **Güvenlik:** Uygulama yerel ağda HTTP üzerinde çalışır; güvenilmeyen Wi-Fi/ağlarda
+> doğrudan açmayın. TLS sonlandıran bir reverse proxy kullanıyorsanız `.env` içinde
+> `SESSION_COOKIE_SECURE=true` yapın. Yalnızca bu bilgisayardan erişim için
+> `APP_BIND_ADDRESS=127.0.0.1` ayarlayın.
+
 ## Günlük kullanım
 
 - Masaüstündeki **Toyota Servis** kısayolu uygulamayı açar.

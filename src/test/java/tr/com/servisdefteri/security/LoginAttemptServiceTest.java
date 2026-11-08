@@ -55,6 +55,26 @@ class LoginAttemptServiceTest {
     }
 
     @Test
+    void blocksIpWhenDifferentUsernamesAreTried() {
+        for (int i = 0; i < LoginAttemptService.MAX_FAILURES; i++) {
+            service.failure("kullanici-" + i, "10.0.0.1");
+        }
+
+        assertThat(service.isBlocked("baska-kullanici", "10.0.0.1")).isTrue();
+        assertThat(service.isBlocked("baska-kullanici", "10.0.0.2")).isFalse();
+    }
+
+    @Test
+    void successResetsIpLock() {
+        for (int i = 0; i < LoginAttemptService.MAX_FAILURES; i++) {
+            service.failure("demo", "10.0.0.1");
+        }
+        service.success("demo", "10.0.0.1");
+
+        assertThat(service.isBlocked("demo", "10.0.0.1")).isFalse();
+    }
+
+    @Test
     void blankUsernameIsIgnored() {
         service.failure(null);
         service.failure("  ");

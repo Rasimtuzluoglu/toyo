@@ -31,11 +31,6 @@ spring:
       date-time: dd.MM.yyyy HH:mm
       time: HH:mm
   servlet:
-    session:
-      timeout: ${SESSION_TIMEOUT:2h}
-      cookie:
-        http-only: true
-        same-site: lax
     multipart:
       max-file-size: 2MB
       max-request-size: 5MB
@@ -47,7 +42,12 @@ server:
       enabled: false
   servlet:
     session:
+      timeout: ${SESSION_TIMEOUT:2h}
       tracking-modes: cookie
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
   forward-headers-strategy: framework
 
 management:

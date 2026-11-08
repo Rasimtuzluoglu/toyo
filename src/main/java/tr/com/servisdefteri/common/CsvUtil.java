@@ -32,10 +32,28 @@ public final class CsvUtil {
             return "";
         }
         String text = value.toString();
+        if (!(value instanceof Number) && isFormulaLike(text)) {
+            text = "'" + text;
+        }
         if (text.contains("\"") || text.contains(";") || text.contains("\n") || text.contains("\r")) {
             return "\"" + text.replace("\"", "\"\"") + "\"";
         }
         return text;
+    }
+
+    /**
+     * Excel'de formül olarak yorumlanabilecek hücreleri etkisizleştirir.
+     * Negatif sayılar (-1.234,56 gibi) metin olarak bozulmasın diye korunur.
+     */
+    private static boolean isFormulaLike(String text) {
+        if (text.isEmpty()) {
+            return false;
+        }
+        char first = text.charAt(0);
+        if (first == '=' || first == '+' || first == '@' || first == '\t' || first == '\r') {
+            return true;
+        }
+        return first == '-' && !text.matches("^-?[0-9][0-9.,]*$");
     }
 
     public static byte[] toUtf8Bom(String csv) {

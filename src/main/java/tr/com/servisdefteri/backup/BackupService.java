@@ -36,7 +36,7 @@ public class BackupService {
 
     private static final Logger log = LoggerFactory.getLogger(BackupService.class);
     private static final DateTimeFormatter FILE_DATE = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-    private static final Pattern SAFE_FILE = Pattern.compile("^[A-Za-z0-9._-]+\\.dump$");
+    private static final Pattern SAFE_FILE = Pattern.compile("^servisdefteri-[A-Za-z0-9._-]+\\.dump$");
 
     private final BackupRunRepository backupRunRepository;
     private final BackupProperties properties;
@@ -207,6 +207,10 @@ public class BackupService {
         LocalDateTime threshold = LocalDateTime.now(clock).minusDays(properties.getRetentionDays());
         try (Stream<Path> files = Files.list(directory)) {
             files.filter(Files::isRegularFile)
+                    .filter(path -> {
+                        String name = path.getFileName().toString();
+                        return name.startsWith("servisdefteri-") || name.startsWith("pre-update-");
+                    })
                     .filter(path -> path.getFileName().toString().endsWith(".dump"))
                     .filter(path -> {
                         try {

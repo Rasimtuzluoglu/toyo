@@ -2,15 +2,18 @@ package tr.com.servisdefteri.security;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MvcResult;
 import tr.com.servisdefteri.support.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,6 +23,12 @@ class SecurityIT extends IntegrationTestSupport {
     private User patron;
     private User muhasebe;
     private User servis;
+
+    @Value("${server.servlet.session.cookie.same-site:}")
+    private String sessionSameSite;
+
+    @Value("${server.servlet.session.timeout:}")
+    private String sessionTimeout;
 
     @BeforeEach
     void createUsers() {
@@ -39,6 +48,42 @@ class SecurityIT extends IntegrationTestSupport {
         mockMvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("**/login"));
+    }
+
+    @Test
+    void securityHeadersAndSessionCookieAreConfigured() throws Exception {
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Frame-Options", "DENY"))
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().string("Referrer-Policy", "same-origin"))
+                .andExpect(header().string("Content-Security-Policy",
+                        containsString("default-src 'self'")))
+                .andExpect(header().string("Content-Security-Policy",
+                        containsString("frame-ancestors 'none'")));
+
+        assertThat(sessionSameSite).isEqualToIgnoringCase("lax");
+        assertThat(sessionTimeout).isEqualTo("2h");
+    }
+
+    @Test
+    void servisCannotBulkExportCustomerOrVehiclePii() throws Exception {
+        mockMvc.perform(get("/customers/export.csv").with(user(principal(servis))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/customers/export.xlsx").with(user(principal(servis))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/vehicles/export.csv").with(user(principal(servis))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/vehicles/export.xlsx").with(user(principal(servis))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void muhasebeCanBulkExportCustomerAndVehicleData() throws Exception {
+        mockMvc.perform(get("/customers/export.csv").with(user(principal(muhasebe))))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/vehicles/export.xlsx").with(user(principal(muhasebe))))
+                .andExpect(status().isOk());
     }
 
     @Test

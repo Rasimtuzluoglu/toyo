@@ -100,6 +100,7 @@ public class CustomerController {
         return "redirect:/customers?active=all";
     }
 
+    @PreAuthorize("hasAnyRole('PATRON','MUHASEBE')")
     @GetMapping("/export.csv")
     public ResponseEntity<byte[]> exportCsv(@RequestParam(required = false) String q,
                                             @RequestParam(required = false) String active,
@@ -108,6 +109,7 @@ public class CustomerController {
                 "musteriler.csv");
     }
 
+    @PreAuthorize("hasAnyRole('PATRON','MUHASEBE')")
     @GetMapping("/export.xlsx")
     public ResponseEntity<byte[]> exportExcel(@RequestParam(required = false) String q,
                                               @RequestParam(required = false) String active,

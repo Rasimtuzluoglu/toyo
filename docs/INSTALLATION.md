@@ -64,6 +64,7 @@ Bu kurulum yalnızca yerel bilgisayar ve aynı ağdaki cihazlar için tasarlanm�
 - Windows Güvenlik Duvarı'nda yalnızca **özel ağ** profili için TCP **18080** portuna izin verin; genel ağ profiline izin vermeyin.
 - Modem/router üzerinde bu port için **port yönlendirme yapmayın**. Dışarıdan erişim gerekirse VPS veya port açmak yerine VPN kullanın.
 - Yerel ağda HTTPS yoktur; güvenilir ve parola korumalı bir Wi-Fi kullanın.
+- TLS sonlandıran bir reverse proxy kullanırsanız `.env` içinde `SESSION_COOKIE_SECURE=true` yapın.
 - Yedekleri aynı bilgisayarda tutmayın; **Yedek Al ve İndir** ile harici disk/NAS'a kopyalayın.
 
 ### Windows'ta otomatik başlatma
@@ -245,6 +246,7 @@ Ayrıntılar güvenlik nedeniyle gizlenir. Uygulama container'ı, veritabanı `h
 
 - Uygulama yerel ağ için HTTP üzerinde çalışır. İnternete açmayın.
 - Dış erişim gerekiyorsa HTTPS sonlandıran bir ters proxy arkasında ve güvenlik duvarı kurallarıyla kullanın.
+- TLS arkasında `SESSION_COOKIE_SECURE=true` ayarlayın.
 - `APP_PORT` yalnızca gerekli arayüzlere açılmalıdır.
 - PostgreSQL portunu yayınlamayın.
 - `.env` dosya izinlerini kısıtlayın.

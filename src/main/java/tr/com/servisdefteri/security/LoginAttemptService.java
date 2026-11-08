@@ -1,22 +1,29 @@
 package tr.com.servisdefteri.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Yerel agda da basit kaba kuvvet denemelerini sinirlar.
- * 5 hatali denemeden sonra kullanici adi 15 dakika kilitlenir.
+ * Kullanici adi ve istemci IP'si ayri ayri 5 hatali denemeden sonra
+ * 15 dakika kilitlenir; boylece hem tek kullaniciya hem de tek IP'den
+ * farkli kullanicilara yapilan denemeler sinirlanir.
  */
 @Service
 public class LoginAttemptService {
 
     static final int MAX_FAILURES = 5;
     static final Duration LOCK_DURATION = Duration.ofMinutes(15);
+    private static final int MAX_ENTRIES = 10_000;
 
     private final Map<String, Attempt> attempts = new ConcurrentHashMap<>();
     private final Clock clock;
@@ -26,7 +33,32 @@ public class LoginAttemptService {
     }
 
     public boolean isBlocked(String username) {
-        String key = key(username);
+        return isBlocked(username, currentIp());
+    }
+
+    public boolean isBlocked(String username, String ip) {
+        return isBlockedKey(userKey(username)) || isBlockedKey(ipKey(ip));
+    }
+
+    public void failure(String username) {
+        failure(username, currentIp());
+    }
+
+    public void failure(String username, String ip) {
+        increment(userKey(username));
+        increment(ipKey(ip));
+    }
+
+    public void success(String username) {
+        success(username, currentIp());
+    }
+
+    public void success(String username, String ip) {
+        remove(userKey(username));
+        remove(ipKey(ip));
+    }
+
+    private boolean isBlockedKey(String key) {
         if (key == null) {
             return false;
         }
@@ -45,10 +77,12 @@ public class LoginAttemptService {
         }
     }
 
-    public void failure(String username) {
-        String key = key(username);
+    private void increment(String key) {
         if (key == null) {
             return;
+        }
+        if (attempts.size() >= MAX_ENTRIES) {
+            attempts.clear();
         }
         attempts.compute(key, (ignored, current) -> {
             Attempt attempt = current == null ? new Attempt() : current;
@@ -62,18 +96,34 @@ public class LoginAttemptService {
         });
     }
 
-    public void success(String username) {
-        String key = key(username);
+    private void remove(String key) {
         if (key != null) {
             attempts.remove(key);
         }
     }
 
-    private String key(String username) {
+    private String userKey(String username) {
         if (username == null || username.isBlank()) {
             return null;
         }
-        return username.trim().toLowerCase(java.util.Locale.ROOT);
+        return "user:" + username.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String ipKey(String ip) {
+        if (ip == null || ip.isBlank()) {
+            return null;
+        }
+        return "ip:" + ip.trim();
+    }
+
+    private String currentIp() {
+        ServletRequestAttributes attributes =
+                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            return null;
+        }
+        HttpServletRequest request = attributes.getRequest();
+        return request == null ? null : request.getRemoteAddr();
     }
 
     private static final class Attempt {

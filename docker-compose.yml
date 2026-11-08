@@ -42,6 +42,7 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       SERVER_PORT: 18080
       SESSION_TIMEOUT: ${SESSION_TIMEOUT:-2h}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-servisdefteri}
       DB_USERNAME: ${POSTGRES_USER:-servisdefteri}
       DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD .env dosyasinda tanimlanmalidir}

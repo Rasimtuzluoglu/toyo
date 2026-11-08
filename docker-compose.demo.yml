@@ -39,6 +39,7 @@ services:
       DB_URL: jdbc:postgresql://demo-db:5432/servisdefteri_demo
       DB_USERNAME: servisdefteri
       DB_PASSWORD: demo-local-password
+      SESSION_COOKIE_SECURE: "false"
       DB_HOST: demo-db
       DB_PORT: 5432
       DB_NAME: servisdefteri_demo

@@ -58,7 +58,15 @@ public class SecurityConfig {
                         .maximumSessions(5))
                 .exceptionHandling(exception -> exception.accessDeniedPage("/403"))
                 .headers(headers -> headers
-                        .frameOptions(frame -> frame.sameOrigin())
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+                                        + "img-src 'self' data:; font-src 'self'; connect-src 'self'; "
+                                        + "object-src 'none'; base-uri 'self'; form-action 'self'; "
+                                        + "frame-ancestors 'none'"))
+                        .frameOptions(frame -> frame.deny())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
                         .referrerPolicy(referrer -> referrer.policy(
                                 org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN)))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/actuator/**"));

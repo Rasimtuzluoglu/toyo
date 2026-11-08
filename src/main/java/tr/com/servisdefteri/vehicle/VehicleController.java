@@ -139,6 +139,7 @@ public class VehicleController {
         return "redirect:/vehicles?active=all";
     }
 
+    @PreAuthorize("hasAnyRole('PATRON','MUHASEBE')")
     @GetMapping("/export.csv")
     public ResponseEntity<byte[]> exportCsv(@RequestParam(required = false) String q,
                                             @RequestParam(required = false) String active,
@@ -147,6 +148,7 @@ public class VehicleController {
                 "araclar.csv");
     }
 
+    @PreAuthorize("hasAnyRole('PATRON','MUHASEBE')")
     @GetMapping("/export.xlsx")
     public ResponseEntity<byte[]> exportExcel(@RequestParam(required = false) String q,
                                               @RequestParam(required = false) String active,

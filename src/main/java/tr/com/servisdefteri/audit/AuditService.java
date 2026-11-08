@@ -74,10 +74,6 @@ public class AuditService {
                 return null;
             }
             HttpServletRequest request = attributes.getRequest();
-            String forwarded = request.getHeader("X-Forwarded-For");
-            if (forwarded != null && !forwarded.isBlank()) {
-                return limit(forwarded.split(",")[0].trim(), 45);
-            }
             return limit(request.getRemoteAddr(), 45);
         } catch (RuntimeException ex) {
             return null;
