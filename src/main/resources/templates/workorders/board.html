@@ -63,10 +63,6 @@
                                th:href="@{/work-orders/board(q=${q}, age='old')}">2+ gün</a></li>
                     </ul>
                 </div>
-                <button type="button" class="btn btn-outline-secondary btn-sm board-density"
-                        data-kanban-density aria-pressed="true" title="Kompakt / normal kart görünümü">
-                    <i class="bi bi-arrows-angle-contract me-1" aria-hidden="true"></i> Kompakt
-                </button>
                 <div class="kanban-tabs d-md-none" role="tablist" aria-label="İş durumları">
                     <button type="button" role="tab" class="kanban-tab" data-kanban-tab="BEKLIYOR"
                             th:classappend="${inProgressRows.isEmpty()} ? ' is-active'"
@@ -104,7 +100,7 @@
                 </a>
             </div>
 
-            <div class="kanban-board kanban-compact">
+            <div class="kanban-board">
                 <section class="kanban-column" id="board-bekliyor" aria-label="Bekleyen işler" data-drop-status="BEKLIYOR">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-bekliyor"></span>Bekliyor</h2>

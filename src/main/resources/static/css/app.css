@@ -660,16 +660,6 @@ a:hover {
     color: #fff;
 }
 
-.board-density {
-    flex: 0 0 auto;
-    white-space: nowrap;
-}
-
-.board-density[aria-pressed="true"] {
-    border-color: var(--sd-accent);
-    color: var(--sd-accent);
-}
-
 .board-filters {
     display: flex;
     gap: 6px;
@@ -808,45 +798,6 @@ a:hover {
     border-radius: 12px;
     background: #fff;
     box-shadow: var(--sd-shadow-soft);
-}
-
-.kanban-compact .kanban-card {
-    padding: 8px 10px;
-    border-radius: 10px;
-}
-
-.kanban-compact .kanban-order {
-    margin-top: 0;
-    color: var(--sd-muted);
-    font-size: 0.7rem;
-}
-
-.kanban-compact .kanban-plate {
-    font-size: 0.92rem;
-}
-
-.kanban-compact .kanban-customer {
-    margin-top: 2px;
-    font-size: 0.78rem;
-}
-
-.kanban-compact .kanban-meta {
-    margin-top: 4px;
-    font-size: 0.72rem;
-}
-
-.kanban-compact .kanban-actions {
-    margin-top: 6px;
-    gap: 4px;
-}
-
-.kanban-compact .kanban-actions .btn {
-    padding: 4px 8px;
-    font-size: 0.72rem;
-}
-
-.kanban-compact .kanban-actions .btn-outline-secondary {
-    padding: 4px 6px;
 }
 
 .kanban-card[draggable="true"] {
@@ -2730,10 +2681,6 @@ body.command-open {
 
     .board-search {
         flex-basis: 100%;
-    }
-
-    .board-density {
-        flex: 1 1 100%;
     }
 
     .kanban-list {

@@ -517,32 +517,6 @@
             }
         }
 
-        var kanbanBoard = document.querySelector('.kanban-board');
-        var densityButton = document.querySelector('[data-kanban-density]');
-        if (kanbanBoard && densityButton) {
-            var densityKey = 'sd.kanbanDensity';
-            var applyDensity = function (compact) {
-                kanbanBoard.classList.toggle('kanban-compact', compact);
-                densityButton.setAttribute('aria-pressed', compact ? 'true' : 'false');
-            };
-            var storedDensity = null;
-            try {
-                storedDensity = window.localStorage.getItem(densityKey);
-            } catch (error) {
-                storedDensity = null;
-            }
-            applyDensity(storedDensity !== 'normal');
-            densityButton.addEventListener('click', function () {
-                var compact = !kanbanBoard.classList.contains('kanban-compact');
-                applyDensity(compact);
-                try {
-                    window.localStorage.setItem(densityKey, compact ? 'compact' : 'normal');
-                } catch (error) {
-                    // Depolama kapalıysa tercih yalnızca bu oturumda geçerli olur.
-                }
-            });
-        }
-
         var collapseButtons = Array.prototype.slice.call(
             document.querySelectorAll('[data-kanban-collapse]'));
         if (collapseButtons.length) {

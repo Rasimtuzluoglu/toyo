@@ -47,7 +47,7 @@
 - Yeni plakada müşteri + araç + iş emri tek adımda oluşur.
 - Kanban üzerinde sürükle-bırak veya tek tıkla **İşleme Al / Tamamla / Teslim Et**.
 - Tamamlamadan sonra 10 dakika içinde **Geri Al**; borç varsa ters kayıt oluşur.
-- Yoğun günler için kompakt kart, katlanabilir kolonlar ve yaş filtresi.
+- Katlanabilir kolonlar ve yaş filtresi.
 - Müşteri ve araç **Pasife Al / Geri Al**: geçmiş iş emri ve finans kayıtları korunur.
 - **PATRON kalıcı silme**: iş emri, tahsilat, müşteri ve araç; yazılı onay ve zincirleme temizlik.
 

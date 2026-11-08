@@ -518,7 +518,10 @@ class UsabilityIT extends BusinessTestSupport {
                         org.hamcrest.Matchers.containsString("34PNB002"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-tab")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-search")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-density")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("data-kanban-density"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Kompakt"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-collapse")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("2+ gün")));
     }
