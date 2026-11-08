@@ -107,6 +107,25 @@ class WebFlowIT extends BusinessTestSupport {
     }
 
     @Test
+    void reportsHubLinksDailyReportAndLedgerDefaultsToCurrentYear() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        var customer = createCustomer("Ekstre Müşteri", "0555 123 45 67");
+
+        mockMvc.perform(get("/reports").with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("/daily-report")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Günlük Döküm")));
+
+        mockMvc.perform(get("/accounts/customer/{id}", customer.getId())
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "01.01." + LocalDate.now().getYear())))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("01.01.2000"))));
+    }
+
+    @Test
     void unknownPageReturns404InsteadOf500() throws Exception {
         User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
 

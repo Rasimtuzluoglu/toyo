@@ -274,7 +274,7 @@ Bakiye = Borç toplamı − Alacak toplamı
 
 **Cari Hesaplar → müşteri → Ekstre**
 
-- Tarih aralığı seçilebilir.
+- Tarih aralığı seçilebilir; varsayılan dönem **bu yılın 1 Ocak – bugün**.
 - Açılış bakiyesi, dönem borcu, dönem alacağı ve kapanış bakiyesi gösterilir.
 - Ters kayıtlar ayrıca işaretlenir.
 - **Yazdır**, **Excel** ve **CSV** (UTF-8 BOM, `;` ayırıcı) desteklenir.

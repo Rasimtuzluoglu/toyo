@@ -243,11 +243,11 @@
             <a th:href="@{/customers}">
                 <i class="bi bi-people" aria-hidden="true"></i><span>Müşteriler</span>
             </a>
-            <a th:href="@{/vehicles}">
-                <i class="bi bi-car-front" aria-hidden="true"></i><span>Araçlar</span>
-            </a>
-            <a th:href="@{/daily-report}">
+            <a sec:authorize="hasRole('SERVIS')" th:href="@{/daily-report}">
                 <i class="bi bi-calendar3-range" aria-hidden="true"></i><span>Döküm</span>
+            </a>
+            <a sec:authorize="hasRole('PATRON')" th:href="@{/vehicles}">
+                <i class="bi bi-car-front" aria-hidden="true"></i><span>Araçlar</span>
             </a>
         </th:block>
         <th:block sec:authorize="hasRole('MUHASEBE')">
@@ -265,9 +265,6 @@
             </a>
             <a th:href="@{/work-orders}">
                 <i class="bi bi-clipboard-check" aria-hidden="true"></i><span>İşler</span>
-            </a>
-            <a th:href="@{/daily-report}">
-                <i class="bi bi-calendar3-range" aria-hidden="true"></i><span>Döküm</span>
             </a>
         </th:block>
     </nav>

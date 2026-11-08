@@ -99,7 +99,7 @@ public class AccountController {
                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
                                  Model model) {
         LocalDate endDate = end == null ? LocalDate.now(clock) : end;
-        LocalDate startDate = start == null ? LocalDate.of(2000, 1, 1) : start;
+        LocalDate startDate = start == null ? defaultStartDate() : start;
         LedgerStatement statement = accountService.statement(id, startDate, endDate);
         model.addAttribute("statement", statement);
         model.addAttribute("business", businessSettingsService.get());
@@ -114,7 +114,7 @@ public class AccountController {
                                                     @RequestParam(required = false)
                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         LocalDate endDate = end == null ? LocalDate.now(clock) : end;
-        LocalDate startDate = start == null ? LocalDate.of(2000, 1, 1) : start;
+        LocalDate startDate = start == null ? defaultStartDate() : start;
         LedgerStatement statement = accountService.statement(id, startDate, endDate);
         String csv = buildCsv(statement);
         String fileName = "cari-ekstre-" + id + "-" + startDate + "-" + endDate + ".csv";
@@ -132,7 +132,7 @@ public class AccountController {
                                                       @RequestParam(required = false)
                                                       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         LocalDate endDate = end == null ? LocalDate.now(clock) : end;
-        LocalDate startDate = start == null ? LocalDate.of(2000, 1, 1) : start;
+        LocalDate startDate = start == null ? defaultStartDate() : start;
         LedgerStatement statement = accountService.statement(id, startDate, endDate);
         return DownloadUtil.xlsx(reportService.ledgerExcel(statement),
                 "cari-ekstre-" + id + "-" + startDate + "-" + endDate + ".xlsx");
@@ -183,6 +183,10 @@ public class AccountController {
             model.addAttribute("activeMenu", "accounts");
             return "accounts/debt-form";
         }
+    }
+
+    private LocalDate defaultStartDate() {
+        return LocalDate.now(clock).withDayOfYear(1);
     }
 
     private String buildCsv(LedgerStatement statement) {
