@@ -36,9 +36,9 @@
 |---|---|---|
 | Doğrudan **Bugün** panosuna düşer. Finans görmez; plaka odaklı iş emri açar, tek dokunuşla durumu ilerletir. | **Finans** özetiyle açılır: bugünkü tahsilat, kalan alacak, açık borçlar ve son tahsilatlar. Tek tıkla tahsilat alır. | Operasyon + finans + raporlar + kullanıcılar + ayarlar: işletmenin tam kokpiti. |
 
-- **SERVIS:** Bugün, Randevular, Müşteriler, Araçlar, İşler
-- **MUHASEBE:** Özet, İş Emirleri, Cari Hesaplar, Tahsilatlar, Raporlar
-- Telefonda alt sabit menü; masaüstünde sabit sol menü ve 4 kolonlu pano.
+- **SERVIS:** Bugün, Randevular, Müşteriler, Araçlar, İşler, Günlük Döküm
+- **MUHASEBE:** Özet, İş Emirleri, Günlük Döküm, Cari Hesaplar, Tahsilatlar, Raporlar
+- Telefonda alt sabit menü; SERVIS'te **Döküm** kısayolu. Masaüstünde sabit sol menü ve 4 kolonlu pano.
 
 ## Öne çıkanlar
 
@@ -216,5 +216,5 @@ E-fatura, banka/kart ödeme kuruluşu entegrasyonu, otomatik SMS/WhatsApp, bulut
 ---
 
 <p align="center">
-  <sub>Toyota Plaza Öztoprak için geliştirildi · powered by <a href="https://www.linkedin.com/in/rasimtuzluoglu311/">RasimTuzluoğlu</a></sub>
+  <sub>Toyota Plaza Öztoprak için geliştirildi · powered by <a href="https://www.linkedin.com/in/rasimtuzluoglu311/">RasimTuzluoğlu</a> · <a href="https://github.com/RasimTuzluoglu">GitHub</a></sub>
 </p>
