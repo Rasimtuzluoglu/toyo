@@ -349,7 +349,11 @@ class UsabilityIT extends BusinessTestSupport {
                         org.hamcrest.Matchers.containsString("Cari Hesaplar"))))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("Bugünkü tahsilat"))))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("sd-mobile-nav")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("sd-mobile-nav")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "https://www.linkedin.com/in/rasimtuzluoglu311/")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "https://github.com/RasimTuzluoglu")));
     }
 
     @Test

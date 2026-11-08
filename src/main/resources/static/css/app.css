@@ -361,6 +361,19 @@ a:hover {
     color: var(--sd-accent);
 }
 
+.sd-powered .sd-powered-github {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 5px;
+    border-bottom: 0;
+    font-size: 0.9rem;
+    vertical-align: -1px;
+}
+
+.sd-powered .sd-powered-github:hover {
+    color: var(--sd-accent);
+}
+
 .sd-sidebar-footer .sd-powered {
     display: block;
     margin-top: 8px;
