@@ -89,6 +89,9 @@ public class VehicleDocumentService {
         delivery.setSignatureData(signature(form.getSignatureData()));
         delivery.setUpdatedAt(LocalDateTime.now(clock));
         VehicleDelivery saved = deliveryRepository.save(delivery);
+        if (order.getStatus() == WorkOrderStatus.TAMAMLANDI) {
+            workOrderService.markDeliveredFromDocument(order.getId());
+        }
         auditService.record(AuditAction.VEHICLE_DELIVERY_SAVED, "İşEmri", order.getId(),
                 "Teslim tutanağı kaydedildi: " + order.getOrderNo()
                         + ", teslim alan=" + delivery.getReceiverName());

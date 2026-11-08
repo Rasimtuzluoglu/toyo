@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -103,6 +104,15 @@ class WebFlowIT extends BusinessTestSupport {
         mockMvc.perform(post("/logout").session(session).with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?logout"));
+    }
+
+    @Test
+    void unknownPageReturns404InsteadOf500() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+
+        mockMvc.perform(get("/board").with(user(principal(patron))))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("HTTP 404")));
     }
 
     private Long createCustomerThroughForm(MockHttpSession session) throws Exception {

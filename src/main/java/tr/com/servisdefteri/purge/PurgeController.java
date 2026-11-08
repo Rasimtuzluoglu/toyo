@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Locale;
+
 @Controller
 @RequestMapping("/purge")
 @PreAuthorize("hasRole('PATRON')")
@@ -137,7 +139,11 @@ public class PurgeController {
     }
 
     private boolean matches(String confirmation, String reference) {
-        return confirmation != null && reference != null
-                && confirmation.trim().equalsIgnoreCase(reference.trim());
+        if (confirmation == null || reference == null) {
+            return false;
+        }
+        Locale turkish = Locale.forLanguageTag("tr-TR");
+        return confirmation.strip().toLowerCase(turkish)
+                .equals(reference.strip().toLowerCase(turkish));
     }
 }

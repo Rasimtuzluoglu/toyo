@@ -280,6 +280,20 @@ public class WorkOrderService {
 
     @Transactional
     public WorkOrder changeStatus(Long orderId, WorkOrderStatus target) {
+        return changeStatus(orderId, target, true);
+    }
+
+    /**
+     * Teslim tutanağı kaydedildiğinde iş emrini teslim edildi durumuna geçirir.
+     * Yetki denetimi controller katmanında yapılır; bu yöntem belge kaydıyla aynı
+     * transaction içinde çağrılır.
+     */
+    @Transactional
+    public WorkOrder markDeliveredFromDocument(Long orderId) {
+        return changeStatus(orderId, WorkOrderStatus.TESLIM_EDILDI, false);
+    }
+
+    private WorkOrder changeStatus(Long orderId, WorkOrderStatus target, boolean enforcePermissions) {
         WorkOrder order = workOrderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> NotFoundException.of("İş emri", orderId));
         WorkOrderStatus previous = order.getStatus();
@@ -287,10 +301,12 @@ public class WorkOrderService {
             throw new BusinessRuleException("'" + previous.getLabel() + "' durumundan '"
                     + (target == null ? "" : target.getLabel()) + "' durumuna geçilemez.");
         }
-        if (target == WorkOrderStatus.IPTAL && !currentUserService.canManageFinances()) {
+        if (enforcePermissions && target == WorkOrderStatus.IPTAL
+                && !currentUserService.canManageFinances()) {
             throw new BusinessRuleException("İş emri iptali için işletme sahibi veya muhasebe yetkisi gerekir.");
         }
-        if (target != WorkOrderStatus.IPTAL && !currentUserService.canOperateWorkOrders()) {
+        if (enforcePermissions && target != WorkOrderStatus.IPTAL
+                && !currentUserService.canOperateWorkOrders()) {
             throw new BusinessRuleException(
                     "İş emri durumunu yalnızca işletme sahibi veya servis kullanıcısı değiştirebilir.");
         }

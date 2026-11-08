@@ -4,11 +4,13 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MvcResult;
 import tr.com.servisdefteri.security.Role;
 import tr.com.servisdefteri.security.User;
 import tr.com.servisdefteri.support.BusinessTestSupport;
+import tr.com.servisdefteri.workorder.WorkOrderController;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -18,6 +20,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -52,6 +55,58 @@ class WorkOrderImportIT extends BusinessTestSupport {
                 """, String.class)).isEqualTo("Ahmet Usta");
         assertThat(count("select count(*) from customers where name = 'İçe Aktarım Yeni'"))
                 .isEqualTo(1);
+    }
+
+    @Test
+    void previewDoesNotCreateUntilConfirmed() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        var customer = createCustomer("Önizleme Müşteri", "0555 446 55 66");
+        createVehicle(customer, "34 IMP 004");
+
+        String csv = """
+                Fiş No;Plaka;Müşteri;Telefon;Şikâyet;Yapılacak İş
+                IMP-PREVIEW-001;34 IMP 004;;;Fren sesi;Fren bakımı
+                """;
+        MockMultipartFile file = new MockMultipartFile("file", "onizleme.csv", "text/csv",
+                csv.getBytes(StandardCharsets.UTF_8));
+        MockHttpSession session = new MockHttpSession();
+
+        mockMvc.perform(multipart("/work-orders/import/preview").file(file).session(session)
+                        .with(user(principal(servis)))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("İçe Aktarma Önizlemesi")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("IMP-PREVIEW-001")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Onayla ve İçe Aktar")));
+
+        assertThat(count("select count(*) from work_orders where order_no = 'IMP-PREVIEW-001'"))
+                .isZero();
+        String token = (String) session.getAttribute(WorkOrderController.SESSION_IMPORT_TOKEN);
+        assertThat(token).isNotBlank();
+
+        mockMvc.perform(post("/work-orders/import/confirm").session(session)
+                        .with(user(principal(servis)))
+                        .with(csrf())
+                        .param("previewToken", token))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/work-orders"));
+
+        assertThat(count("select count(*) from work_orders where order_no = 'IMP-PREVIEW-001'"))
+                .isEqualTo(1);
+    }
+
+    @Test
+    void confirmWithoutPreviewCreatesNothing() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+
+        mockMvc.perform(post("/work-orders/import/confirm")
+                        .with(user(principal(servis)))
+                        .with(csrf())
+                        .param("previewToken", "gecersiz"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Önizleme bulunamadı")));
+
+        assertThat(count("select count(*) from work_orders")).isZero();
     }
 
     @Test

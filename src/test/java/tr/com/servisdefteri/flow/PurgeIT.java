@@ -75,6 +75,21 @@ class PurgeIT extends BusinessTestSupport {
     }
 
     @Test
+    void turkishUppercaseConfirmationIsAccepted() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Öztoprak Lojistik A.Ş.", "0555 700 00 08");
+
+        mockMvc.perform(post("/purge/customer/{id}", customer.getId())
+                        .with(user(principal(patron)))
+                        .with(csrf())
+                        .param("confirmation", "ÖZTOPRAK LOJİSTİK A.Ş."))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/customers?active=all"));
+
+        assertThat(count("select count(*) from customers where id = ?", customer.getId())).isZero();
+    }
+
+    @Test
     void onlyPatronCanOpenPurgeScreen() throws Exception {
         User muhasebe = createUser("muhasebe", "Muhasebe", Role.MUHASEBE);
         Customer customer = createCustomer("Yetki Müşteri", "0555 700 00 04");

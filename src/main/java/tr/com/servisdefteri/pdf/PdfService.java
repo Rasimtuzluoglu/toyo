@@ -259,7 +259,7 @@ public class PdfService {
                     report.rows().size() + " iş", "", baseFont);
 
             Paragraph summary = new Paragraph(
-                    "Toplam tutar: " + money(report.totalAmount())
+                    "İş emri toplamı: " + money(report.totalAmount())
                             + "   ·   Tahsilat: " + money(report.totalPaid())
                             + "   ·   Kalan: " + money(report.totalRemaining()),
                     bold);
@@ -307,7 +307,8 @@ public class PdfService {
 
             Paragraph note = new Paragraph("Bu döküm " + safe(business.getName())
                     + " tarafından " + DATE.format(report.date())
-                    + " tarihinde açılan iş emirlerini içerir. Tutarlar iş emri ve cari kayıtlarından alınmıştır.",
+                    + " tarihinde açılan iş emirlerini içerir. "
+                    + "Kalan = iş emri toplamı - tahsilat; cari borç yalnızca tamamlanan işlerde oluşur.",
                     small);
             note.setSpacingBefore(12);
             document.add(note);

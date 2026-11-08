@@ -52,7 +52,54 @@ public class WorkOrderImportService {
             throw new WorkOrderImportException(List.of(
                     new WorkOrderImportException.ImportError(0, "Dosya seçilmelidir.")));
         }
-        List<List<String>> rows = readRows(file);
+        try {
+            return importBytes(file.getBytes(), file.getOriginalFilename());
+        } catch (java.io.IOException ex) {
+            throw new WorkOrderImportException(List.of(
+                    new WorkOrderImportException.ImportError(0, "Dosya okunamadı.")));
+        }
+    }
+
+    @Transactional
+    public int importBytes(byte[] content, String fileName) {
+        ParsedImport parsed = parse(content, fileName);
+        for (int i = 0; i < parsed.forms().size(); i++) {
+            try {
+                quickWorkOrderService.create(parsed.forms().get(i));
+            } catch (BusinessRuleException ex) {
+                throw new WorkOrderImportException(List.of(
+                        new WorkOrderImportException.ImportError(parsed.rowNumbers().get(i), ex.getMessage())));
+            }
+        }
+        return parsed.forms().size();
+    }
+
+    @Transactional(readOnly = true)
+    public ImportPreview previewBytes(byte[] content, String fileName) {
+        ParsedImport parsed = parse(content, fileName);
+        List<ImportPreview.ImportRow> rows = new ArrayList<>(parsed.forms().size());
+        for (int i = 0; i < parsed.forms().size(); i++) {
+            QuickWorkOrderForm form = parsed.forms().get(i);
+            rows.add(new ImportPreview.ImportRow(
+                    parsed.rowNumbers().get(i),
+                    form.getOrderNo(),
+                    form.getPlate(),
+                    form.getCustomerName(),
+                    form.getPhone(),
+                    form.getComplaint(),
+                    form.getServiceDescription(),
+                    form.getAssignedName(),
+                    form.getMileage()));
+        }
+        return new ImportPreview(fileName, rows.size(), rows);
+    }
+
+    private ParsedImport parse(byte[] content, String fileName) {
+        if (content == null || content.length == 0) {
+            throw new WorkOrderImportException(List.of(
+                    new WorkOrderImportException.ImportError(0, "Dosya seçilmelidir.")));
+        }
+        List<List<String>> rows = readRows(content, fileName);
         if (rows.isEmpty()) {
             throw new WorkOrderImportException(List.of(
                     new WorkOrderImportException.ImportError(0, "Dosyada veri satırı bulunamadı.")));
@@ -85,16 +132,10 @@ public class WorkOrderImportService {
         if (!errors.isEmpty()) {
             throw new WorkOrderImportException(errors);
         }
+        return new ParsedImport(forms, formRows);
+    }
 
-        for (int i = 0; i < forms.size(); i++) {
-            try {
-                quickWorkOrderService.create(forms.get(i));
-            } catch (BusinessRuleException ex) {
-                throw new WorkOrderImportException(List.of(
-                        new WorkOrderImportException.ImportError(formRows.get(i), ex.getMessage())));
-            }
-        }
-        return forms.size();
+    private record ParsedImport(List<QuickWorkOrderForm> forms, List<Integer> rowNumbers) {
     }
 
     public byte[] template() {
@@ -236,15 +277,14 @@ public class WorkOrderImportService {
         }
     }
 
-    private List<List<String>> readRows(MultipartFile file) {
-        String name = file.getOriginalFilename() == null
-                ? "" : file.getOriginalFilename().toLowerCase(Locale.ROOT);
+    private List<List<String>> readRows(byte[] content, String fileName) {
+        String name = fileName == null ? "" : fileName.toLowerCase(Locale.ROOT);
         try {
             if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
-                return readExcel(file);
+                return readExcel(content);
             }
             if (name.endsWith(".csv")) {
-                return readCsv(file.getBytes());
+                return readCsv(content);
             }
         } catch (WorkOrderImportException ex) {
             throw ex;
@@ -258,8 +298,8 @@ public class WorkOrderImportService {
                         "Yalnızca .csv, .xlsx veya .xls dosyaları desteklenir.")));
     }
 
-    private List<List<String>> readExcel(MultipartFile file) throws Exception {
-        try (InputStream in = file.getInputStream();
+    private List<List<String>> readExcel(byte[] content) throws Exception {
+        try (InputStream in = new java.io.ByteArrayInputStream(content);
              Workbook workbook = WorkbookFactory.create(in)) {
             Sheet sheet = workbook.getSheetAt(0);
             DataFormatter formatter = new DataFormatter(Locale.ROOT);

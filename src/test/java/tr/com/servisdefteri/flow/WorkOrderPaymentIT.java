@@ -11,6 +11,7 @@ import tr.com.servisdefteri.security.User;
 import tr.com.servisdefteri.support.BusinessTestSupport;
 import tr.com.servisdefteri.vehicle.Vehicle;
 import tr.com.servisdefteri.workorder.WorkOrder;
+import tr.com.servisdefteri.workorder.WorkOrderStatus;
 
 import java.math.BigDecimal;
 
@@ -103,6 +104,35 @@ class WorkOrderPaymentIT extends BusinessTestSupport {
 
         assertThat(count("select count(*) from payments where customer_id = ?", customer.getId()))
                 .isZero();
+    }
+
+    @Test
+    void deliveryPageOffersWorkOrderPaymentAndSavingMarksDelivered() throws Exception {
+        User servis = createUser("servis", "Servis", Role.SERVIS);
+        Customer customer = createCustomer("Teslim Ödeme Müşteri", "0555 720 00 04");
+        Vehicle vehicle = createVehicle(customer, "34 PAY 104");
+        WorkOrder order = createCompletedOrder(customer, vehicle, "1000.00");
+
+        mockMvc.perform(get("/work-orders/{id}/delivery", order.getId())
+                        .with(user(principal(servis))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("İş emri kalanı")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tahsilat Al")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "/work-orders/" + order.getId() + "/payment")));
+
+        mockMvc.perform(post("/work-orders/{id}/delivery", order.getId())
+                        .with(user(principal(servis)))
+                        .with(csrf())
+                        .param("receiverName", "Teslim Alan")
+                        .param("mileage", "1500")
+                        .param("fuelLevel", "YARIM"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/work-orders/" + order.getId()));
+
+        WorkOrder delivered = workOrderService.findById(order.getId());
+        assertThat(delivered.getStatus()).isEqualTo(WorkOrderStatus.TESLIM_EDILDI);
+        assertThat(delivered.getDeliveredAt()).isNotNull();
     }
 
     @Test

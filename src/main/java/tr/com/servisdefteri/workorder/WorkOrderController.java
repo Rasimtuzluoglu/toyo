@@ -36,6 +36,7 @@ import tr.com.servisdefteri.security.Role;
 import tr.com.servisdefteri.settings.BusinessSettingsService;
 import tr.com.servisdefteri.vehicle.VehicleService;
 
+import java.io.IOException;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,10 +46,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/work-orders")
 public class WorkOrderController {
+
+    public static final String SESSION_IMPORT_TOKEN = "workOrderImportToken";
+    public static final String SESSION_IMPORT_CONTENT = "workOrderImportContent";
 
     private final WorkOrderService workOrderService;
     private final CustomerService customerService;
@@ -311,7 +316,8 @@ public class WorkOrderController {
 
     @GetMapping("/import")
     @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
-    public String importForm(Model model) {
+    public String importForm(Model model, HttpSession session) {
+        clearImportPreview(session);
         model.addAttribute("activeMenu", "workorders");
         return "workorders/import";
     }
@@ -330,6 +336,67 @@ public class WorkOrderController {
             model.addAttribute("activeMenu", "workorders");
             return "workorders/import";
         }
+    }
+
+    @PostMapping("/import/preview")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String previewImport(@RequestParam("file") MultipartFile file, HttpSession session,
+                                Model model) {
+        try {
+            byte[] content = file.getBytes();
+            ImportPreview preview = importService.previewBytes(content, file.getOriginalFilename());
+            String token = UUID.randomUUID().toString();
+            session.setAttribute(SESSION_IMPORT_TOKEN, token);
+            session.setAttribute(SESSION_IMPORT_CONTENT,
+                    new StoredImport(file.getOriginalFilename(), content));
+            model.addAttribute("preview", preview);
+            model.addAttribute("previewToken", token);
+            model.addAttribute("activeMenu", "workorders");
+            return "workorders/import-preview";
+        } catch (WorkOrderImportException ex) {
+            clearImportPreview(session);
+            model.addAttribute("importErrors", ex.getErrors());
+            model.addAttribute("activeMenu", "workorders");
+            return "workorders/import";
+        } catch (IOException ex) {
+            clearImportPreview(session);
+            model.addAttribute("importErrors", List.of(new WorkOrderImportException.ImportError(
+                    0, "Dosya okunamadı. Lütfen yeniden deneyin.")));
+            model.addAttribute("activeMenu", "workorders");
+            return "workorders/import";
+        }
+    }
+
+    @PostMapping("/import/confirm")
+    @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
+    public String confirmImport(@RequestParam(required = false) String previewToken,
+                                HttpSession session, Model model,
+                                RedirectAttributes redirectAttributes) {
+        String token = (String) session.getAttribute(SESSION_IMPORT_TOKEN);
+        StoredImport stored = (StoredImport) session.getAttribute(SESSION_IMPORT_CONTENT);
+        if (token == null || stored == null || !token.equals(previewToken)) {
+            model.addAttribute("importErrors", List.of(new WorkOrderImportException.ImportError(
+                    0, "Önizleme bulunamadı veya süresi doldu. Dosyayı yeniden yükleyin.")));
+            model.addAttribute("activeMenu", "workorders");
+            return "workorders/import";
+        }
+        try {
+            int count = importService.importBytes(stored.content(), stored.fileName());
+            clearImportPreview(session);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    count + " iş emri içe aktarıldı.");
+            return "redirect:/work-orders";
+        } catch (WorkOrderImportException ex) {
+            clearImportPreview(session);
+            model.addAttribute("importErrors", ex.getErrors());
+            model.addAttribute("activeMenu", "workorders");
+            return "workorders/import";
+        }
+    }
+
+    private void clearImportPreview(HttpSession session) {
+        session.removeAttribute(SESSION_IMPORT_TOKEN);
+        session.removeAttribute(SESSION_IMPORT_CONTENT);
     }
 
     @GetMapping("/import/template")
@@ -698,5 +765,8 @@ public class WorkOrderController {
         } catch (IllegalArgumentException | DateTimeParseException ex) {
             return null;
         }
+    }
+
+    private record StoredImport(String fileName, byte[] content) {
     }
 }

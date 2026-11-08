@@ -108,6 +108,7 @@ public class VehicleDocumentController {
         model.addAttribute("deliveryForm", documentService.toForm(delivery, order));
         model.addAttribute("fuelLevels", FuelLevel.values());
         model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
+        model.addAttribute("workOrderDebt", accountService.workOrderDebt(orderId));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/delivery";
     }
@@ -125,7 +126,8 @@ public class VehicleDocumentController {
         }
         try {
             documentService.saveDelivery(orderId, form);
-            redirectAttributes.addFlashAttribute("successMessage", "Teslim tutanağı kaydedildi.");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Teslim tutanağı kaydedildi; iş emri teslim edildi.");
             return "redirect:/work-orders/" + orderId;
         } catch (BusinessRuleException ex) {
             bindingResult.reject("delivery.failed", ex.getMessage());
@@ -172,6 +174,7 @@ public class VehicleDocumentController {
         model.addAttribute("delivery", documentService.findDelivery(orderId));
         model.addAttribute("fuelLevels", FuelLevel.values());
         model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
+        model.addAttribute("workOrderDebt", accountService.workOrderDebt(orderId));
         model.addAttribute("activeMenu", "workorders");
     }
 }

@@ -14,7 +14,9 @@
                 <div>
                     <div class="page-eyebrow">Servis Operasyonu</div>
                     <h1 class="page-title">İş Emri İçe Aktar</h1>
-                    <p class="page-subtitle">CSV veya Excel dosyasındaki satırları toplu iş emrine dönüştürün.</p>
+                    <p class="page-subtitle">
+                        Dosyayı yükleyin, satırları önizleyin ve onaylayın. Onaylamadan hiçbir kayıt oluşmaz.
+                    </p>
                 </div>
                 <div class="page-actions">
                     <a class="btn btn-outline-secondary" th:href="@{/work-orders/import/template}">
@@ -29,10 +31,10 @@
                     <div class="sd-card">
                         <div class="sd-card-header">
                             <h2>Dosya yükle</h2>
-                            <span class="record-meta">En fazla 200 satır</span>
+                            <span class="record-meta">1. Yükle · 2. Önizle · 3. Onayla</span>
                         </div>
                         <div class="sd-card-body">
-                            <form method="post" th:action="@{/work-orders/import}"
+                            <form method="post" th:action="@{/work-orders/import/preview}"
                                   enctype="multipart/form-data" data-submit-once>
                                 <div class="mb-3">
                                     <label class="form-label" for="file">CSV veya Excel dosyası</label>
@@ -44,8 +46,9 @@
                                     </div>
                                 </div>
                                 <button class="btn btn-primary" type="submit">
-                                    <i class="bi bi-upload me-1"></i> İçe Aktar
+                                    <i class="bi bi-eye me-1"></i> Önizle
                                 </button>
+                                <span class="record-meta ms-2">En fazla 200 satır</span>
                             </form>
                         </div>
                     </div>

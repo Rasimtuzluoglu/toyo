@@ -2903,6 +2903,59 @@ body.command-open {
     }
 }
 
+.daily-mobile-card {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--sd-border);
+}
+
+.daily-mobile-card:last-child {
+    border-bottom: 0;
+}
+
+.daily-mobile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-top: 5px;
+    color: var(--sd-muted);
+    font-size: 0.78rem;
+}
+
+.daily-mobile-work {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+.daily-mobile-money {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--sd-border);
+}
+
+.daily-mobile-money div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.daily-mobile-money span {
+    color: var(--sd-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.daily-mobile-money strong {
+    font-size: 0.84rem;
+    white-space: nowrap;
+}
+
 @media print {
     body {
         background: #fff;

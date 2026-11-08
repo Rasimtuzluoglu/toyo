@@ -59,9 +59,11 @@ Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla 
 
 - Tarih seçici varsayılan olarak bugünü gösterir.
 - Durumdan bağımsız olarak o gün açılan işler listelenir: fiş no, saat, müşteri, telefon, plaka, araç, yapılan iş, ilgilenen, durum, toplam, tahsilat ve kalan.
-- Üstte toplam iş sayısı, toplam tutar, tahsil edilen ve kalan özeti bulunur.
+- **Kalan = iş emri toplamı - bu iş emrine yapılan tahsilat.** Cari borç yalnızca tamamlanan işlerde oluşur; cari bakiye için Cari Hesaplar ekranı kullanılır.
+- Mobilde tablo yerine kart görünümü kullanılır; masaüstünde tüm sütunlar tablo halinde görünür.
+- Üstte toplam iş sayısı, iş emri toplamı, tahsil edilen ve kalan özeti bulunur.
 - **Excel** ve **PDF** düğmeleriyle döküm indirilir.
-- PATRON, MUHASEBE ve SERVIS erişebilir.
+- PATRON, MUHASEBE ve SERVIS erişebilir; mobil alt menüde **Döküm** kısayolu bulunur.
 
 ## Randevular
 
@@ -168,6 +170,10 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 
 **İş Emirleri → İçe Aktar** ekranından CSV veya Excel dosyası yüklenir.
 
+1. Dosyayı seçip **Önizle** düğmesine basın.
+2. Açılan önizleme ekranında satırları kontrol edin; bu adımda **henüz kayıt oluşmaz**.
+3. **Onayla ve İçe Aktar** düğmesine basın.
+
 - Zorunlu sütunlar: **Fiş No, Plaka, Şikâyet, Yapılacak İş**
 - Yeni plaka için **Müşteri** ve **Telefon** da zorunludur.
 - İsteğe bağlı: **İlgilenen**, **Kilometre**
@@ -243,7 +249,9 @@ Bekliyor → İşlemde → Tamamlandı → Teslim Edildi
 **İş emri detayı → Teslim tutanağı**
 
 - Yalnızca iş emri `Tamamlandı` veya `Teslim Edildi` durumundayken kaydedilir.
-- Üst bölümde **iş emri tutarı** ve **müşteri kalan bakiyesi** görünür; bakiye varsa **Tahsilat Al** bağlantısı çıkar.
+- Üst bölümde **iş emri tutarı**, **tahsil edilen** ve **iş emri kalanı** görünür; kalan varsa **Tahsilat Al** bağlantısı çıkar.
+- **Tahsilat Al** tüm rollerde yalnızca bu iş emrinin kalanını tahsil eder; müşterinin diğer borçları bu ekranda görünmez.
+- Tutanak kaydedildiğinde iş emri otomatik olarak **Teslim Edildi** durumuna geçer.
 - Teslim alan kişi, kilometre, yakıt seviyesi ve not girilir.
 - Tutanakta yapılan işlemler, genel toplam ve imza alanları yer alır.
 - **Yazdır** veya **PDF** ile müşteri imzası alınır.

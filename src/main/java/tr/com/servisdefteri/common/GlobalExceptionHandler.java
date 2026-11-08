@@ -9,6 +9,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -32,6 +34,14 @@ public class GlobalExceptionHandler {
         ModelAndView mav = new ModelAndView("error/404");
         mav.setStatus(HttpStatus.NOT_FOUND);
         mav.addObject("errorMessage", ex.getMessage());
+        return mav;
+    }
+
+    @ExceptionHandler({NoResourceFoundException.class, NoHandlerFoundException.class})
+    public ModelAndView missingPage() {
+        ModelAndView mav = new ModelAndView("error/404");
+        mav.setStatus(HttpStatus.NOT_FOUND);
+        mav.addObject("errorMessage", "Aradığınız sayfa mevcut değil.");
         return mav;
     }
 

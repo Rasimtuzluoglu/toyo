@@ -50,7 +50,10 @@ public class DailyReportService {
             WorkOrderDebt debt = accountService.workOrderDebt(order.getId());
             BigDecimal total = scale(order.getTotalAmount());
             BigDecimal paid = debt == null ? BigDecimal.ZERO : scale(debt.paid());
-            BigDecimal remaining = debt == null ? BigDecimal.ZERO : scale(debt.remaining());
+            BigDecimal remaining = scale(total.subtract(paid));
+            if (remaining.signum() < 0) {
+                remaining = BigDecimal.ZERO;
+            }
             rows.add(new DailyReportRow(
                     order.getId(),
                     order.getOrderNo(),
@@ -98,9 +101,10 @@ public class DailyReportService {
         List<String> info = List.of(
                 "Tarih: " + DATE.format(view.date()),
                 "Toplam iş: " + view.rows().size(),
-                "Toplam tutar: " + CsvUtil.money(view.totalAmount()) + " ₺"
+                "İş emri toplamı: " + CsvUtil.money(view.totalAmount()) + " ₺"
                         + " · Tahsilat: " + CsvUtil.money(view.totalPaid()) + " ₺"
-                        + " · Kalan: " + CsvUtil.money(view.totalRemaining()) + " ₺");
+                        + " · Kalan: " + CsvUtil.money(view.totalRemaining()) + " ₺",
+                "Kalan = iş emri toplamı - tahsilat. Cari borç yalnızca tamamlanan işlerde oluşur.");
         return ExcelUtil.toXlsx("Günlük İşler", "Günlük İş Dökümü", info, headers, rows);
     }
 

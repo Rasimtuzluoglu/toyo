@@ -15,11 +15,11 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
-  <img alt="104 test" src="https://img.shields.io/badge/tests-104%20passing-brightgreen">
+  <img alt="122 test" src="https://img.shields.io/badge/tests-122%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ve demo ortamı çalışıyor · **116 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ve demo ortamı çalışıyor · **122 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Bir bakışta
 
@@ -55,7 +55,7 @@
 - **Manuel fiş no**: otomatik üretilmez; Excel'den kopyalayıp yapıştırabilirsiniz.
 - Yazarken mükerrer kontrolü; aynı numara kullanılamaz.
 - **Kaydet ve Yeni** ile art arda kayıt.
-- **CSV / XLSX / XLS içe aktarma**: en fazla 200 satır; bir satırda hata varsa hiçbir kayıt oluşmaz.
+- **CSV / XLSX / XLS içe aktarma**: en fazla 200 satır; önizleme ve onay adımı; bir satırda hata varsa hiçbir kayıt oluşmaz.
 - "İlgilenen kişi" serbest metin; son kullanılan isimler chip olarak önerilir.
 
 **💰 Finans**
@@ -67,10 +67,12 @@
 
 **📊 Raporlar**
 - **Günlük Döküm**: seçilen günde açılan tüm iş emirleri; durum, tutar, tahsilat ve kalan.
-- Excel ve PDF indirme; PATRON, MUHASEBE ve SERVIS erişimi.
+- **Kalan = iş emri toplamı - tahsilat**; cari borç ayrıca Cari Hesaplar ekranında izlenir.
+- Mobilde kart görünümü; Excel ve PDF indirme; PATRON, MUHASEBE ve SERVIS erişimi.
 
 **📄 Belgeler ve marka**
 - Araç kabul formu, teslim tutanağı, iş emri ve tahsilat makbuzu; PDF ve ıslak/dijital imza.
+- Teslim tutanağı kaydedilince iş emri otomatik **Teslim Edildi** olur; teslim ekranında iş emri bazlı tahsilat açılır.
 - White-label: işletme adı, slogan, ana renk ve logo; giriş, menü, belgeler ve PDF'lerde geçerli.
 
 **🔐 Güvenlik, veri ve bakım**
@@ -186,7 +188,7 @@ docker compose -f docker-compose.demo.yml up -d
 mvn clean package
 ```
 
-- **116 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
+- **122 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
 - Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
 - Pre-push hook: `scripts/install-ci-hook.ps1`.

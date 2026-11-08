@@ -52,24 +52,36 @@
                             <strong class="money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</strong>
                         </div>
                         <div class="summary-item">
-                            <span>Müşteri kalan bakiyesi</span>
+                            <span>Tahsil edilen</span>
+                            <strong class="money text-success"
+                                    th:text="${workOrderDebt == null ? '0,00 ₺' : fmt.money(workOrderDebt.paid)}">0,00 ₺</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>İş emri kalanı</span>
                             <strong class="money"
-                                    th:classappend="${customerBalance.signum() > 0} ? ' money-debt' : ' money-credit'"
-                                    th:text="${fmt.money(customerBalance)}">0,00 ₺</strong>
+                                    th:classappend="${workOrderDebt != null and workOrderDebt.remaining.signum() > 0} ? ' money-debt' : ' money-credit'"
+                                    th:text="${workOrderDebt == null ? '0,00 ₺' : fmt.money(workOrderDebt.remaining)}">0,00 ₺</strong>
                         </div>
                         <div class="summary-item">
                             <span>Durum</span>
                             <strong th:text="${order.status.label}">Tamamlandı</strong>
                         </div>
                     </div>
+                    <div class="record-meta mt-2" th:if="${customerBalance != null}">
+                        Müşterinin toplam cari bakiyesi:
+                        <strong th:text="${fmt.money(customerBalance)}">0,00 ₺</strong>
+                        <span th:if="${customerBalance.signum() > 0}">(diğer işler dahil)</span>
+                    </div>
                     <div class="mt-3 d-flex gap-2 flex-wrap align-items-center"
-                         sec:authorize="hasAnyRole('PATRON','MUHASEBE')"
-                         th:if="${customerBalance.signum() > 0}">
+                         sec:authorize="hasAnyRole('PATRON','MUHASEBE','SERVIS')"
+                         th:if="${workOrderDebt != null and workOrderDebt.remaining.signum() > 0}">
                         <a class="btn btn-outline-success btn-sm"
-                           th:href="@{/payments/new(customerId=${order.customer.id})}">
+                           th:href="@{/work-orders/{id}/payment(id=${order.id})}">
                             <i class="bi bi-cash-coin me-1"></i> Tahsilat Al
                         </a>
-                        <span class="record-meta">Tahsilatı aldıktan sonra teslim tutanağını kaydedin.</span>
+                        <span class="record-meta">
+                            Yalnızca bu iş emrinin kalanı tahsil edilir; diğer borçlar bu ekranda görünmez.
+                        </span>
                     </div>
                 </div>
             </div>
@@ -107,7 +119,7 @@
                 <div class="sd-card" th:if="${order.status.completed}">
                     <div class="sd-card-header">
                         <h2><i class="bi bi-pencil-square me-2"></i>Teslim bilgilerini <span th:text="${delivery == null ? 'girin' : 'güncelleyin'}">girin</span></h2>
-                        <span class="record-meta">Islak imza için kaydettikten sonra yazdırın</span>
+                        <span class="record-meta">Kaydedince iş emri Teslim Edildi olur · Islak imza için yazdırın</span>
                     </div>
                     <div class="sd-card-body">
                         <div th:replace="~{fragments/layout :: globalErrors}"></div>

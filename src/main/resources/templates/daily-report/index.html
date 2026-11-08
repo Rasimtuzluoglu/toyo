@@ -14,7 +14,7 @@
                 <div>
                     <div class="page-eyebrow">Rapor</div>
                     <h1 class="page-title">Günlük Döküm</h1>
-                    <p class="page-subtitle">Seçilen günde açılan tüm iş emirleri; durum, tutar ve kalan borç.</p>
+                    <p class="page-subtitle">Seçilen günde açılan tüm iş emirleri; durum, tutar, tahsilat ve kalan.</p>
                 </div>
                 <div class="page-actions">
                     <a class="btn btn-outline-secondary"
@@ -55,7 +55,7 @@
                 <div class="stat-card">
                     <span class="stat-icon amber"><i class="bi bi-cash-stack"></i></span>
                     <div class="stat-value money" th:text="${fmt.money(report.totalAmount)}">0,00 ₺</div>
-                    <div class="stat-label">Toplam tutar</div>
+                    <div class="stat-label">İş emri toplamı</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon green"><i class="bi bi-check2-circle"></i></span>
@@ -68,6 +68,10 @@
                     <div class="stat-label">Kalan</div>
                 </div>
             </div>
+            <p class="record-meta mb-4">
+                Kalan = iş emri toplamı - bu iş emrine yapılan tahsilat. Cari borç yalnızca
+                tamamlanan işlerde oluşur; cari bakiye için Cari Hesaplar ekranını kullanın.
+            </p>
 
             <div class="sd-card">
                 <div class="sd-card-header">
@@ -75,7 +79,7 @@
                     <span class="record-meta" th:text="${fmt.date(selectedDate)}">01.01.2026</span>
                 </div>
                 <div class="sd-card-body p-0" th:if="${!report.rows.isEmpty()}">
-                    <div class="table-responsive">
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table align-middle mb-0">
                             <thead>
                             <tr>
@@ -120,6 +124,47 @@
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="d-md-none">
+                        <div class="daily-mobile-card" th:each="row : ${report.rows}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <a class="fw-semibold"
+                                   th:href="@{/work-orders/{id}(id=${row.orderId})}"
+                                   th:text="${row.orderNo}">IS-0000</a>
+                                <span class="sd-badge sd-badge-neutral"
+                                      th:text="${row.statusLabel}">Bekliyor</span>
+                            </div>
+                            <div class="daily-mobile-meta">
+                                <span th:text="${row.customerName}">Müşteri</span>
+                                <span th:text="${row.phone}">Telefon</span>
+                                <span th:text="${fmt.time(row.openedAt)}">09:00</span>
+                            </div>
+                            <div class="daily-mobile-meta">
+                                <strong th:text="${row.plate}">34ABC123</strong>
+                                <span th:text="${row.vehicle}">Toyota Corolla</span>
+                                <span th:if="${row.assignedName != null and !row.assignedName.isEmpty()}"
+                                      th:text="${'· ' + row.assignedName}">İlgilenen</span>
+                            </div>
+                            <div class="daily-mobile-work" th:text="${row.workDone}">Yapılan iş</div>
+                            <div class="daily-mobile-work record-meta"
+                                 th:if="${row.complaint != null and !row.complaint.isEmpty()}"
+                                 th:text="${row.complaint}">Şikâyet</div>
+                            <div class="daily-mobile-money">
+                                <div>
+                                    <span>Toplam</span>
+                                    <strong class="money" th:text="${fmt.money(row.total)}">0,00 ₺</strong>
+                                </div>
+                                <div>
+                                    <span>Tahsilat</span>
+                                    <strong class="money text-success" th:text="${fmt.money(row.paid)}">0,00 ₺</strong>
+                                </div>
+                                <div>
+                                    <span>Kalan</span>
+                                    <strong class="money money-debt" th:text="${fmt.money(row.remaining)}">0,00 ₺</strong>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="empty-state" th:if="${report.rows.isEmpty()}">
