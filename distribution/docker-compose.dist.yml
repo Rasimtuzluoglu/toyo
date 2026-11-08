@@ -53,7 +53,7 @@ services:
       THYMELEAF_CACHE: "true"
       TZ: Europe/Istanbul
     ports:
-      - "${APP_PORT:-18080}:18080"
+      - "127.0.0.1:${APP_PORT:-18080}:18080"
     volumes:
       - backups:/app/backups
     security_opt:

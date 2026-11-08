@@ -84,7 +84,7 @@
 - Günlük otomatik yedek; kaçırılan yedek açılışta telafi edilir.
 - Güncelleme öncesi yedek, GitHub son commit kontrolü ve host ajanıyla Docker güncellemesi.
 
-> **Ağ notu:** Uygulama yerel ağa HTTP olarak açılabilir. Güvenilmeyen ağlarda doğrudan açmayın; TLS sonlandıran bir reverse proxy kullanın, `SESSION_COOKIE_SECURE=true` ve güvenilen proxy arkasında `FORWARD_HEADERS_STRATEGY=framework` yapın. Sadece bu bilgisayardan erişim için `APP_BIND_ADDRESS=127.0.0.1` ayarlayın.
+> **Ağ notu:** Varsayılan olarak uygulama yalnızca **bu bilgisayara** (`127.0.0.1`) bağlanır. Yerel ağdaki tablet/telefon için `APP_BIND_ADDRESS=0.0.0.0` yapın; bu durumda güvenilir bir ağ kullanın, TLS sonlandıran reverse proxy ekleyin ve `SESSION_COOKIE_SECURE=true` ayarlayın.
 
 ## Mimari
 

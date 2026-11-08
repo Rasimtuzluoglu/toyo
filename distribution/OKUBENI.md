@@ -57,10 +57,10 @@ Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlat�
 Kurulum sonunda yerel ağ IP'si ekranda gösterilir. Telefon/tablet aynı Wi-Fi veya
 kablolu ağa bağlıysa bu adresi kullanabilir.
 
-> **Güvenlik:** Uygulama yerel ağda HTTP üzerinde çalışır; güvenilmeyen Wi-Fi/ağlarda
-> doğrudan açmayın. TLS sonlandıran bir reverse proxy kullanıyorsanız `.env` içinde
-> `SESSION_COOKIE_SECURE=true` yapın. Yalnızca bu bilgisayardan erişim için
-> `APP_BIND_ADDRESS=127.0.0.1` ayarlayın.
+> **Güvenlik:** Varsayılan olarak uygulama yalnızca bu bilgisayara (`127.0.0.1`) bağlanır.
+> Yerel ağdaki tablet/telefon için `.env` içinde `APP_BIND_ADDRESS=0.0.0.0` yapın; yalnızca
+> güvenilir bir ağda kullanın. TLS sonlandıran reverse proxy arkasında
+> `SESSION_COOKIE_SECURE=true` ayarlayın.
 
 ## Günlük kullanım
 

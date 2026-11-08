@@ -58,8 +58,8 @@ Uygulama: `http://localhost:18080`
 ### Yerel ağda kullanım (VPS / internete açma yok)
 Bu kurulum yalnızca yerel bilgisayar ve aynı ağdaki cihazlar için tasarlanmıştır. Uygulama internete açılmaz; PostgreSQL portu da dışarı yayınlanmaz.
 
-- **Yalnızca bu bilgisayardan kullanılacaksa:** `.env` içinde `APP_BIND_ADDRESS=127.0.0.1` yapın.
-- **Tablet/telefon aynı Wi-Fi üzerinden bağlanacaksa:** `APP_BIND_ADDRESS=0.0.0.0` bırakın.
+- **Varsayılan:** `APP_BIND_ADDRESS=127.0.0.1`; uygulama yalnızca bu bilgisayardan açılır.
+- **Tablet/telefon aynı Wi-Fi üzerinden bağlanacaksa:** `.env` içinde `APP_BIND_ADDRESS=0.0.0.0` yapın.
 - Sunucu bilgisayarın yerel IP'sini `ipconfig` ile bulun ve tabletten `http://192.168.x.x:18080` adresini açın.
 - Windows Güvenlik Duvarı'nda yalnızca **özel ağ** profili için TCP **18080** portuna izin verin; genel ağ profiline izin vermeyin.
 - Modem/router üzerinde bu port için **port yönlendirme yapmayın**. Dışarıdan erişim gerekirse VPS veya port açmak yerine VPN kullanın.
