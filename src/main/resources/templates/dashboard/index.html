@@ -32,9 +32,6 @@
                     <a class="btn btn-outline-secondary" th:href="@{/work-orders/quick}">
                         <i class="bi bi-lightning-charge me-1"></i> Hızlı İş
                     </a>
-                    <a class="btn btn-primary" th:href="@{/work-orders/new}">
-                        <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
-                    </a>
                 </div>
             </div>
 
@@ -49,13 +46,15 @@
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(view.todayCollections)}">0,00 ₺</div>
+                    <div class="stat-value money money-credit" th:text="${fmt.money(view.todayCollections)}">0,00 ₺</div>
                     <div class="stat-label">Bugünkü tahsilat</div>
                     <div class="stat-hint"><a th:href="@{/payments/new}">Tahsilat kaydet</a></div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon amber"><i class="bi bi-wallet2"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(view.netReceivable)}">0,00 ₺</div>
+                    <div class="stat-value money"
+                         th:classappend="${view.netReceivable.signum() > 0 ? ' money-debt' : (view.netReceivable.signum() < 0 ? ' money-credit' : '')}"
+                         th:text="${fmt.money(view.netReceivable)}">0,00 ₺</div>
                     <div class="stat-label">Kalan net alacak</div>
                     <div class="stat-hint">
                         <span th:text="${view.debtorCount}">0</span> borçlu ·
@@ -286,7 +285,7 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-xl-7">
+                <div class="col-12">
                     <div class="sd-card" th:if="${!view.completedToday.isEmpty()}">
                         <div class="sd-card-header">
                             <h2><i class="bi bi-check2-circle me-2 text-success"></i>Bugün tamamlananlar</h2>
@@ -357,44 +356,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-5">
-                    <div class="sd-card">
-                        <div class="sd-card-header">
-                            <h2><i class="bi bi-lightning-charge me-2 text-danger"></i>Hızlı işlemler</h2>
-                        </div>
-                        <div class="sd-card-body">
-                            <div class="d-grid gap-2">
-                                <a class="btn btn-outline-secondary text-start" th:href="@{/customers/new}"
-                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
-                                    <i class="bi bi-person-plus me-2"></i>Yeni müşteri kaydı
-                                </a>
-                                <a class="btn btn-outline-secondary text-start" th:href="@{/vehicles/new}"
-                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
-                                    <i class="bi bi-car-front me-2"></i>Yeni araç kaydı
-                                </a>
-                                <a class="btn btn-outline-secondary text-start" th:href="@{/work-orders/new}"
-                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
-                                    <i class="bi bi-clipboard-plus me-2"></i>Yeni iş emri
-                                </a>
-                                <a class="btn btn-outline-secondary text-start" th:href="@{/work-orders/quick}"
-                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
-                                    <i class="bi bi-lightning-charge me-2"></i>Hızlı iş emri
-                                </a>
-                                <a class="btn btn-outline-secondary text-start" th:href="@{/work-orders/board}">
-                                    <i class="bi bi-calendar2-check me-2"></i>Günlük iş panosu
-                                </a>
-                                <a class="btn btn-outline-secondary text-start" th:href="@{/appointments}"
-                                   sec:authorize="hasAnyRole('PATRON','SERVIS')">
-                                    <i class="bi bi-calendar3 me-2"></i>Randevular
-                                </a>
-                                <a class="btn btn-outline-secondary text-start" th:href="@{/payments/new}"
-                                   sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
-                                    <i class="bi bi-cash-coin me-2"></i>Tahsilat kaydet
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </div>
         </main>
         <footer th:replace="~{fragments/layout :: footer}"></footer>

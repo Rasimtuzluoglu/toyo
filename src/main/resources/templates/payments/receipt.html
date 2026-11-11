@@ -47,7 +47,7 @@
         </div>
         <div class="col-5">
             <div class="form-section-title">Ödeme</div>
-            <div class="detail-value-lg money" th:text="${fmt.money(payment.amount)}">0,00 ₺</div>
+            <div class="detail-value-lg money money-credit" th:text="${fmt.money(payment.amount)}">0,00 ₺</div>
             <div th:text="${payment.method.label}">Nakit</div>
         </div>
     </div>

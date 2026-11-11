@@ -326,6 +326,11 @@ a:hover {
     margin: 0 auto;
 }
 
+/* Panoda tek arama kutusu: üst bardaki genel arama gizlenir. */
+body.board-page .sd-search {
+    display: none;
+}
+
 .sd-footer {
     padding: 18px 28px;
     border-top: 1px solid var(--sd-border);
@@ -1224,13 +1229,70 @@ a:hover {
 }
 
 .money-debt {
-    color: var(--sd-danger);
+    color: var(--sd-danger) !important;
     font-weight: 600;
 }
 
 .money-credit {
-    color: var(--sd-success);
+    color: var(--sd-success) !important;
     font-weight: 600;
+}
+
+/* Liste tablolarının mobil kart karşılığı */
+.mobile-data-card {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--sd-border);
+}
+
+.mobile-data-card:last-child {
+    border-bottom: 0;
+}
+
+.mobile-data-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.mobile-data-title {
+    color: var(--sd-text);
+    font-weight: 700;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.mobile-data-title:hover {
+    color: var(--sd-accent);
+}
+
+.mobile-data-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin-top: 6px;
+    color: var(--sd-muted);
+    font-size: 0.78rem;
+}
+
+.mobile-data-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.mobile-data-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.mobile-data-actions .btn {
+    flex: 1 1 auto;
 }
 
 .text-muted-soft {
@@ -2847,7 +2909,12 @@ body.command-open {
     }
 
     .sd-content {
-        padding-bottom: 92px;
+        padding-bottom: 108px;
+    }
+
+    .quick-actions {
+        position: static;
+        margin-top: 12px;
     }
 
     .undo-toast {

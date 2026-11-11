@@ -48,10 +48,6 @@
                        sec:authorize="hasAnyRole('PATRON','SERVIS')">
                         <i class="bi bi-lightning-charge me-1"></i> Hızlı İş Emri
                     </a>
-                    <a class="btn btn-primary" th:href="@{/work-orders/new}"
-                       sec:authorize="hasAnyRole('PATRON','SERVIS')">
-                        <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
-                    </a>
                 </div>
             </div>
 
@@ -100,7 +96,36 @@
                     <span class="record-meta" th:text="${orders.totalElements} + ' kayıt'">0 kayıt</span>
                 </div>
                 <div class="sd-card-body p-0" th:if="${!orders.isEmpty()}">
-                    <div class="table-responsive">
+                    <div class="d-md-none">
+                        <div class="mobile-data-card" th:each="order : ${orders.content}">
+                            <div class="mobile-data-head">
+                                <a class="mobile-data-title" th:href="@{/work-orders/{id}(id=${order.id})}"
+                                   th:text="${order.orderNo}">IS-0000</a>
+                                <span class="sd-badge"
+                                      th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                      th:text="${order.status.label}">Durum</span>
+                            </div>
+                            <div class="mobile-data-meta">
+                                <span th:text="${order.customer.name}">Müşteri</span>
+                                <span th:text="${order.vehicle.plate}">34ABC123</span>
+                                <span th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</span>
+                                <span th:if="${order.mileage != null}"
+                                      th:text="${fmt.number(order.mileage) + ' km'}">0 km</span>
+                            </div>
+                            <div class="mobile-data-foot">
+                                <span class="record-meta"
+                                      th:text="${order.assigneeDisplay == null ? 'Sorumlu atanmadı' : order.assigneeDisplay}">Sorumlu</span>
+                                <strong class="money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</strong>
+                            </div>
+                            <div class="mobile-data-actions">
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/work-orders/{id}(id=${order.id})}">Detay</a>
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/work-orders/{id}/print(id=${order.id})}">Yazdır</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table align-middle">
                             <thead>
                             <tr>

@@ -56,7 +56,7 @@
             <div class="stat-grid">
                 <div class="stat-card">
                     <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
-                    <div class="stat-value" th:text="${fmt.money(payment.amount)}">0,00 ₺</div>
+                    <div class="stat-value money money-credit" th:text="${fmt.money(payment.amount)}">0,00 ₺</div>
                     <div class="stat-label">Tahsilat tutarı</div>
                 </div>
                 <div class="stat-card">
@@ -66,12 +66,16 @@
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon red"><i class="bi bi-exclamation-circle"></i></span>
-                    <div class="stat-value" th:text="${fmt.money(openDebtTotal)}">0,00 ₺</div>
+                    <div class="stat-value money"
+                         th:classappend="${openDebtTotal.signum() > 0 ? ' money-debt' : ''}"
+                         th:text="${fmt.money(openDebtTotal)}">0,00 ₺</div>
                     <div class="stat-label">Kalan açık borç</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon blue"><i class="bi bi-journal-text"></i></span>
-                    <div class="stat-value" th:text="${fmt.money(balance)}">0,00 ₺</div>
+                    <div class="stat-value money"
+                         th:classappend="${balance.signum() > 0 ? ' money-debt' : (balance.signum() < 0 ? ' money-credit' : '')}"
+                         th:text="${fmt.money(balance)}">0,00 ₺</div>
                     <div class="stat-label">Güncel cari bakiye</div>
                 </div>
             </div>

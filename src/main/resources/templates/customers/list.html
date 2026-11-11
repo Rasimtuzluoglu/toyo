@@ -84,7 +84,33 @@
                     <span class="record-meta" th:text="${customers.totalElements} + ' kayıt'">0 kayıt</span>
                 </div>
                 <div class="sd-card-body p-0" th:if="${!customers.isEmpty()}">
-                    <div class="table-responsive">
+                    <div class="d-md-none">
+                        <div class="mobile-data-card" th:each="customer : ${customers.content}">
+                            <div class="mobile-data-head">
+                                <a class="mobile-data-title" th:href="@{/customers/{id}(id=${customer.id})}">
+                                    <span class="table-avatar"
+                                          th:text="${#strings.toUpperCase(#strings.substring(customer.name, 0, 1))}">A</span>
+                                    <span th:text="${customer.name}">Müşteri</span>
+                                </a>
+                                <span class="sd-badge"
+                                      th:classappend="${customer.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                      th:text="${customer.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                            </div>
+                            <div class="mobile-data-meta">
+                                <span class="sd-badge sd-badge-neutral" th:text="${customer.type.label}">Bireysel</span>
+                                <span th:text="${customer.phone}">0555</span>
+                                <span th:if="${customer.email != null}" th:text="${customer.email}">E-posta</span>
+                            </div>
+                            <div class="mobile-data-actions">
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/customers/{id}(id=${customer.id})}">Detay</a>
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                   th:href="@{/customers/{id}/edit(id=${customer.id})}">Düzenle</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table align-middle">
                             <thead>
                             <tr>

@@ -79,7 +79,9 @@
             <div class="summary-strip mb-4">
                 <div class="summary-item">
                     <span>Açılış bakiyesi</span>
-                    <strong class="money" th:text="${fmt.money(statement.openingBalance)}">0,00 ₺</strong>
+                    <strong class="money"
+                            th:classappend="${statement.openingBalance.signum() > 0 ? ' money-debt' : (statement.openingBalance.signum() < 0 ? ' money-credit' : '')}"
+                            th:text="${fmt.money(statement.openingBalance)}">0,00 ₺</strong>
                 </div>
                 <div class="summary-item">
                     <span>Dönem borcu</span>
@@ -137,7 +139,9 @@
                                     th:text="${row.debit.signum() > 0 ? fmt.money(row.debit) : ''}"></td>
                                 <td class="text-end money money-credit"
                                     th:text="${row.credit.signum() > 0 ? fmt.money(row.credit) : ''}"></td>
-                                <td class="text-end money fw-semibold" th:text="${fmt.money(row.balance)}">0,00 ₺</td>
+                                <td class="text-end money fw-semibold"
+                                    th:classappend="${row.balance.signum() > 0 ? ' money-debt' : (row.balance.signum() < 0 ? ' money-credit' : '')}"
+                                    th:text="${fmt.money(row.balance)}">0,00 ₺</td>
                             </tr>
                             </tbody>
                         </table>

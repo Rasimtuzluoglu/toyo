@@ -31,22 +31,22 @@
             <div class="stat-grid">
                 <div class="stat-card">
                     <span class="stat-icon green"><i class="bi bi-clock"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(currentTotal)}">0,00 ₺</div>
+                    <div class="stat-value money money-debt" th:text="${fmt.money(currentTotal)}">0,00 ₺</div>
                     <div class="stat-label">0-30 gün</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon amber"><i class="bi bi-clock-history"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(midTotal)}">0,00 ₺</div>
+                    <div class="stat-value money money-debt" th:text="${fmt.money(midTotal)}">0,00 ₺</div>
                     <div class="stat-label">31-60 gün</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon red"><i class="bi bi-exclamation-triangle"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(oldTotal)}">0,00 ₺</div>
+                    <div class="stat-value money money-debt" th:text="${fmt.money(oldTotal)}">0,00 ₺</div>
                     <div class="stat-label">61+ gün</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon navy"><i class="bi bi-calculator"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(grandTotal)}">0,00 ₺</div>
+                    <div class="stat-value money money-debt" th:text="${fmt.money(grandTotal)}">0,00 ₺</div>
                     <div class="stat-label">Toplam açık borç</div>
                 </div>
             </div>
@@ -76,19 +76,19 @@
                                        th:text="${row.name}">Müşteri</a>
                                 </td>
                                 <td th:text="${row.phone}">Telefon</td>
-                                <td class="text-end money" th:text="${fmt.money(row.current)}">0,00 ₺</td>
-                                <td class="text-end money" th:text="${fmt.money(row.mid)}">0,00 ₺</td>
-                                <td class="text-end money" th:text="${fmt.money(row.old)}">0,00 ₺</td>
-                                <td class="text-end money fw-semibold" th:text="${fmt.money(row.total)}">0,00 ₺</td>
+                                <td class="text-end money money-debt" th:text="${fmt.money(row.current)}">0,00 ₺</td>
+                                <td class="text-end money money-debt" th:text="${fmt.money(row.mid)}">0,00 ₺</td>
+                                <td class="text-end money money-debt" th:text="${fmt.money(row.old)}">0,00 ₺</td>
+                                <td class="text-end money money-debt fw-semibold" th:text="${fmt.money(row.total)}">0,00 ₺</td>
                             </tr>
                             </tbody>
                             <tfoot>
                             <tr>
                                 <th colspan="2">Toplam</th>
-                                <th class="text-end money" th:text="${fmt.money(currentTotal)}">0,00 ₺</th>
-                                <th class="text-end money" th:text="${fmt.money(midTotal)}">0,00 ₺</th>
-                                <th class="text-end money" th:text="${fmt.money(oldTotal)}">0,00 ₺</th>
-                                <th class="text-end money" th:text="${fmt.money(grandTotal)}">0,00 ₺</th>
+                                <th class="text-end money money-debt" th:text="${fmt.money(currentTotal)}">0,00 ₺</th>
+                                <th class="text-end money money-debt" th:text="${fmt.money(midTotal)}">0,00 ₺</th>
+                                <th class="text-end money money-debt" th:text="${fmt.money(oldTotal)}">0,00 ₺</th>
+                                <th class="text-end money money-debt" th:text="${fmt.money(grandTotal)}">0,00 ₺</th>
                             </tr>
                             </tfoot>
                         </table>

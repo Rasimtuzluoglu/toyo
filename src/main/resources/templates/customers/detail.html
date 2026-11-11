@@ -32,30 +32,41 @@
                        th:href="@{/customers/{id}/edit(id=${customer.id})}">
                         <i class="bi bi-pencil me-1"></i> Düzenle
                     </a>
-                    <form sec:authorize="hasRole('PATRON')" th:if="${customer.active}"
-                          th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
-                          data-submit-once
-                          data-confirm="Müşteri pasife alınsın mı? Geçmiş iş emirleri ve finans kayıtları korunur; müşteri ve araçları pasife alınır."
-                          class="d-inline">
-                        <button class="btn btn-outline-danger" type="submit">
-                            <i class="bi bi-archive me-1"></i> Pasife Al
-                        </button>
-                    </form>
-                    <form sec:authorize="hasRole('PATRON')" th:if="${!customer.active}"
-                          th:action="@{/customers/{id}/activate(id=${customer.id})}" method="post"
-                          data-submit-once class="d-inline">
-                        <button class="btn btn-outline-success" type="submit">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i> Geri Al
-                        </button>
-                    </form>
-                    <a class="btn btn-outline-danger" sec:authorize="hasRole('PATRON')"
-                       th:href="@{/purge/customer/{id}(id=${customer.id})}">
-                        <i class="bi bi-trash3 me-1"></i> Kalıcı Sil
-                    </a>
                     <a class="btn btn-outline-secondary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
                        th:href="@{/vehicles/new(customerId=${customer.id})}">
                         <i class="bi bi-car-front me-1"></i> Araç Ekle
                     </a>
+                    <div class="dropdown" sec:authorize="hasRole('PATRON')">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Diğer işlemler">
+                            <i class="bi bi-three-dots me-1" aria-hidden="true"></i> Diğer
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li th:if="${customer.active}">
+                                <form th:action="@{/customers/{id}/delete(id=${customer.id})}" method="post"
+                                      data-submit-once
+                                      data-confirm="Müşteri pasife alınsın mı? Geçmiş iş emirleri ve finans kayıtları korunur; müşteri ve araçları pasife alınır.">
+                                    <button class="dropdown-item text-danger" type="submit">
+                                        <i class="bi bi-archive me-2"></i>Pasife Al
+                                    </button>
+                                </form>
+                            </li>
+                            <li th:if="${!customer.active}">
+                                <form th:action="@{/customers/{id}/activate(id=${customer.id})}" method="post"
+                                      data-submit-once>
+                                    <button class="dropdown-item text-success" type="submit">
+                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Geri Al
+                                    </button>
+                                </form>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger"
+                                   th:href="@{/purge/customer/{id}(id=${customer.id})}">
+                                    <i class="bi bi-trash3 me-2"></i>Kalıcı Sil
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                     <a class="btn btn-primary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
                        th:href="@{/work-orders/new(customerId=${customer.id})}">
                         <i class="bi bi-clipboard-plus me-1"></i> İş Emri Aç
@@ -66,13 +77,17 @@
             <div class="stat-grid" th:if="${financialVisible}">
                 <div class="stat-card">
                     <span class="stat-icon navy"><i class="bi bi-journal-text"></i></span>
-                    <div class="stat-value" th:text="${fmt.money(balance)}">0,00 ₺</div>
+                    <div class="stat-value money"
+                         th:classappend="${balance.signum() > 0 ? ' money-debt' : (balance.signum() < 0 ? ' money-credit' : '')}"
+                         th:text="${fmt.money(balance)}">0,00 ₺</div>
                     <div class="stat-label">Cari bakiye</div>
                     <div class="stat-hint">Borç − alacak</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon red"><i class="bi bi-exclamation-circle"></i></span>
-                    <div class="stat-value" th:text="${fmt.money(openDebtTotal)}">0,00 ₺</div>
+                    <div class="stat-value money"
+                         th:classappend="${openDebtTotal.signum() > 0 ? ' money-debt' : ''}"
+                         th:text="${fmt.money(openDebtTotal)}">0,00 ₺</div>
                     <div class="stat-label">Açık borç</div>
                     <div class="stat-hint">Tahsil edilmemiş borç hareketleri</div>
                 </div>

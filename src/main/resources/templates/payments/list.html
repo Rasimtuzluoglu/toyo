@@ -99,7 +99,31 @@
                     <span class="record-meta" th:text="${payments.totalElements} + ' kayıt'">0 kayıt</span>
                 </div>
                 <div class="sd-card-body p-0" th:if="${!payments.isEmpty()}">
-                    <div class="table-responsive">
+                    <div class="d-md-none">
+                        <div class="mobile-data-card" th:each="payment : ${payments.content}">
+                            <div class="mobile-data-head">
+                                <a class="mobile-data-title" th:href="@{/payments/{id}(id=${payment.id})}"
+                                   th:text="${payment.receiptNo}">TH-0000</a>
+                                <strong class="money money-credit"
+                                        th:text="${fmt.money(payment.amount)}">0,00 ₺</strong>
+                            </div>
+                            <div class="mobile-data-meta">
+                                <span th:text="${payment.customer.name}">Müşteri</span>
+                                <span th:text="${fmt.date(payment.paymentDate)}">01.01.2026</span>
+                                <span class="sd-badge sd-badge-neutral" th:text="${payment.method.label}">Nakit</span>
+                                <span class="sd-badge"
+                                      th:classappend="${payment.status.name() == 'AKTIF'} ? ' sd-badge-aktif' : ' sd-badge-iptal'"
+                                      th:text="${payment.status.label}">Aktif</span>
+                            </div>
+                            <div class="mobile-data-actions">
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/payments/{id}(id=${payment.id})}">Detay</a>
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/payments/{id}/receipt(id=${payment.id})}">Makbuz</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table align-middle">
                             <thead>
                             <tr>
@@ -131,7 +155,7 @@
                                           th:classappend="${payment.status.name() == 'AKTIF'} ? ' sd-badge-aktif' : ' sd-badge-iptal'"
                                           th:text="${payment.status.label}">Aktif</span>
                                 </td>
-                                <td class="text-end money fw-semibold" th:text="${fmt.money(payment.amount)}">0,00 ₺</td>
+                                <td class="text-end money money-credit fw-semibold" th:text="${fmt.money(payment.amount)}">0,00 ₺</td>
                                 <td class="text-end">
                                     <div class="action-row justify-content-end">
                                         <a class="btn btn-outline-secondary btn-sm"

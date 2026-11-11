@@ -23,12 +23,14 @@
             <div class="stat-grid dashboard-kpis">
                 <div class="stat-card kpi-primary">
                     <span class="stat-icon green"><i class="bi bi-cash-stack"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(view.todayCollections)}">0,00 ₺</div>
+                    <div class="stat-value money money-credit" th:text="${fmt.money(view.todayCollections)}">0,00 ₺</div>
                     <div class="stat-label">Bugünkü tahsilat</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon amber"><i class="bi bi-wallet2"></i></span>
-                    <div class="stat-value money" th:text="${fmt.money(view.netReceivable)}">0,00 ₺</div>
+                    <div class="stat-value money"
+                         th:classappend="${view.netReceivable.signum() > 0 ? ' money-debt' : (view.netReceivable.signum() < 0 ? ' money-credit' : '')}"
+                         th:text="${fmt.money(view.netReceivable)}">0,00 ₺</div>
                     <div class="stat-label">Kalan net alacak</div>
                 </div>
                 <div class="stat-card">

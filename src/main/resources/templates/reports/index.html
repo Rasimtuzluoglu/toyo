@@ -20,7 +20,7 @@
             <div class="stat-grid">
                 <div class="stat-card">
                     <span class="stat-icon green"><i class="bi bi-cash-coin"></i></span>
-                    <div class="stat-value" th:text="${fmt.money(monthCollections)}">0,00 ₺</div>
+                    <div class="stat-value money money-credit" th:text="${fmt.money(monthCollections)}">0,00 ₺</div>
                     <div class="stat-label">Bu ay tahsilat</div>
                     <div class="stat-hint" th:text="${fmt.date(start) + ' - ' + fmt.date(end)}">Dönem</div>
                 </div>

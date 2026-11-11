@@ -30,7 +30,7 @@
             <div class="stat-grid">
                 <div class="stat-card">
                     <span class="stat-icon red"><i class="bi bi-wallet2"></i></span>
-                    <div class="stat-value" th:text="${fmt.money(totalReceivable)}">0,00 ₺</div>
+                    <div class="stat-value money money-debt" th:text="${fmt.money(totalReceivable)}">0,00 ₺</div>
                     <div class="stat-label">Toplam açık alacak</div>
                     <div class="stat-hint">Borçlu müşterilerin pozitif bakiyeleri</div>
                 </div>
@@ -66,7 +66,31 @@
                     <span class="record-meta" th:text="${totalElements} + ' hesap'">0 hesap</span>
                 </div>
                 <div class="sd-card-body p-0" th:if="${!balances.isEmpty()}">
-                    <div class="table-responsive">
+                    <div class="d-md-none">
+                        <div class="mobile-data-card" th:each="row : ${balances}">
+                            <div class="mobile-data-head">
+                                <a class="mobile-data-title"
+                                   th:href="@{/accounts/customer/{id}(id=${row.customerId})}"
+                                   th:text="${row.name}">Müşteri</a>
+                                <strong class="money"
+                                        th:classappend="${row.balance.signum() > 0 ? ' money-debt' : (row.balance.signum() < 0 ? ' money-credit' : '')}"
+                                        th:text="${fmt.money(row.balance)}">0,00 ₺</strong>
+                            </div>
+                            <div class="mobile-data-meta">
+                                <span th:text="${row.phone}">Telefon</span>
+                                <span class="sd-badge"
+                                      th:classappend="${row.balance.signum() > 0 ? ' sd-badge-borclu' : (row.balance.signum() < 0 ? ' sd-badge-alacakli' : ' sd-badge-neutral')}"
+                                      th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Alacaklı' : 'Dengede')}">Dengede</span>
+                            </div>
+                            <div class="mobile-data-actions">
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/accounts/customer/{id}(id=${row.customerId})}">Ekstre</a>
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/payments/new(customerId=${row.customerId})}">Tahsilat</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table align-middle">
                             <thead>
                             <tr>

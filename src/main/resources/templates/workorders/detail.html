@@ -50,10 +50,20 @@
                        th:href="@{/work-orders/{id}/payment(id=${order.id})}">
                         <i class="bi bi-cash-coin me-1"></i> Tahsilat Al
                     </a>
-                    <a class="btn btn-outline-danger" sec:authorize="hasRole('PATRON')"
-                       th:href="@{/purge/work-order/{id}(id=${order.id})}">
-                        <i class="bi bi-trash3 me-1"></i> Kalıcı Sil
-                    </a>
+                    <div class="dropdown" sec:authorize="hasRole('PATRON')">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" aria-label="Diğer işlemler">
+                            <i class="bi bi-three-dots me-1" aria-hidden="true"></i> Diğer
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item text-danger"
+                                   th:href="@{/purge/work-order/{id}(id=${order.id})}">
+                                    <i class="bi bi-trash3 me-2"></i>Kalıcı Sil
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -337,21 +347,21 @@
                                     <span class="process-dot"></span>
                                     <div>
                                         <strong>Araç kabul formu</strong>
-                                        <small th:text="${intake == null ? 'Bekliyor' : fmt.dateTime(intake.intakeAt)}">Bekliyor</small>
+                                        <small th:text="${intake == null ? 'Henüz yapılmadı' : fmt.dateTime(intake.intakeAt)}">Henüz yapılmadı</small>
                                     </div>
                                 </div>
                                 <div class="process-step" th:classappend="${order.status.completed} ? ' done'">
                                     <span class="process-dot"></span>
                                     <div>
                                         <strong>İş tamamlandı</strong>
-                                        <small th:text="${order.closedAt == null ? 'Bekliyor' : fmt.dateTime(order.closedAt)}">Bekliyor</small>
+                                        <small th:text="${order.closedAt == null ? 'Henüz yapılmadı' : fmt.dateTime(order.closedAt)}">Henüz yapılmadı</small>
                                     </div>
                                 </div>
                                 <div class="process-step" th:classappend="${order.deliveredAt != null} ? ' done'">
                                     <span class="process-dot"></span>
                                     <div>
                                         <strong>Araç teslim edildi</strong>
-                                        <small th:text="${order.deliveredAt == null ? 'Bekliyor' : fmt.dateTime(order.deliveredAt)}">Bekliyor</small>
+                                        <small th:text="${order.deliveredAt == null ? 'Henüz yapılmadı' : fmt.dateTime(order.deliveredAt)}">Henüz yapılmadı</small>
                                     </div>
                                 </div>
                             </div>

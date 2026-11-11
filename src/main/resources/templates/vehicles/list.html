@@ -84,7 +84,31 @@
                     <span class="record-meta" th:text="${vehicles.totalElements} + ' kayıt'">0 kayıt</span>
                 </div>
                 <div class="sd-card-body p-0" th:if="${!vehicles.isEmpty()}">
-                    <div class="table-responsive">
+                    <div class="d-md-none">
+                        <div class="mobile-data-card" th:each="vehicle : ${vehicles.content}">
+                            <div class="mobile-data-head">
+                                <a class="mobile-data-title" th:href="@{/vehicles/{id}(id=${vehicle.id})}"
+                                   th:text="${vehicle.plate}">34ABC123</a>
+                                <span class="sd-badge"
+                                      th:classappend="${vehicle.active} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                      th:text="${vehicle.active ? 'Aktif' : 'Pasif'}">Aktif</span>
+                            </div>
+                            <div class="mobile-data-meta">
+                                <span th:text="${(vehicle.brand == null ? '' : vehicle.brand) + ' ' + (vehicle.model == null ? '' : vehicle.model)}">Marka Model</span>
+                                <span th:text="${vehicle.customer.name}">Müşteri</span>
+                                <span th:text="${vehicle.modelYear == null ? '—' : vehicle.modelYear}">2020</span>
+                                <span th:text="${fmt.number(vehicle.currentMileage) + ' km'}">0 km</span>
+                            </div>
+                            <div class="mobile-data-actions">
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   th:href="@{/vehicles/{id}(id=${vehicle.id})}">Detay</a>
+                                <a class="btn btn-outline-secondary btn-sm"
+                                   sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                   th:href="@{/work-orders/new(customerId=${vehicle.customer.id},vehicleId=${vehicle.id})}">İş Emri</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive d-none d-md-block">
                         <table class="table align-middle">
                             <thead>
                             <tr>

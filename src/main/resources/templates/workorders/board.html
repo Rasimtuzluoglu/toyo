@@ -2,7 +2,7 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head(${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'Bugün' : 'Günlük İşler'})}"></head>
-<body>
+<body class="board-page">
 <div class="sd-shell">
     <aside th:replace="~{fragments/layout :: sidebar('board')}"></aside>
     <div class="sd-main">
@@ -23,9 +23,6 @@
                     </a>
                     <a class="btn btn-outline-secondary" th:href="@{/work-orders/quick}">
                         <i class="bi bi-lightning-charge me-1"></i> Hızlı İş
-                    </a>
-                    <a class="btn btn-primary" th:href="@{/work-orders/new}">
-                        <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
                     </a>
                 </div>
             </div>

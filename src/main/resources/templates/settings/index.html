@@ -209,7 +209,7 @@
                             <h2><i class="bi bi-hdd-stack me-2"></i>PostgreSQL Yedekleme</h2>
                             <span class="sd-badge"
                                   th:classappend="${backupEnabled} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
-                                  th:text="${backupEnabled ? 'Etkin' : 'Devre Dışı'}">Etkin</span>
+                                  th:text="${backupEnabled ? 'Otomatik: Açık' : 'Otomatik: Kapalı'}">Otomatik: Açık</span>
                         </div>
                         <div class="sd-card-body">
                             <dl class="detail-list">
@@ -222,12 +222,13 @@
                                     <dd th:text="${retentionDays} + ' gün'">14 gün</dd>
                                 </div>
                                 <div>
-                                    <dt>Zamanlama (cron)</dt>
-                                    <dd class="money" th:text="${backupCron}">0 0 2 * * *</dd>
+                                    <dt>Zamanlama</dt>
+                                    <dd class="money"
+                                        th:text="${backupCron == '0 0 2 * * *' ? 'Her gün 02:00' : backupCron}">Her gün 02:00</dd>
                                 </div>
                                 <div>
                                     <dt>Yöntem</dt>
-                                    <dd>pg_dump · custom format (.dump)</dd>
+                                    <dd>PostgreSQL yedeği (.dump)</dd>
                                 </div>
                             </dl>
                             <form method="post" th:action="@{/settings/backup-directory}" class="mt-3"
@@ -254,11 +255,13 @@
                             </div>
                         </div>
                         <div class="sd-card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <span class="record-meta">Manuel yedek, veritabanı boyutuna göre birkaç saniye sürebilir.</span>
+                            <span class="record-meta">
+                                Manuel yedek, otomatik yedekleme kapalı olsa da kullanılabilir; boyutuna göre birkaç saniye sürebilir.
+                            </span>
                             <div class="d-flex gap-2 flex-wrap">
                                 <form th:action="@{/settings/backup}" method="post" data-submit-once>
                                     <input type="hidden" name="formToken" th:value="${formToken}">
-                                    <button class="btn btn-outline-secondary" type="submit" th:disabled="${!backupEnabled}">
+                                    <button class="btn btn-outline-secondary" type="submit">
                                         <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
                                         <i class="bi bi-hdd-stack me-1"></i> Sunucuda Yedekle
                                     </button>
@@ -266,7 +269,7 @@
                                 <form th:action="@{/settings/backup}" method="post" data-submit-once>
                                     <input type="hidden" name="formToken" th:value="${formToken}">
                                     <input type="hidden" name="download" value="true">
-                                    <button class="btn btn-navy" type="submit" th:disabled="${!backupEnabled}">
+                                    <button class="btn btn-navy" type="submit">
                                         <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
                                         <i class="bi bi-download me-1"></i> Yedek Al ve İndir
                                     </button>
@@ -281,7 +284,26 @@
                             <span class="record-meta" th:text="${backupRuns.size()} + ' kayıt'">0 kayıt</span>
                         </div>
                         <div class="sd-card-body p-0" th:if="${!backupRuns.isEmpty()}">
-                            <div class="table-responsive">
+                            <div class="d-md-none">
+                                <div class="mobile-data-card" th:each="run : ${backupRuns}">
+                                    <div class="mobile-data-head">
+                                        <strong th:text="${fmt.dateTime(run.startedAt)}">01.01.2026</strong>
+                                        <span class="sd-badge"
+                                              th:classappend="${run.status.name() == 'BASARILI' ? ' sd-badge-aktif' : (run.status.name() == 'BASARISIZ' ? ' sd-badge-iptal' : ' sd-badge-neutral')}"
+                                              th:text="${run.status.label}">Başarılı</span>
+                                    </div>
+                                    <div class="mobile-data-meta">
+                                        <span th:text="${run.fileName == null ? '—' : run.fileName}">—</span>
+                                        <span th:text="${fmt.fileSize(run.fileSizeBytes)}">—</span>
+                                        <span th:text="${run.triggeredBy}">MANUEL</span>
+                                    </div>
+                                    <div class="mobile-data-actions" th:if="${run.status.name() == 'BASARILI'}">
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/settings/backups/{id}/download(id=${run.id})}">İndir</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive d-none d-md-block">
                                 <table class="table align-middle">
                                     <thead>
                                     <tr>
@@ -319,7 +341,7 @@
                         <div class="empty-state" th:if="${backupRuns.isEmpty()}">
                             <i class="bi bi-hdd"></i>
                             <strong>Henüz yedek yok</strong>
-                            İlk yedeği “Şimdi Yedekle” düğmesiyle veya zamanlanmış görevle alabilirsiniz.
+                            İlk yedeği “Sunucuda Yedekle” düğmesiyle veya zamanlanmış görevle alabilirsiniz.
                         </div>
                     </div>
                 </div>

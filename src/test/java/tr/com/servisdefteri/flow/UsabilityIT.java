@@ -537,6 +537,27 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void listPagesRenderMobileCardsAndMoneyColors() throws Exception {
+        User patron = createUser("patron", "Patron Kullanıcı", Role.PATRON);
+        Customer customer = createCustomer("Mobil Kart Müşteri", "0555 196 96 96");
+        Vehicle vehicle = createVehicle(customer, "34 MBC 001");
+        createCompletedOrder(customer, vehicle, "1000.00");
+        runAsSystemPatron(() -> createPayment(customer, "500.00"));
+
+        for (String path : List.of("/customers", "/vehicles", "/work-orders", "/accounts", "/payments")) {
+            mockMvc.perform(get(path).with(user(principal(patron))))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(
+                            org.hamcrest.Matchers.containsString("mobile-data-card")));
+        }
+
+        mockMvc.perform(get("/payments").with(user(principal(patron))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("money-credit")));
+        mockMvc.perform(get("/accounts").with(user(principal(patron))))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("money-debt")));
+    }
+
+    @Test
     void boardAgeFilterSeparatesOldAndTodayOrders() throws Exception {
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
         Customer todayCustomer = createCustomer("Bugün Pano Müşteri", "0555 194 94 94");
