@@ -96,10 +96,8 @@ public abstract class BusinessTestSupport extends IntegrationTestSupport {
 
     protected WorkOrder createCompletedOrder(Customer customer, Vehicle vehicle, String amount) {
         WorkOrder order = createWorkOrderWithItem(customer, vehicle, amount);
-        runAsSystemPatron(() -> {
-            workOrderService.changeStatus(order.getId(), WorkOrderStatus.ISLEMDE);
-            workOrderService.changeStatus(order.getId(), WorkOrderStatus.TAMAMLANDI);
-        });
+        runAsSystemPatron(() ->
+                workOrderService.changeStatus(order.getId(), WorkOrderStatus.TAMAMLANDI));
         return workOrderService.findById(order.getId());
     }
 

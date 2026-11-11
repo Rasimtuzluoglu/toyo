@@ -44,7 +44,6 @@
                     <div class="stat-value" th:text="${view.openWorkOrders}">0</div>
                     <div class="stat-label">Açık iş emri</div>
                     <div class="stat-hint">
-                        <span th:text="${view.inProgressWorkOrders}">0</span> işlemde ·
                         <a th:href="@{/work-orders/board}">Panoya git</a>
                     </div>
                 </div>
@@ -172,7 +171,7 @@
                                         <span>
                                             <span class="status-dot"
                                                   th:classappend="${' dot-' + #strings.toLowerCase(status.status.name())}"></span>
-                                            <span th:text="${status.status.label}">Bekliyor</span>
+                                            <span th:text="${status.status.label}">İşlemde</span>
                                         </span>
                                         <strong th:text="${status.count}">0</strong>
                                     </div>
@@ -243,7 +242,7 @@
                                         <td>
                                             <span class="sd-badge"
                                                   th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
-                                                  th:text="${order.status.label}">Bekliyor</span>
+                                                  th:text="${order.status.label}">İşlemde</span>
                                         </td>
                                         <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>
                                     </tr>
@@ -253,8 +252,8 @@
                         </div>
                         <div class="empty-state" th:if="${view.pendingWorkOrders.isEmpty()}">
                             <i class="bi bi-check2-circle"></i>
-                            <strong>Bekleyen iş yok</strong>
-                            Şu anda tamamlanmayı bekleyen bir iş emri bulunmuyor.
+                            <strong>Devam eden iş yok</strong>
+                            Şu anda devam eden bir iş emri bulunmuyor.
                         </div>
                     </div>
                 </div>

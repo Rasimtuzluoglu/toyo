@@ -87,9 +87,9 @@ Tahsilat oluşturma ve borçlandırma işlemlerinde müşteri satırı `SELECT .
 ## İş Emri Durum Akışı
 
 ```text
-BEKLIYOR ──► ISLEMDE ──► TAMAMLANDI ──► TESLIM_EDILDI
-    │           │            │
-    └───────────┴────────────┴──► IPTAL
+ISLEMDE ──► TAMAMLANDI ──► TESLIM_EDILDI
+    │            │
+    └────────────┴──► IPTAL
 ```
 
 - `TAMAMLANDI`: toplam sunucuda yeniden hesaplanır; tutar > 0 ise cari borç oluşturulur ve `debited=true` işaretlenir.
@@ -103,7 +103,7 @@ BEKLIYOR ──► ISLEMDE ──► TAMAMLANDI ──► TESLIM_EDILDI
 
 Ayrı bir “gün” tablosu veya kopyalama işi yoktur. Pano her açılışta mevcut iş emirlerini sorgular:
 
-- **Devam eden işler:** `status IN ('BEKLIYOR','ISLEMDE')` olan tüm işler. `opened_at` tarihinden bugüne kadar geçen gün sayısı “kaç gündür açık” etiketiyle gösterilir. İş kapanana kadar her gün listede kalır.
+- **Devam eden işler:** `status = 'ISLEMDE'` olan tüm işler. `opened_at` tarihinden bugüne kadar geçen gün sayısı “kaç gündür açık” etiketiyle gösterilir. İş kapanana kadar her gün listede kalır.
 - **Bugün biten işler:** `status IN ('TAMAMLANDI','TESLIM_EDILDI')` ve `closed_at` veya `delivered_at` değeri bugünün 00:00–24:00 aralığında olan işler. Ertesi gün bu listeden çıkar.
 - Aynı mantık ana paneldeki “Bugün tamamlanan işler” tablosunda da kullanılır.
 

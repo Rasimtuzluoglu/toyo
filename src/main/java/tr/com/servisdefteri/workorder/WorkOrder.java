@@ -78,7 +78,7 @@ public class WorkOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private WorkOrderStatus status = WorkOrderStatus.BEKLIYOR;
+    private WorkOrderStatus status = WorkOrderStatus.ISLEMDE;
 
     @Column(length = 2000)
     private String notes;

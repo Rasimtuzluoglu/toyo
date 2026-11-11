@@ -132,10 +132,8 @@ class DailyReportIT extends BusinessTestSupport {
         item.setUnitPrice(new BigDecimal(amount));
         workOrderService.addItem(order.getId(), item);
         if (complete) {
-            runAsSystemPatron(() -> {
-                workOrderService.changeStatus(order.getId(), WorkOrderStatus.ISLEMDE);
-                workOrderService.changeStatus(order.getId(), WorkOrderStatus.TAMAMLANDI);
-            });
+            runAsSystemPatron(() ->
+                    workOrderService.changeStatus(order.getId(), WorkOrderStatus.TAMAMLANDI));
         }
         return workOrderService.findById(order.getId());
     }

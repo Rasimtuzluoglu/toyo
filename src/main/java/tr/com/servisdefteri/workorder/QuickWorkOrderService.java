@@ -103,7 +103,6 @@ public class QuickWorkOrderService {
         }
 
         if (form.isCompleteNow()) {
-            workOrderService.changeStatus(order.getId(), WorkOrderStatus.ISLEMDE);
             workOrderService.changeStatus(order.getId(), WorkOrderStatus.TAMAMLANDI);
             order = workOrderService.findById(order.getId());
         }

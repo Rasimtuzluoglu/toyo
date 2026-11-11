@@ -117,7 +117,7 @@
                                          th:text="${row.complaint}">Şikâyet</div>
                                 </td>
                                 <td th:text="${row.assignedName}">—</td>
-                                <td><span class="sd-badge sd-badge-neutral" th:text="${row.statusLabel}">Bekliyor</span></td>
+                                <td><span class="sd-badge sd-badge-neutral" th:text="${row.statusLabel}">İşlemde</span></td>
                                 <td class="text-end money" th:text="${fmt.money(row.total)}">0,00 ₺</td>
                                 <td class="text-end money text-success" th:text="${fmt.money(row.paid)}">0,00 ₺</td>
                                 <td class="text-end money money-debt" th:text="${fmt.money(row.remaining)}">0,00 ₺</td>
@@ -133,7 +133,7 @@
                                    th:href="@{/work-orders/{id}(id=${row.orderId})}"
                                    th:text="${row.orderNo}">IS-0000</a>
                                 <span class="sd-badge sd-badge-neutral"
-                                      th:text="${row.statusLabel}">Bekliyor</span>
+                                      th:text="${row.statusLabel}">İşlemde</span>
                             </div>
                             <div class="daily-mobile-meta">
                                 <span th:text="${row.customerName}">Müşteri</span>

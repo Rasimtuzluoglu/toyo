@@ -15,8 +15,8 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     @Test
     void allMigrationsAreAppliedAndExpectedTablesExist() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("17");
-        assertThat(flyway.info().applied()).hasSize(17);
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("18");
+        assertThat(flyway.info().applied()).hasSize(18);
 
         Long tables = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.tables
@@ -63,5 +63,11 @@ class FlywayMigrationIT extends IntegrationTestSupport {
                   and table_name in ('work_orders', 'account_transactions', 'payments', 'work_order_items')
                 """, Long.class);
         assertThat(checkConstraints).isGreaterThan(5L);
+
+        String statusConstraint = jdbcTemplate.queryForObject("""
+                select pg_get_constraintdef(oid) from pg_constraint
+                where conname = 'ck_work_orders_status'
+                """, String.class);
+        assertThat(statusConstraint).doesNotContain("BEKLIYOR");
     }
 }

@@ -64,14 +64,8 @@
                     </ul>
                 </div>
                 <div class="kanban-tabs d-md-none" role="tablist" aria-label="İş durumları">
-                    <button type="button" role="tab" class="kanban-tab" data-kanban-tab="BEKLIYOR"
-                            th:classappend="${inProgressRows.isEmpty()} ? ' is-active'"
-                            th:attr="aria-selected=${inProgressRows.isEmpty()}">
-                        Bekliyor <span th:text="${waitingRows.size()}">0</span>
-                    </button>
-                    <button type="button" role="tab" class="kanban-tab" data-kanban-tab="ISLEMDE"
-                            th:classappend="${!inProgressRows.isEmpty()} ? ' is-active'"
-                            th:attr="aria-selected=${!inProgressRows.isEmpty()}">
+                    <button type="button" role="tab" class="kanban-tab is-active" data-kanban-tab="ISLEMDE"
+                            aria-selected="true">
                         İşlemde <span th:text="${inProgressRows.size()}">0</span>
                     </button>
                     <button type="button" role="tab" class="kanban-tab" data-kanban-tab="TAMAMLANDI"
@@ -86,10 +80,6 @@
             </div>
 
             <div class="board-summary d-none d-md-flex" aria-label="İş özeti">
-                <a href="#board-bekliyor">
-                    <span class="status-dot dot-bekliyor" aria-hidden="true"></span>
-                    Bekleyen <strong th:text="${waitingRows.size()}">0</strong>
-                </a>
                 <a href="#board-islemde">
                     <span class="status-dot dot-islemde" aria-hidden="true"></span>
                     İşlemde <strong th:text="${inProgressRows.size()}">0</strong>
@@ -101,25 +91,6 @@
             </div>
 
             <div class="kanban-board">
-                <section class="kanban-column" id="board-bekliyor" aria-label="Bekleyen işler" data-drop-status="BEKLIYOR">
-                    <div class="kanban-column-header">
-                        <h2><span class="status-dot dot-bekliyor"></span>Bekliyor</h2>
-                        <div class="kanban-header-actions">
-                            <span class="kanban-count" th:text="${waitingRows.size()}">0</span>
-                            <button type="button" class="kanban-collapse" data-kanban-collapse="BEKLIYOR"
-                                    aria-expanded="true" aria-label="Bekleyen işleri daralt">
-                                <i class="bi bi-chevron-up" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="kanban-list">
-                        <th:block th:each="row : ${waitingRows}">
-                            <div th:replace="~{workorders/board-fragments :: orderCard(${row.order}, ${row.ageLabel})}"></div>
-                        </th:block>
-                        <div class="kanban-empty" th:if="${waitingRows.isEmpty()}">Bekleyen iş yok.</div>
-                    </div>
-                </section>
-
                 <section class="kanban-column" id="board-islemde" aria-label="İşlemdeki işler" data-drop-status="ISLEMDE">
                     <div class="kanban-column-header">
                         <h2><span class="status-dot dot-islemde"></span>İşlemde</h2>

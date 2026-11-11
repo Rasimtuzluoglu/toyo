@@ -56,9 +56,6 @@ class WebFlowIT extends BusinessTestSupport {
                 .andExpect(redirectedUrl("/work-orders/" + orderId));
 
         mockMvc.perform(post("/work-orders/{id}/status", orderId).session(session).with(csrf())
-                        .param("status", "ISLEMDE"))
-                .andExpect(status().is3xxRedirection());
-        mockMvc.perform(post("/work-orders/{id}/status", orderId).session(session).with(csrf())
                         .param("status", "TAMAMLANDI"))
                 .andExpect(status().is3xxRedirection());
 

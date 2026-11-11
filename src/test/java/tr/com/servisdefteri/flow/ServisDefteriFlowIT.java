@@ -120,14 +120,14 @@ class ServisDefteriFlowIT extends BusinessTestSupport {
         Customer customer = createCustomer("Mehmet Şahin", "0537 666 77 88");
         Vehicle vehicle = createVehicle(customer, "34MNO345");
         WorkOrder order = createOpenOrder(customer, vehicle);
+        assertThat(order.getStatus()).isEqualTo(WorkOrderStatus.ISLEMDE);
 
         assertThatThrownBy(() -> workOrderService.changeStatus(order.getId(), WorkOrderStatus.TESLIM_EDILDI))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("geçilemez");
-
-        runAsSystemPatron(() -> workOrderService.changeStatus(order.getId(), WorkOrderStatus.ISLEMDE));
-        assertThat(workOrderService.findById(order.getId()).getStatus())
-                .isEqualTo(WorkOrderStatus.ISLEMDE);
+        assertThatThrownBy(() -> workOrderService.changeStatus(order.getId(), WorkOrderStatus.ISLEMDE))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("geçilemez");
     }
 
     @Test
@@ -196,18 +196,18 @@ class ServisDefteriFlowIT extends BusinessTestSupport {
     }
 
     @Test
-    void muhasebeCannotMoveWorkOrderToInProgress() {
+    void muhasebeCannotCompleteWorkOrder() {
         User muhasebe = createUser("muhasebe2", "Muhasebe Kullanıcısı", Role.MUHASEBE);
         Customer customer = createCustomer("Deniz Koç", "0542 345 67 89");
         Vehicle vehicle = createVehicle(customer, "34MHS456");
         WorkOrder order = createOpenOrder(customer, vehicle);
 
         authenticate(muhasebe);
-        assertThatThrownBy(() -> workOrderService.changeStatus(order.getId(), WorkOrderStatus.ISLEMDE))
+        assertThatThrownBy(() -> workOrderService.changeStatus(order.getId(), WorkOrderStatus.TAMAMLANDI))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("yalnızca");
 
-        assertThat(workOrderService.findById(order.getId()).getStatus()).isEqualTo(WorkOrderStatus.BEKLIYOR);
+        assertThat(workOrderService.findById(order.getId()).getStatus()).isEqualTo(WorkOrderStatus.ISLEMDE);
     }
 
     @Test

@@ -43,16 +43,16 @@ Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla 
 
 **Günlük İşler** ekranı, servisin her sabah bakacağı tek listedir. SERVIS rolünde ekranın adı **Bugün** olur.
 
-- **Devam eden işler:** `Bekliyor` ve `İşlemde` durumundaki tüm işler her gün otomatik olarak listelenir. İşin kaç gündür açık olduğu (“Bugün açıldı”, “Dünden devir”, “3 günden beri açık”) gösterilir.
+- **Devam eden işler:** `İşlemde` durumundaki tüm işler her gün otomatik olarak listelenir. İşin kaç gündür açık olduğu (“Bugün açıldı”, “Dünden devir”, “3 günden beri açık”) gösterilir.
 - **Bugün biten işler:** `Tamamlandı` veya `Teslim Edildi` durumuna bugün geçen işler görünür. Ertesi gün bu listenin dışında kalır.
 - Bitmemiş iş ertesi gün de listede görünmeye devam eder; iş kapanana kadar devreder.
 - İş tamamlandığında veya teslim edildiğinde “bitti” sayılır; iki durum da ertesi gün panodan kalkar.
-- Üstteki üç sayaç **Bekleyen / İşlemde / Teslimata hazır** durumunu gösterir; tıklayınca ilgili kolona gidilir.
-- Satırdaki **İşleme Al / Tamamla / Teslim Et** düğmeleriyle detaya girmeden durum ilerletilebilir.
+- Üstteki iki sayaç **İşlemde / Teslimata hazır** durumunu gösterir; tıklayınca ilgili kolona gidilir.
+- Satırdaki **Tamamla / Teslim Et** düğmeleriyle detaya girmeden durum ilerletilebilir.
 - Kartlar sürüklenerek de bir sonraki aşamaya taşınabilir; tablette düğmeler kullanılabilir.
 - Üstteki arama alanıyla **plaka, müşteri adı veya iş emri numarası** ile pano filtrelenir.
 - Yaş filtresi (**Tümü / Bugün / Dünden / 2+ gün**) tek **Filtre** menüsündedir.
-- Telefonda pano **Bekliyor / İşlemde / Tamamlandı / Teslim Edildi** sekmelerine ayrılır; aynı anda tek sütun görünür.
+- Telefonda pano **İşlemde / Tamamlandı / Teslim Edildi** sekmelerine ayrılır; aynı anda tek sütun görünür.
 - Tablet ve masaüstünde tüm sütunlar birlikte görünür.
 
 ## Günlük Döküm
@@ -147,7 +147,7 @@ Araç detayında son iş emirleri, işlem yapılan müşteri, durum ve tutar gö
 5. **Müşteri ne dedi?** alanına şikâyeti yazın.
 6. **Yapılacak iş** alanına işlemi yazın veya hazır seçeneklerden birine basın.
 7. **Kim ilgileniyor?** alanına sorumlu kişinin adını yazın. Son kullanılan isimler alanın altında küçük öneri düğmeleri olarak çıkar; tıklayınca yazılır.
-8. **Kaydet** deyin. İş emri `Bekliyor` durumunda açılır. Art arda kayıt girecekseniz **Kaydet ve Yeni** ile formu boş olarak yeniden açabilirsiniz.
+8. **Kaydet** deyin. İş emri `İşlemde` durumunda açılır. Art arda kayıt girecekseniz **Kaydet ve Yeni** ile formu boş olarak yeniden açabilirsiniz.
 
 - **Kilometre** ve **ekip notu** isteğe bağlıdır; **Gelişmiş alanlar** bölümündedir.
 - **Düzenle** ekranı da sadeleştirildi: fiş no, sorumlu, şikâyet ve yapılan işlemler ana bölümde; müşteri/araç, açılış tarihi, tespit ve ekip notu **Gelişmiş alanlar** altında.
@@ -194,17 +194,17 @@ Yeni iş emrinde **Fiş numarası** zorunludur ve **otomatik üretilmez**; numar
 - Tip: Hizmet / Parça
 - Açıklama, miktar, birim fiyat
 - Satır tutarı ve genel toplam sunucuda `BigDecimal` ile hesaplanır.
-- Kalem ekleme/düzenleme yalnızca **Bekliyor** veya **İşlemde** durumunda ve borçlandırılmamış iş emrinde yapılır.
+- Kalem ekleme/düzenleme yalnızca **İşlemde** durumunda ve borçlandırılmamış iş emrinde yapılır.
 - **Hazır kalem** düğmeleri (motor yağı, filtre, fren, klima vb.) açıklama ve tipi forma doldurur; fiyatı siz belirlersiniz.
 
 ### Hızlı durum işlemleri
 
-İş emri detayında ve günlük panoda mevcut duruma uygun **İşleme Al**, **Tamamla**, **Teslim Et** ve **İptal Et** düğmeleri gösterilir. Rutin geçişler tek tıkla yapılır; ayrı onay penceresi yoktur. “Tamamla” işlemi tutar varsa cari borcu otomatik oluşturur.
+İş emri detayında ve günlük panoda mevcut duruma uygun **Tamamla**, **Teslim Et** ve **İptal Et** düğmeleri gösterilir. Rutin geçişler tek tıkla yapılır; ayrı onay penceresi yoktur. “Tamamla” işlemi tutar varsa cari borcu otomatik oluşturur.
 
 - Tamamlamadan sonra ekranın sağ altında **Geri Al** bildirimi çıkar. Son **10 dakika** içinde tamamlama geri alınabilir; borç varsa ters kayıt oluşturulur, kayıt silinmez.
 - **PATRON/MUHASEBE** “Tamamla” yanındaki seçenekten **Cari / Nakit / Kart** seçebilir. Nakit veya kart seçilirse tahsilat aynı işlemde kaydedilir.
 - **Teslim Et** tek tıktır; imza gerekmiyorsa doğrudan teslim edilir, teslim tutanağı istenirse sonradan kaydedilir.
-- **İşleme Al / Tamamla / Teslim Et:** PATRON ve SERVIS.
+- **Tamamla / Teslim Et:** PATRON ve SERVIS.
 - **İptal Et:** PATRON ve MUHASEBE. İptalde onay penceresi vardır.
 - MUHASEBE iş emrini görüntüleyebilir ve iptal edebilir; yeni iş emri açamaz, kalem ekleyemez veya durumu ilerletemez.
 
@@ -212,8 +212,7 @@ Yeni iş emrinde **Fiş numarası** zorunludur ve **otomatik üretilmez**; numar
 
 | Durum | Anlamı |
 |---|---|
-| **Bekliyor** | İş emri açıldı, işleme başlanmadı |
-| **İşlemde** | Araç üzerinde çalışılıyor |
+| **İşlemde** | İş emri açıldı; araç üzerinde çalışılıyor |
 | **Tamamlandı** | İş bitti; tutar > 0 ise cari borç oluştu |
 | **Teslim Edildi** | Araç müşteriye teslim edildi |
 | **İptal** | İş emri iptal edildi; borç varsa ters kayıt oluştu |
@@ -221,8 +220,8 @@ Yeni iş emrinde **Fiş numarası** zorunludur ve **otomatik üretilmez**; numar
 Geçişler:
 
 ```text
-Bekliyor → İşlemde → Tamamlandı → Teslim Edildi
-    └──────────┴──────────┴──────→ İptal
+İşlemde → Tamamlandı → Teslim Edildi
+    └──────────┴──────→ İptal
 ```
 
 - Tamamlandığında borç otomatik oluşur; aynı iş emri ikinci kez borçlandırılamaz.

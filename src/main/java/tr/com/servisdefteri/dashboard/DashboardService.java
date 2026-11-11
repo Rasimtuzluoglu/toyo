@@ -98,7 +98,6 @@ public class DashboardService {
                 customerService.activeCount(),
                 vehicleService.activeCount(),
                 workOrderService.openCount(),
-                workOrderService.inProgressCount(),
                 financialVisible,
                 financialVisible ? netReceivable : BigDecimal.ZERO,
                 financialVisible ? debtorCount : 0,

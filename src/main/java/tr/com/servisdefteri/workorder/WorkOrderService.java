@@ -34,7 +34,7 @@ import java.util.Optional;
 public class WorkOrderService {
 
     private static final List<WorkOrderStatus> OPEN_STATUSES =
-            List.of(WorkOrderStatus.BEKLIYOR, WorkOrderStatus.ISLEMDE);
+            List.of(WorkOrderStatus.ISLEMDE);
     private static final List<WorkOrderStatus> FINISHED_STATUSES =
             List.of(WorkOrderStatus.TAMAMLANDI, WorkOrderStatus.TESLIM_EDILDI);
     private static final int UNDO_WINDOW_MINUTES = 10;
@@ -182,7 +182,7 @@ public class WorkOrderService {
         order.setVehicle(vehicle);
         order.setAssignedName(blankToNull(form.getAssignedName()));
         order.setOpenedAt(form.getOpenedAt());
-        order.setStatus(WorkOrderStatus.BEKLIYOR);
+        order.setStatus(WorkOrderStatus.ISLEMDE);
         order.setCreatedAt(LocalDateTime.now(clock));
         order.setCreatedBy(currentUserService.idOrNull());
         applyDescriptiveFields(order, form);
@@ -433,11 +433,6 @@ public class WorkOrderService {
     @Transactional(readOnly = true)
     public long openCount() {
         return workOrderRepository.countByStatusIn(OPEN_STATUSES);
-    }
-
-    @Transactional(readOnly = true)
-    public long inProgressCount() {
-        return workOrderRepository.countByStatus(WorkOrderStatus.ISLEMDE);
     }
 
     private WorkOrder lockEditable(Long orderId) {

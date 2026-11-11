@@ -10,7 +10,7 @@
            th:text="${order.vehicle.plate}">34ABC123</a>
         <span class="sd-badge"
               th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
-              th:text="${order.status.label}">Bekliyor</span>
+              th:text="${order.status.label}">İşlemde</span>
     </div>
     <a class="kanban-order" th:href="@{/work-orders/{id}(id=${order.id})}"
        th:text="${order.orderNo}">IS-0000</a>

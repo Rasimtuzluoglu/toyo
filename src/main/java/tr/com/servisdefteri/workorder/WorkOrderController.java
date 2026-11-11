@@ -169,11 +169,8 @@ public class WorkOrderController {
         List<WorkOrder> finishedToday = workOrderService.finishedToday().stream()
                 .filter(order -> matchesBoardSearch(order, needle))
                 .toList();
-        model.addAttribute("openRows", openRows);
         model.addAttribute("q", q == null ? "" : q.trim());
         model.addAttribute("age", ageFilter);
-        model.addAttribute("waitingRows", openRows.stream()
-                .filter(row -> row.order().getStatus() == WorkOrderStatus.BEKLIYOR).toList());
         model.addAttribute("inProgressRows", openRows.stream()
                 .filter(row -> row.order().getStatus() == WorkOrderStatus.ISLEMDE).toList());
         model.addAttribute("completedRows", finishedToday.stream()

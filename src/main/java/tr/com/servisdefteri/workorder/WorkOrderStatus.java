@@ -7,7 +7,6 @@ import java.util.List;
 @Getter
 public enum WorkOrderStatus {
 
-    BEKLIYOR("Bekliyor", "secondary", "Beklemeye Al"),
     ISLEMDE("İşlemde", "info", "İşleme Al"),
     TAMAMLANDI("Tamamlandı", "success", "Tamamla"),
     TESLIM_EDILDI("Teslim Edildi", "primary", "Teslim Et"),
@@ -28,7 +27,6 @@ public enum WorkOrderStatus {
             return false;
         }
         return switch (this) {
-            case BEKLIYOR -> target == ISLEMDE || target == IPTAL;
             case ISLEMDE -> target == TAMAMLANDI || target == IPTAL;
             case TAMAMLANDI -> target == TESLIM_EDILDI || target == IPTAL;
             case TESLIM_EDILDI, IPTAL -> false;
@@ -40,7 +38,7 @@ public enum WorkOrderStatus {
     }
 
     public boolean isOpen() {
-        return this == BEKLIYOR || this == ISLEMDE;
+        return this == ISLEMDE;
     }
 
     public boolean isCompleted() {

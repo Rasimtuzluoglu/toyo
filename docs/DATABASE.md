@@ -77,7 +77,7 @@ Araç sahibi değiştiğinde kayıt eklenir. `previous_customer_id`, `new_custom
 | `opened_at` | TIMESTAMP | NOT NULL |
 | `complaint`, `diagnosis`, `work_done`, `notes` | VARCHAR(2000) | NULL |
 | `mileage` | INTEGER | CHECK ≥ 0 veya NULL |
-| `status` | VARCHAR(20) | CHECK: BEKLIYOR, ISLEMDE, TAMAMLANDI, TESLIM_EDILDI, IPTAL |
+| `status` | VARCHAR(20) | CHECK: ISLEMDE, TAMAMLANDI, TESLIM_EDILDI, IPTAL |
 | `closed_at`, `delivered_at` | TIMESTAMP | NULL |
 | `labor_total`, `parts_total`, `total_amount` | NUMERIC(14,2) | NOT NULL, CHECK ≥ 0 |
 | `debited` | BOOLEAN | NOT NULL |
@@ -86,7 +86,7 @@ Araç sahibi değiştiğinde kayıt eklenir. `previous_customer_id`, `new_custom
 
 `order_no` manuel girilir ve benzersiz olmalıdır; uygulama otomatik numara üretmez. `customer_id`, iş emrinin açıldığı andaki müşteriyi temsil eder; araç sahibi sonradan değişse bile bu ilişki korunur. `assigned_name` serbest metindir; eski `assigned_user_id` kayıtları V17 ile isimlere kopyalanmıştır.
 
-Günlük iş panosu açık işleri `status IN ('BEKLIYOR','ISLEMDE')` ile, bugün biten işleri ise `closed_at` veya `delivered_at` değeri bugünün aralığında olan `TAMAMLANDI`/`TESLIM_EDILDI` kayıtlarıyla okur. Ayrı bir “gün” tablosu yoktur; devir, durum ve kapanış zaman damgalarından hesaplanır.
+Günlük iş panosu açık işleri `status = 'ISLEMDE'` ile, bugün biten işleri ise `closed_at` veya `delivered_at` değeri bugünün aralığında olan `TAMAMLANDI`/`TESLIM_EDILDI` kayıtlarıyla okur. Ayrı bir “gün” tablosu yoktur; devir, durum ve kapanış zaman damgalarından hesaplanır.
 
 ### `work_order_items`
 

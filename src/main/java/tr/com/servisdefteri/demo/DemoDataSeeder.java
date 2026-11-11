@@ -142,60 +142,58 @@ public class DemoDataSeeder implements ApplicationRunner {
         vehicles.add(vehicle(customers.get(10), "34 TP 1011", "Toyota", "Hilux", 2020, 118000, "MR0HA8CD300123411"));
         vehicles.add(vehicle(customers.get(11), "34 TP 1012", "Toyota", "Proace", 2021, 93000, "NMTBB3BE40R123412"));
 
-        WorkOrder waitingToday = order(customers.get(0), vehicles.get(0), 0, "Motor yağı ve filtre bakımı");
-        addItem(waitingToday, WorkOrderItemType.HIZMET, "Periyodik bakım", "1", "1850.00");
-        addItem(waitingToday, WorkOrderItemType.PARCA, "Motor yağı 5W-30", "4", "480.00");
+        WorkOrder inProgressToday = order(customers.get(0), vehicles.get(0), 0, "Motor yağı ve filtre bakımı");
+        addItem(inProgressToday, WorkOrderItemType.HIZMET, "Periyodik bakım", "1", "1850.00");
+        addItem(inProgressToday, WorkOrderItemType.PARCA, "Motor yağı 5W-30", "4", "480.00");
 
-        WorkOrder waitingYesterday = order(customers.get(1), vehicles.get(1), 1, "Fren sesi ve balata kontrolü");
-        addItem(waitingYesterday, WorkOrderItemType.HIZMET, "Fren balata kontrolü", "1", "950.00");
+        WorkOrder inProgressYesterday = order(customers.get(1), vehicles.get(1), 1, "Fren sesi ve balata kontrolü");
+        addItem(inProgressYesterday, WorkOrderItemType.HIZMET, "Fren balata kontrolü", "1", "950.00");
 
         WorkOrder inProgress = order(customers.get(2), vehicles.get(2), 0, "Klima soğutmuyor");
         addItem(inProgress, WorkOrderItemType.HIZMET, "Klima bakımı ve gaz dolumu", "1", "2400.00");
-        transition(inProgress, WorkOrderStatus.ISLEMDE);
 
         WorkOrder inProgressOld = order(customers.get(3), vehicles.get(3), 2, "Periyodik bakım ve lastik kontrolü");
         addItem(inProgressOld, WorkOrderItemType.HIZMET, "Periyodik bakım", "1", "3200.00");
         addItem(inProgressOld, WorkOrderItemType.PARCA, "Hava filtresi", "1", "720.00");
-        transition(inProgressOld, WorkOrderStatus.ISLEMDE);
 
         WorkOrder readyOne = order(customers.get(4), vehicles.get(4), 0, "Yağ bakımı");
         addItem(readyOne, WorkOrderItemType.HIZMET, "Periyodik bakım", "1", "2100.00");
         addItem(readyOne, WorkOrderItemType.PARCA, "Polen filtresi", "1", "650.00");
-        transition(readyOne, WorkOrderStatus.ISLEMDE, WorkOrderStatus.TAMAMLANDI);
+        transition(readyOne, WorkOrderStatus.TAMAMLANDI);
 
         WorkOrder readyTwo = order(customers.get(5), vehicles.get(5), 0, "Akü ve şarj kontrolü");
         addItem(readyTwo, WorkOrderItemType.HIZMET, "Akü kontrolü", "1", "450.00");
         addItem(readyTwo, WorkOrderItemType.PARCA, "Akü", "1", "4200.00");
-        transition(readyTwo, WorkOrderStatus.ISLEMDE, WorkOrderStatus.TAMAMLANDI);
+        transition(readyTwo, WorkOrderStatus.TAMAMLANDI);
 
         WorkOrder deliveredOne = order(customers.get(6), vehicles.get(6), 0, "Polen filtresi ve iç temizlik");
         addItem(deliveredOne, WorkOrderItemType.HIZMET, "Polen filtresi değişimi", "1", "1100.00");
         addItem(deliveredOne, WorkOrderItemType.PARCA, "Polen filtresi", "1", "780.00");
-        transition(deliveredOne, WorkOrderStatus.ISLEMDE, WorkOrderStatus.TAMAMLANDI, WorkOrderStatus.TESLIM_EDILDI);
+        transition(deliveredOne, WorkOrderStatus.TAMAMLANDI, WorkOrderStatus.TESLIM_EDILDI);
 
         WorkOrder deliveredTwo = order(customers.get(7), vehicles.get(7), 0, "Fren balatası değişimi");
         addItem(deliveredTwo, WorkOrderItemType.HIZMET, "Fren balatası değişimi", "1", "1600.00");
         addItem(deliveredTwo, WorkOrderItemType.PARCA, "Fren balatası takımı", "1", "2900.00");
-        transition(deliveredTwo, WorkOrderStatus.ISLEMDE, WorkOrderStatus.TAMAMLANDI, WorkOrderStatus.TESLIM_EDILDI);
+        transition(deliveredTwo, WorkOrderStatus.TAMAMLANDI, WorkOrderStatus.TESLIM_EDILDI);
 
         WorkOrder completedYesterday = order(customers.get(8), vehicles.get(8), 1, "İlk bakım");
         addItem(completedYesterday, WorkOrderItemType.HIZMET, "İlk bakım", "1", "1750.00");
-        transition(completedYesterday, WorkOrderStatus.ISLEMDE, WorkOrderStatus.TAMAMLANDI);
+        transition(completedYesterday, WorkOrderStatus.TAMAMLANDI);
 
-        WorkOrder waitingOld = order(customers.get(9), vehicles.get(9), 4, "Rot-balans ve lastik");
-        addItem(waitingOld, WorkOrderItemType.HIZMET, "Rot-balans ayarı", "1", "1250.00");
-        addItem(waitingOld, WorkOrderItemType.PARCA, "Balans ağırlığı", "4", "90.00");
+        WorkOrder inProgressOldest = order(customers.get(9), vehicles.get(9), 4, "Rot-balans ve lastik");
+        addItem(inProgressOldest, WorkOrderItemType.HIZMET, "Rot-balans ayarı", "1", "1250.00");
+        addItem(inProgressOldest, WorkOrderItemType.PARCA, "Balans ağırlığı", "4", "90.00");
 
         WorkOrder oldService = order(customers.get(10), vehicles.get(10), 220, "Geçmiş dönem bakımı");
         addItem(oldService, WorkOrderItemType.HIZMET, "Periyodik bakım", "1", "1600.00");
-        transition(oldService, WorkOrderStatus.ISLEMDE, WorkOrderStatus.TAMAMLANDI);
+        transition(oldService, WorkOrderStatus.TAMAMLANDI);
         backdateClosed(oldService, 219);
 
         WorkOrder highMileage = order(customers.get(11), vehicles.get(11), 60, "Filo bakımı");
         highMileage.setMileage(Math.max(0, vehicles.get(11).getCurrentMileage() - 15_000));
         workOrderRepository.save(highMileage);
         addItem(highMileage, WorkOrderItemType.HIZMET, "Filo bakım kontrolü", "1", "1900.00");
-        transition(highMileage, WorkOrderStatus.ISLEMDE, WorkOrderStatus.TAMAMLANDI);
+        transition(highMileage, WorkOrderStatus.TAMAMLANDI);
         backdateClosed(highMileage, 59);
 
         pay(customers.get(6), "1800.00", 0, PaymentMethod.KART);

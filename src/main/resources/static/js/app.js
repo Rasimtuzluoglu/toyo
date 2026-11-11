@@ -427,7 +427,6 @@
         var kanbanForm = document.getElementById('kanbanMoveForm');
         if (kanbanForm) {
             var allowedMoves = {
-                BEKLIYOR: ['ISLEMDE'],
                 ISLEMDE: ['TAMAMLANDI'],
                 TAMAMLANDI: ['TESLIM_EDILDI'],
                 TESLIM_EDILDI: []

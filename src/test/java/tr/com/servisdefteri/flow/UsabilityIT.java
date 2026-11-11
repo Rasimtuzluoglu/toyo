@@ -90,7 +90,7 @@ class UsabilityIT extends BusinessTestSupport {
         assertThat(order.getVehicle().getBrand()).isEqualTo("Toyota");
         assertThat(order.getMileage()).isEqualTo(12345);
         assertThat(order.getComplaint()).isEqualTo("Fren sesi");
-        assertThat(order.getStatus().name()).isEqualTo("BEKLIYOR");
+        assertThat(order.getStatus().name()).isEqualTo("ISLEMDE");
     }
 
     @Test
@@ -117,14 +117,14 @@ class UsabilityIT extends BusinessTestSupport {
         WorkOrder order = createOpenOrder(customer, vehicle);
 
         mockMvc.perform(post("/work-orders/{id}/status", order.getId())
-                        .param("status", "ISLEMDE")
+                        .param("status", "TAMAMLANDI")
                         .param("returnTo", "board")
                         .with(user(principal(servis)))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/work-orders/board"));
 
-        assertThat(workOrderService.findById(order.getId()).getStatus().name()).isEqualTo("ISLEMDE");
+        assertThat(workOrderService.findById(order.getId()).getStatus().name()).isEqualTo("TAMAMLANDI");
     }
 
     @Test
@@ -406,7 +406,7 @@ class UsabilityIT extends BusinessTestSupport {
                 """, Long.class);
         WorkOrder order = workOrderService.findById(orderId);
 
-        assertThat(order.getStatus().name()).isEqualTo("BEKLIYOR");
+        assertThat(order.getStatus().name()).isEqualTo("ISLEMDE");
         assertThat(order.getAssignedName()).isEqualTo("Servis Kullanıcısı");
         assertThat(order.getComplaint()).isEqualTo("Fren yaparken ses geliyor");
         assertThat(order.getNotes()).isEqualTo("Ekip notu");
@@ -521,6 +521,12 @@ class UsabilityIT extends BusinessTestSupport {
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("34PNB002"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-tab")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString(
+                        "data-kanban-tab=\"ISLEMDE\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("Bekliyor"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(
+                        org.hamcrest.Matchers.containsString("board-bekliyor"))))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("data-kanban-search")))
                 .andExpect(content().string(org.hamcrest.Matchers.not(
                         org.hamcrest.Matchers.containsString("data-kanban-density"))))
@@ -746,10 +752,8 @@ class UsabilityIT extends BusinessTestSupport {
         Vehicle vehicle = createVehicle(customer, "34 TEK 001");
         WorkOrder order = createWorkOrderWithItem(customer, vehicle, "1200.00");
 
-        runAsSystemPatron(() -> {
-            workOrderService.changeStatus(order.getId(), tr.com.servisdefteri.workorder.WorkOrderStatus.ISLEMDE);
-            workOrderService.completeWithPayment(order.getId(), PaymentMethod.NAKIT);
-        });
+        runAsSystemPatron(() ->
+                workOrderService.completeWithPayment(order.getId(), PaymentMethod.NAKIT));
 
         WorkOrder completed = workOrderService.findById(order.getId());
         assertThat(completed.getStatus().name()).isEqualTo("TAMAMLANDI");
@@ -809,7 +813,7 @@ class UsabilityIT extends BusinessTestSupport {
             clearAuthentication();
         }
 
-        assertThat(workOrderService.findById(order.getId()).getStatus().name()).isEqualTo("BEKLIYOR");
+        assertThat(workOrderService.findById(order.getId()).getStatus().name()).isEqualTo("ISLEMDE");
     }
 
     @Test
@@ -818,8 +822,6 @@ class UsabilityIT extends BusinessTestSupport {
         Customer customer = createCustomer("Undo Müşteri", "0555 171 71 71");
         Vehicle vehicle = createVehicle(customer, "34 UND 001");
         WorkOrder order = createOpenOrder(customer, vehicle);
-        runAsSystemPatron(() -> workOrderService.changeStatus(order.getId(),
-                tr.com.servisdefteri.workorder.WorkOrderStatus.ISLEMDE));
 
         mockMvc.perform(post("/work-orders/{id}/status", order.getId())
                         .param("status", "TAMAMLANDI")
