@@ -14,7 +14,7 @@
                 <div>
                     <div class="page-eyebrow">Finans</div>
                     <h1 class="page-title">Cari Hesaplar</h1>
-                    <p class="page-subtitle">Müşteri bakiyeleri hareketlerden türetilir. Borç bakiyeyi artırır, alacak azaltır.</p>
+                    <p class="page-subtitle">Müşteri bakiyeleri hareketlerden türetilir. Borç bakiyeyi artırır, tahsilat azaltır.</p>
                 </div>
                 <div class="page-actions">
                     <a class="btn btn-outline-secondary" th:href="@{/reports/balances}">
@@ -31,8 +31,8 @@
                 <div class="stat-card">
                     <span class="stat-icon red"><i class="bi bi-wallet2"></i></span>
                     <div class="stat-value money money-debt" th:text="${fmt.money(totalReceivable)}">0,00 ₺</div>
-                    <div class="stat-label">Toplam açık alacak</div>
-                    <div class="stat-hint">Borçlu müşterilerin pozitif bakiyeleri</div>
+                    <div class="stat-label">Toplam açık borç</div>
+                    <div class="stat-hint">Bize borçlu müşterilerin bakiyeleri</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon navy"><i class="bi bi-people"></i></span>
@@ -80,7 +80,7 @@
                                 <span th:text="${row.phone}">Telefon</span>
                                 <span class="sd-badge"
                                       th:classappend="${row.balance.signum() > 0 ? ' sd-badge-borclu' : (row.balance.signum() < 0 ? ' sd-badge-alacakli' : ' sd-badge-neutral')}"
-                                      th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Alacaklı' : 'Dengede')}">Dengede</span>
+                                      th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Fazla ödeme' : 'Dengede')}">Dengede</span>
                             </div>
                             <div class="mobile-data-actions">
                                 <a class="btn btn-outline-secondary btn-sm"
@@ -114,7 +114,7 @@
                                 <td>
                                     <span class="sd-badge"
                                           th:classappend="${row.balance.signum() > 0 ? ' sd-badge-borclu' : (row.balance.signum() < 0 ? ' sd-badge-alacakli' : ' sd-badge-neutral')}"
-                                          th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Alacaklı' : 'Dengede')}">
+                                          th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Fazla ödeme' : 'Dengede')}">
                                         Dengede
                                     </span>
                                 </td>

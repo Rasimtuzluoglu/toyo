@@ -42,8 +42,8 @@ class DailyReportIT extends BusinessTestSupport {
         User servis = createUser("servis", "Servis", Role.SERVIS);
         Customer customer = createCustomer("Günlük Müşteri", "0555 710 00 01");
         Vehicle vehicle = createVehicle(customer, "34 DLY 001");
-        WorkOrder today = order(customer, vehicle, LocalDateTime.now().withHour(10).withMinute(0));
-        WorkOrder old = order(customer, vehicle, LocalDateTime.now().minusDays(3).withHour(10).withMinute(0));
+        WorkOrder today = order(customer, vehicle, todayAtSafeTime());
+        WorkOrder old = order(customer, vehicle, todayAtSafeTime().minusDays(3));
 
         mockMvc.perform(get("/daily-report").with(user(principal(servis))))
                 .andExpect(status().isOk())
@@ -67,7 +67,7 @@ class DailyReportIT extends BusinessTestSupport {
         createUser("servis", "Servis", Role.SERVIS);
         Customer customer = createCustomer("Günlük Toplam Müşteri", "0555 710 00 03");
         Vehicle vehicle = createVehicle(customer, "34 DLY 003");
-        LocalDateTime openedAt = LocalDate.now().atTime(12, 0);
+        LocalDateTime openedAt = todayAtSafeTime();
 
         WorkOrder open = orderWithAmount(customer, vehicle, openedAt, "500.00", false);
         WorkOrder completed = orderWithAmount(customer, vehicle, openedAt, "1000.00", true);
@@ -94,7 +94,7 @@ class DailyReportIT extends BusinessTestSupport {
         createUser("servis", "Servis", Role.SERVIS);
         Customer customer = createCustomer("İptal Rapor Müşteri", "0555 710 00 05");
         Vehicle vehicle = createVehicle(customer, "34 DLY 005");
-        LocalDateTime openedAt = LocalDate.now().atTime(12, 0);
+        LocalDateTime openedAt = todayAtSafeTime();
 
         WorkOrder cancelled = orderWithAmount(customer, vehicle, openedAt, "1000.00", true);
         runAsSystemPatron(() ->
@@ -116,7 +116,7 @@ class DailyReportIT extends BusinessTestSupport {
         User servis = createUser("servis", "Servis", Role.SERVIS);
         Customer customer = createCustomer("Dışa Aktarım Müşteri", "0555 710 00 02");
         Vehicle vehicle = createVehicle(customer, "34 DLY 002");
-        order(customer, vehicle, LocalDateTime.now().withHour(11).withMinute(0));
+        order(customer, vehicle, todayAtSafeTime());
 
         MvcResult excel = mockMvc.perform(get("/daily-report/export.xlsx")
                         .with(user(principal(servis))))
@@ -132,6 +132,11 @@ class DailyReportIT extends BusinessTestSupport {
                 .andReturn();
         byte[] body = pdf.getResponse().getContentAsByteArray();
         assertThat(new String(body, 0, 4, StandardCharsets.US_ASCII)).isEqualTo("%PDF");
+    }
+
+    private LocalDateTime todayAtSafeTime() {
+        // Gece yarısına yakın saatlerde "bugün 10:00" gelecekte kalıp testi kırabiliyordu.
+        return LocalDate.now().atStartOfDay().plusMinutes(1);
     }
 
     private WorkOrder order(Customer customer, Vehicle vehicle, LocalDateTime openedAt) {

@@ -23,7 +23,7 @@
                 <div>
                     <div class="page-eyebrow">Rapor</div>
                     <h1 class="page-title">Cari Hareket Dökümü</h1>
-                    <p class="page-subtitle">Müşteri ve tarih aralığı seçerek borç/alacak hareketlerini inceleyin.</p>
+                    <p class="page-subtitle">Müşteri ve tarih aralığı seçerek borç/tahsilat hareketlerini inceleyin.</p>
                 </div>
                 <div class="page-actions">
                     <a class="btn btn-outline-secondary" th:href="@{/reports}">
@@ -89,7 +89,7 @@
                         <strong class="money money-debt" th:text="${fmt.money(statement.totalDebit)}">0,00 ₺</strong>
                     </div>
                     <div class="summary-item">
-                        <span>Alacak</span>
+                        <span>Tahsilat</span>
                         <strong class="money money-credit" th:text="${fmt.money(statement.totalCredit)}">0,00 ₺</strong>
                     </div>
                     <div class="summary-item ms-auto">
@@ -116,7 +116,7 @@
                                     <th>Açıklama</th>
                                     <th>İş Emri</th>
                                     <th class="text-end">Borç</th>
-                                    <th class="text-end">Alacak</th>
+                                    <th class="text-end">Tahsilat</th>
                                     <th class="text-end">Bakiye</th>
                                 </tr>
                                 </thead>
@@ -125,8 +125,8 @@
                                     <td class="record-meta" th:text="${fmt.date(row.date)}">01.01.2026</td>
                                     <td>
                                         <span class="sd-badge"
-                                              th:classappend="${row.type.name() == 'BORC'} ? ' sd-badge-borclu' : ' sd-badge-alacakli'"
-                                              th:text="${row.type.label}">Borç</span>
+                                              th:classappend="${row.type.name() == 'BORC' ? ' sd-badge-borclu' : ' sd-badge-alacakli'}"
+                                              th:text="${row.type.name() == 'BORC' ? 'Borç' : 'Tahsilat'}">Borç</span>
                                         <span class="sd-badge sd-badge-neutral ms-1" th:if="${row.reversal}">Ters</span>
                                     </td>
                                     <td th:text="${row.description}">Açıklama</td>

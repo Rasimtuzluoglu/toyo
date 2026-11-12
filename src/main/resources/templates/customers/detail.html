@@ -81,7 +81,7 @@
                          th:classappend="${balance.signum() > 0 ? ' money-debt' : (balance.signum() < 0 ? ' money-credit' : '')}"
                          th:text="${fmt.money(balance)}">0,00 ₺</div>
                     <div class="stat-label">Cari bakiye</div>
-                    <div class="stat-hint">Borç − alacak</div>
+                    <div class="stat-hint">Borç − tahsilat</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon red"><i class="bi bi-exclamation-circle"></i></span>

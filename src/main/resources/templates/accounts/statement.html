@@ -88,7 +88,7 @@
                     <strong class="money money-debt" th:text="${fmt.money(statement.totalDebit)}">0,00 ₺</strong>
                 </div>
                 <div class="summary-item">
-                    <span>Dönem alacağı</span>
+                    <span>Dönem tahsilatı</span>
                     <strong class="money money-credit" th:text="${fmt.money(statement.totalCredit)}">0,00 ₺</strong>
                 </div>
                 <div class="summary-item ms-auto">
@@ -115,7 +115,7 @@
                                 <th>Açıklama</th>
                                 <th>İş Emri</th>
                                 <th class="text-end">Borç</th>
-                                <th class="text-end">Alacak</th>
+                                <th class="text-end">Tahsilat</th>
                                 <th class="text-end">Bakiye</th>
                             </tr>
                             </thead>
@@ -124,8 +124,8 @@
                                 <td class="record-meta" th:text="${fmt.date(row.date)}">01.01.2026</td>
                                 <td>
                                     <span class="sd-badge"
-                                          th:classappend="${row.type.name() == 'BORC'} ? ' sd-badge-borclu' : ' sd-badge-alacakli'"
-                                          th:text="${row.type.label}">Borç</span>
+                                          th:classappend="${row.type.name() == 'BORC' ? ' sd-badge-borclu' : ' sd-badge-alacakli'}"
+                                          th:text="${row.type.name() == 'BORC' ? 'Borç' : 'Tahsilat'}">Borç</span>
                                     <span class="sd-badge sd-badge-neutral ms-1" th:if="${row.reversal}">Ters kayıt</span>
                                 </td>
                                 <td th:text="${row.description}">Açıklama</td>
@@ -153,7 +153,7 @@
                     Seçilen tarih aralığında cari hareket yok.
                 </div>
                 <div class="sd-card-footer record-meta">
-                    Bakiye = borç toplamı − alacak toplamı. Ters kayıtlar orijinal hareketi silmez; izlenebilirliği korur.
+                    Bakiye = borç toplamı − tahsilat toplamı. Ters kayıtlar orijinal hareketi silmez; izlenebilirliği korur.
                 </div>
             </div>
         </main>

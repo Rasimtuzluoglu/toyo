@@ -13,7 +13,7 @@
                 <div>
                     <div class="page-eyebrow">Rapor</div>
                     <h1 class="page-title">Müşteri Bakiyeleri</h1>
-                    <p class="page-subtitle">Bakiye, tüm cari hareketlerin borç − alacak toplamıdır.</p>
+                    <p class="page-subtitle">Bakiye, tüm cari hareketlerin borç − tahsilat toplamıdır.</p>
                 </div>
                 <div class="page-actions">
                     <a class="btn btn-outline-secondary" th:href="@{/reports}">
@@ -32,12 +32,12 @@
                 <div class="stat-card">
                     <span class="stat-icon red"><i class="bi bi-arrow-up-right"></i></span>
                     <div class="stat-value money money-debt" th:text="${fmt.money(receivables)}">0,00 ₺</div>
-                    <div class="stat-label">Toplam alacak</div>
+                    <div class="stat-label">Toplam açık borç</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon green"><i class="bi bi-arrow-down-left"></i></span>
                     <div class="stat-value money money-credit" th:text="${fmt.money(credits)}">0,00 ₺</div>
-                    <div class="stat-label">Toplam alacaklı bakiye</div>
+                    <div class="stat-label">Toplam fazla ödeme</div>
                 </div>
             </div>
 
@@ -89,7 +89,7 @@
                                 <td>
                                     <span class="sd-badge"
                                           th:classappend="${row.balance.signum() > 0 ? ' sd-badge-borclu' : (row.balance.signum() < 0 ? ' sd-badge-alacakli' : ' sd-badge-neutral')}"
-                                          th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Alacaklı' : 'Dengede')}">
+                                          th:text="${row.balance.signum() > 0 ? 'Borçlu' : (row.balance.signum() < 0 ? 'Fazla ödeme' : 'Dengede')}">
                                         Dengede
                                     </span>
                                 </td>
