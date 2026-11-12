@@ -65,6 +65,14 @@ if not exist "%ROOT%ToyotaServis-1.0.0.tar" (
     goto fail
 )
 
+if not defined TOYOTA_BACKUP_DIR set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
+echo.
+echo Yedeklerin tutulacagi klasoru secin (bosluk kullanmadan).
+set /p "BACKUP_INPUT=Yedek klasoru [%TOYOTA_BACKUP_DIR%]: "
+if defined BACKUP_INPUT set "TOYOTA_BACKUP_DIR=%BACKUP_INPUT%"
+if not exist "%TOYOTA_BACKUP_DIR%" mkdir "%TOYOTA_BACKUP_DIR%" >nul 2>&1
+set "BACKUP_ENV_DIR=%TOYOTA_BACKUP_DIR:\=/%"
+
 if not exist "%ENVFILE%" (
     for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "DBPASS=%%P"
     if not defined DBPASS (
@@ -76,11 +84,14 @@ if not exist "%ENVFILE%" (
     >> "%ENVFILE%" echo POSTGRES_PASSWORD=!DBPASS!
     >> "%ENVFILE%" echo APP_PORT=%APP_PORT%
     >> "%ENVFILE%" echo BACKUP_RETENTION_DAYS=14
+    >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
     echo .env olusturuldu.
 ) else (
     echo Mevcut .env kullaniliyor.
     for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"APP_PORT=" "%ENVFILE%" 2^>nul') do set "APP_PORT=%%B"
     if not defined APP_PORT set "APP_PORT=18080"
+    findstr /B /C:"BACKUP_HOST_DIR=" "%ENVFILE%" >nul 2>&1
+    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
 )
 
 if defined TOYOTA_SKIP_START (

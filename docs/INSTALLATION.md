@@ -84,6 +84,22 @@ Manuel başlatma:
 powershell -ExecutionPolicy Bypass -File .\scripts\start-toyota.ps1
 ```
 
+### Yedek klasörü
+
+Kurulum betiği yedeklerin tutulacağı klasörü sorar. Varsayılan konum
+`%USERPROFILE%\ToyotaServis-Yedekler` klasörüdür. Seçilen klasör `.env` içindeki
+`BACKUP_HOST_DIR` değerine yazılır ve Docker bu klasörü container içindeki
+`/app/backups` yoluna bağlar. Böylece hem manuel hem zamanlanmış yedekler doğrudan
+bilgisayardaki klasöre düşer.
+
+Klasörü sonradan değiştirmek için:
+
+```powershell
+notepad .env
+# BACKUP_HOST_DIR=C:/ToyotaServis-Yedekler
+docker compose up -d
+```
+
 ### Yedek geri yükleme tatbikatı
 
 ```powershell
@@ -106,7 +122,7 @@ Bu betik ajanı **Windows Görev Zamanlayıcı**'ya ekler ve hemen başlatır. G
 
 - **Manuel güncelleme:** Ayarlar → **Kontrol Et** → **Güncelle ve Yeniden Başlat**. Uygulama 1-3 dakika erişilemez olabilir ve oturumlar kapanır.
 - **Otomatik güncelleme:** Ajanı `UPDATE_AUTO=true` ortam değişkeniyle başlatırsanız 5 dakikada bir GitHub kontrol edilir ve yeni commit otomatik uygulanır. Canlı kullanımda mesai saatleri dışında tercih edin.
-- Her güncellemeden önce `/app/backups/pre-update-YYYYMMDD-HHmmss.dump` yedeği otomatik alınır. Yedek alınamazsa güncelleme **durdurulur**.
+- Her güncellemeden önce seçilen yedek klasörüne `pre-update-YYYYMMDD-HHmmss.dump` yedeği otomatik alınır. Yedek alınamazsa güncelleme **durdurulur**.
 - Ajan, yalnızca hızlı ileri alma (`git pull --ff-only`) yapar. Yerel değişiklik varsa güncelleme **hata** olarak durur; önce commit/stash yapılmalıdır.
 - GitHub deposu özel ise `APP_UPDATE_GITHUB_TOKEN` ortam değişkenini tanımlayın.
 - Güncelleme günlükleri: `updates/update.log` ve `updates/agent.log`.
@@ -293,5 +309,5 @@ Kurulum bir kez tamamlandıysa `/setup` bilinçli olarak kapalıdır. Kullanıc�
 
 - Container içinde `pg_dump` bulunmalıdır (Dockerfile `postgresql16-client` kurar).
 - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` değerlerini kontrol edin.
-- `BACKUP_DIR` yazılabilir olmalıdır (`/app/backups` volume).
+- `BACKUP_HOST_DIR` ile seçilen bilgisayar klasörü yazılabilir olmalı ve Docker Desktop bu sürücüye erişebilmelidir.
 - Hata mesajı Ayarlar ekranındaki yedek geçmişinde ve uygulama logunda görünür.

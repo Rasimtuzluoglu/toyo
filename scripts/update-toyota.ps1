@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$RequestedCommit = ""
 )
 
@@ -87,10 +87,41 @@ try {
     $env:GIT_COMMIT = $newCommit
 
     $backupName = "pre-update-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".dump"
+    $backupHostDir = "./backups"
+    $envPath = Join-Path $projectRoot ".env"
+    if (Test-Path $envPath) {
+        $backupLine = Get-Content $envPath | Where-Object { $_ -match '^BACKUP_HOST_DIR=' } | Select-Object -Last 1
+        if ($backupLine) {
+            $backupHostDir = $backupLine.Substring($backupLine.IndexOf('=') + 1).Trim().Trim('"')
+        }
+    }
+    if (-not [System.IO.Path]::IsPathRooted($backupHostDir)) {
+        $backupHostDir = Join-Path $projectRoot $backupHostDir
+    }
+    New-Item -ItemType Directory -Force -Path $backupHostDir | Out-Null
+    $hostBackupPath = Join-Path $backupHostDir $backupName
+
     Write-Log "Güncelleme öncesi veritabanı yedeği alınıyor: $backupName"
     docker compose exec -T app sh -lc "PGPASSWORD=`$DB_PASSWORD pg_dump -h `$DB_HOST -p `$DB_PORT -U `$DB_USERNAME -Fc -f /app/backups/$backupName `$DB_NAME" *>> $logFile
     if ($LASTEXITCODE -ne 0) {
         throw "Güncelleme öncesi yedek alınamadı; güncelleme durduruldu."
+    }
+
+    $backupMount = (docker inspect servisdefteri-app --format '{{range .Mounts}}{{if eq .Destination "/app/backups"}}{{.Source}}{{end}}{{end}}').Trim()
+    $alreadyOnHost = $false
+    if ($backupMount) {
+        try {
+            $alreadyOnHost = [System.IO.Path]::GetFullPath($backupMount) -eq [System.IO.Path]::GetFullPath($backupHostDir)
+        } catch {
+            $alreadyOnHost = $false
+        }
+    }
+    if (-not $alreadyOnHost) {
+        docker cp "servisdefteri-app:/app/backups/$backupName" $hostBackupPath *>> $logFile
+        if ($LASTEXITCODE -ne 0) {
+            throw "Güncelleme öncesi yedek seçilen klasöre kopyalanamadı; güncelleme durduruldu."
+        }
+        Write-Log "Güncelleme öncesi yedek host klasörüne kopyalandı: $hostBackupPath"
     }
 
     Write-Status "running" "Docker imajı yeniden oluşturuluyor ($newCommit)..." $newCommit $startedAt
@@ -120,7 +151,7 @@ try {
     }
 
     Write-Utf8 $deployedFile $newCommit
-    Write-Status "success" "Güncelleme tamamlandı ($newCommit)." $newCommit $startedAt
+    Write-Status "success" "Güncelleme tamamlandı." $newCommit $startedAt
     Write-Log "Güncelleme başarılı: $newCommit"
     exit 0
 } catch {

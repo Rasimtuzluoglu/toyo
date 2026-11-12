@@ -7,7 +7,7 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 - Otomatik: varsayılan her gün 02:00 (`BACKUP_CRON=0 0 2 * * *`)
 - Manuel: **Ayarlar → Sunucuda Yedekle** veya **Yedek Al ve İndir** (yalnızca PATRON)
 - Dosya adı: `servisdefteri-YYYYMMdd-HHmmss.dump`
-- Konum: Ayarlar’daki **Yedek klasörü** alanı; boşsa `BACKUP_DIR` (Docker'da `/app/backups`)
+- Konum: Kurulumda seçilen **bilgisayardaki yedek klasörü** (`BACKUP_HOST_DIR`); Docker içinde `/app/backups` yoluna bağlanır
 - Saklama: varsayılan 14 gün (`BACKUP_RETENTION_DAYS`); süresi dolan `.dump` dosyaları silinir, veritabanındaki `backup_runs` kayıtları kalır
 - Sonuçlar `backup_runs` tablosuna ve denetim kaydına yazılır
 - Bilgisayar 02:00'de kapalıysa, sonraki açılışta son başarılı yedek 36 saatten eskiyse **telafi yedeği** otomatik alınır
@@ -35,12 +35,19 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 
 ### Yedek klasörünü değiştirme
 
-**Ayarlar → Yedek klasörü** alanına sunucu/container içindeki bir yol yazıp **Kaydet** deyin.
+Kurulum betiği yedek klasörünü sorar ve `.env` içine `BACKUP_HOST_DIR` olarak yazar.
+Sonradan değiştirmek için:
 
-- Yol yoksa otomatik oluşturulur; yazılamıyorsa hata gösterilir.
-- Boş bırakılırsa `BACKUP_DIR` ortam değişkeni kullanılır.
-- Docker’da yazılan yol **container içindedir**. Container yeniden oluşturulduğunda kaybolmaması için bu yolun bir volume olarak bağlanması gerekir.
-- Bilgisayarınızdaki bir klasöre kaydetmek için yol yazmak yerine **Yedek Al ve İndir** kullanın.
+```powershell
+notepad .env
+# BACKUP_HOST_DIR=C:/ToyotaServis-Yedekler
+docker compose up -d
+```
+
+- Klasör yoksa otomatik oluşturulur.
+- Yol Windows tarafında gerçek bir klasördür; container içindeki `/app/backups` bu klasöre bağlanır.
+- Boş bırakılırsa `./backups` kullanılır.
+- Ayarlar → Yedekleme ekranı seçili klasörü salt okunur gösterir.
 
 ## Manuel Yedek (Komut Satırı)
 
@@ -66,21 +73,17 @@ docker compose exec -T db pg_dump -U servisdefteri -d servisdefteri -Fc > "servi
 docker compose cp app:/app/backups/servisdefteri-20261028-020000.dump ./yedek/
 ```
 
-Ayrı bir diske/NAS'a kopyalamak için aynı yöntemi kullanın. `servisdefteri-backups` volume'u tek başına yeterli değildir; disk arızasına karşı ikinci kopya tutun.
+Ayrı bir diske/NAS'a kopyalamak için aynı yöntemi kullanın. Yedek klasörü tek başına yeterli değildir; disk arızasına karşı ikinci kopya tutun.
 
 ### Windows klasörüne otomatik yedek
 
-Docker'da sunucu yolu container içindedir. Windows'taki bir klasöre otomatik yedek almak için `docker-compose.yml` içindeki `app` servisine bir bağlama ekleyin:
+`.env` içinde `BACKUP_HOST_DIR` değerini Windows klasörüne ayarlayın:
 
-```yaml
-services:
-  app:
-    volumes:
-      - backups:/app/backups
-      - D:/ToyotaYedek:/app/yedek
+```dotenv
+BACKUP_HOST_DIR=C:/ToyotaServis-Yedekler
 ```
 
-Ardından **Ayarlar → Yedek klasörü** alanına `/app/yedek` yazın. Klasörün Windows'ta mevcut olduğundan emin olun.
+Ardından `docker compose up -d` çalıştırın. Otomatik yedekler doğrudan bu klasöre yazılır.
 
 ## Geri Yükleme Testi (Önerilen Yöntem)
 

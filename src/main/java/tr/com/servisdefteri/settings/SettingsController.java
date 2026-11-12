@@ -2,6 +2,7 @@ package tr.com.servisdefteri.settings;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +43,9 @@ public class SettingsController {
     private final FormTokenService formTokenService;
     private final BusinessSettingsService businessSettingsService;
     private final UpdateService updateService;
+
+    @Value("${app.backup.host-directory:}")
+    private String backupHostDirectory;
 
     public SettingsController(BackupService backupService, AuditLogRepository auditLogRepository,
                               FormTokenService formTokenService,
@@ -193,6 +197,7 @@ public class SettingsController {
                 .orElse(null));
         model.addAttribute("backupEnabled", backupService.isEnabled());
         model.addAttribute("backupDirectory", backupService.currentDirectory());
+        model.addAttribute("backupHostDirectory", backupHostDirectory);
         model.addAttribute("retentionDays", backupService.getProperties().getRetentionDays());
         model.addAttribute("backupCron", backupService.getProperties().getCron());
         model.addAttribute("recentAudit", auditLogRepository.findAllByOrderByCreatedAtDesc(

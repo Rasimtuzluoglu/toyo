@@ -187,21 +187,20 @@
                                 </div>
                             </dl>
 
-                            <form method="post" th:action="@{/settings/backup-directory}" class="mt-3"
-                                  data-submit-once>
-                                <input type="hidden" name="formToken" th:value="${formToken}">
-                                <label class="form-label" for="backupDirectoryInput">Yedek klasörü</label>
+                            <div class="mt-3">
+                                <label class="form-label" for="backupHostDirectory">Bilgisayardaki yedek klasörü</label>
                                 <div class="input-group">
-                                    <input class="form-control" id="backupDirectoryInput" name="directory"
-                                           type="text" th:value="${backupDirectory}"
-                                           placeholder="/app/backups" maxlength="500">
-                                    <button class="btn btn-outline-secondary" type="submit">Kaydet</button>
+                                    <input class="form-control" id="backupHostDirectory" type="text"
+                                           readonly
+                                           th:value="${backupHostDirectory == null or backupHostDirectory.isBlank() ? 'Kurulumda seçilmedi' : backupHostDirectory}">
+                                    <span class="input-group-text">salt okunur</span>
                                 </div>
                                 <div class="form-text">
-                                    Docker kullanıyorsanız bu yol container içindedir ve kalıcı olması için volume gerekir.
-                                    Boş bırakılırsa sunucu varsayılanı kullanılır.
+                                    Otomatik yedekler bu klasöre yazılır. Değiştirmek için <code>.env</code>
+                                    içindeki <code>BACKUP_HOST_DIR</code> değerini güncelleyip servisleri yeniden başlatın.
+                                    Container içi yol: <span class="money" th:text="${backupDirectory}">/app/backups</span>
                                 </div>
-                            </form>
+                            </div>
 
                             <div class="alert alert-warning mt-3 mb-0" role="note">
                                 <i class="bi bi-exclamation-triangle-fill me-1"></i>

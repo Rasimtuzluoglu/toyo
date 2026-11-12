@@ -83,7 +83,8 @@ kablolu ağa bağlıysa bu adresi kullanabilir.
 - Uygulama her gün saat 02:00'de otomatik yedek alır.
 - Bilgisayar 02:00'de kapalıysa sonraki açılışta 36 saatten eski yedek telafi edilir.
 - Ayarlar → Yedekleme ekranından manuel yedek alabilir ve yedeği indirebilirsiniz.
-- Yedekler `toyota-servis-backups` Docker volume'unda tutulur.
+- Kurulum sırasında seçtiğiniz klasöre otomatik yedek yazılır (varsayılan: `%USERPROFILE%\ToyotaServis-Yedekler`).
+- Yedek klasörünü değiştirmek için `.env` içindeki `BACKUP_HOST_DIR` değerini güncelleyip servisleri yeniden başlatın.
 - Veritabanı verisi `toyota-servis-pgdata` volume'undadır.
 
 > `C:\ToyotaServis\.env` dosyasını kaybetmeyin. Veritabanı parolası burada tutulur.

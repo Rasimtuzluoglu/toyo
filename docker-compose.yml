@@ -55,6 +55,7 @@ services:
       INITIAL_ADMIN_FULL_NAME: ${INITIAL_ADMIN_FULL_NAME:-Isletme Sahibi}
       BACKUP_ENABLED: ${BACKUP_ENABLED:-true}
       BACKUP_DIR: /app/backups
+      BACKUP_HOST_DIR: ${BACKUP_HOST_DIR:-./backups}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       BACKUP_CRON: ${BACKUP_CRON:-0 0 2 * * *}
       APP_UPDATE_ENABLED: ${APP_UPDATE_ENABLED:-true}
@@ -67,7 +68,7 @@ services:
     ports:
       - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-18080}:18080"
     volumes:
-      - backups:/app/backups
+      - "${BACKUP_HOST_DIR:-./backups}:/app/backups"
       - ./updates:/app/updates
     security_opt:
       - no-new-privileges:true
@@ -82,8 +83,6 @@ services:
 volumes:
   pgdata:
     name: servisdefteri-pgdata
-  backups:
-    name: servisdefteri-backups
 
 networks:
   internal:

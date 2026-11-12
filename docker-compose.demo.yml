@@ -45,11 +45,14 @@ services:
       DB_PORT: 5432
       DB_NAME: servisdefteri_demo
       BACKUP_ENABLED: "false"
+      BACKUP_HOST_DIR: ${DEMO_BACKUP_HOST_DIR:-./demo-backups}
       APP_UPDATE_ENABLED: "false"
       THYMELEAF_CACHE: "false"
       TZ: Europe/Istanbul
     ports:
       - "127.0.0.1:18081:18080"
+    volumes:
+      - "${DEMO_BACKUP_HOST_DIR:-./demo-backups}:/app/backups"
     networks:
       - demo-internal
     logging:

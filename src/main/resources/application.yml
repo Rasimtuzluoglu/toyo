@@ -85,6 +85,7 @@ app:
   backup:
     enabled: ${BACKUP_ENABLED:true}
     directory: ${BACKUP_DIR:./backups}
+    host-directory: ${BACKUP_HOST_DIR:}
     retention-days: ${BACKUP_RETENTION_DAYS:14}
     cron: ${BACKUP_CRON:0 0 2 * * *}
     pg-dump-path: ${PG_DUMP_PATH:pg_dump}
