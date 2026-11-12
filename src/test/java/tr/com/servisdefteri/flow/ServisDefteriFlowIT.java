@@ -83,7 +83,7 @@ class ServisDefteriFlowIT extends BusinessTestSupport {
 
         PaymentForm form = new PaymentForm();
         form.setCustomerId(customer.getId());
-        form.setAmount(new BigDecimal("15000.00"));
+        form.setAmount(new BigDecimal("10000.00"));
         form.setPaymentDate(LocalDate.now());
         form.setMethod(PaymentMethod.NAKIT);
         AllocationForm allocation = new AllocationForm();
@@ -291,7 +291,35 @@ class ServisDefteriFlowIT extends BusinessTestSupport {
 
         assertThatThrownBy(() -> paymentService.create(form))
                 .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("kapalı");
+                .hasMessageContaining("açık borçtan fazla");
+    }
+
+    @Test
+    void paymentCannotExceedOpenDebtAndMustBeFullyAllocated() {
+        Customer customer = createCustomer("Fazla Ödeme Müşteri", "0555 909 09 09");
+        Vehicle vehicle = createVehicle(customer, "34 FZL 001");
+        createCompletedOrder(customer, vehicle, "1000.00");
+
+        PaymentForm over = paymentForm(customer, "1100.00");
+        assertThatThrownBy(() -> paymentService.create(over))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("açık borçtan fazla");
+
+        PaymentForm unallocated = paymentForm(customer, "500.00");
+        assertThatThrownBy(() -> paymentService.create(unallocated))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("tamamı");
+
+        assertThat(jdbcTemplate.queryForObject("select count(*) from payments", Long.class)).isZero();
+    }
+
+    private PaymentForm paymentForm(Customer customer, String amount) {
+        PaymentForm form = new PaymentForm();
+        form.setCustomerId(customer.getId());
+        form.setAmount(new BigDecimal(amount));
+        form.setPaymentDate(LocalDate.now());
+        form.setMethod(PaymentMethod.NAKIT);
+        return form;
     }
 
     @Test

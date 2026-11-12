@@ -263,26 +263,26 @@ Geçişler:
 ### Bakiye mantığı
 
 ```text
-Bakiye = Borç toplamı − Alacak toplamı
+Bakiye = Borç toplamı − Tahsilat toplamı
 ```
 
-- **Borç**: müşterinin işletmeye borcu artar.
-- **Alacak**: müşterinin borcu azalır (tahsilat).
-- Pozitif bakiye = müşteri borçlu.
-- Negatif bakiye = müşteri alacaklı (avans/fazla ödeme).
+- **Borç**: müşterinin işletmeye borcu artar (hizmet karşılığı).
+- **Tahsilat**: müşterinin borcu azalır.
+- Pozitif bakiye = müşteri **bize borçlu**.
+- Negatif bakiye yalnızca geçmişte kaydedilmiş fazla ödeme varsa görünür; yeni tahsilatlar açık borçtan fazla olamaz.
 
 ### Cari ekstre
 
 **Cari Hesaplar → müşteri → Ekstre**
 
 - Tarih aralığı seçilebilir; varsayılan dönem **bu yılın 1 Ocak – bugün**.
-- Açılış bakiyesi, dönem borcu, dönem alacağı ve kapanış bakiyesi gösterilir.
+- Açılış bakiyesi, dönem borcu, dönem tahsilatı ve kapanış bakiyesi gösterilir.
 - Ters kayıtlar ayrıca işaretlenir.
 - **Yazdır**, **Excel** ve **CSV** (UTF-8 BOM, `;` ayırıcı) desteklenir.
 
 ### Manuel borç
 
-İş emri dışında oluşan bir alacak için **Manuel Borç** kullanılır. Bu ekran yalnızca PATRON yetkisindedir; MUHASEBE yalnızca tahsilat girer. Gelecek tarihli kayıt oluşturulamaz. Kayıt silinmez; düzeltme ters kayıtla yapılır.
+İş emri dışında oluşan bir borç için **Manuel Borç** kullanılır. Bu ekran yalnızca PATRON yetkisindedir; MUHASEBE yalnızca tahsilat girer. Gelecek tarihli kayıt oluşturulamaz. Kayıt silinmez; düzeltme ters kayıtla yapılır.
 
 ## Tahsilatlar
 
@@ -292,16 +292,17 @@ Bakiye = Borç toplamı − Alacak toplamı
 2. Müşteri seçin → **Açık Borçları Getir**
 3. Tarih, tutar, ödeme yöntemi (Nakit/Banka/Kart), açıklama girin.
 4. **Tek açık borç varsa tutar ve dağıtım otomatik doldurulur**; dağıtım tablosu gizlenir, yerine tek satırlık borç özeti gelir. Kontrol edip doğrudan kaydedebilirsiniz. Birden fazla borçta dağıtım tablosu görünür; satırları doldurun veya **Kalanı Dağıt** / **Tüm Açık Borcu Getir** düğmelerini kullanın.
-5. Ekranın altındaki özet, dağıtılan tutarı ve varsa avans olarak kalacak tutarı gösterir.
+5. Ekranın altındaki özet, dağıtılan tutarı ve kalan dağıtım tutarını gösterir.
 6. Kaydedin.
 
-Boş bırakılan borca dağıtım yapılmaz; dağıtılmayan kısım avans/alacak olarak cari hesaba işlenir.
+Tahsilatın **tamamı** açık borçlara dağıtılmalıdır; dağıtılmayan tutar kalmaz.
 
 Kurallar:
 
-- Dağıtım toplamı tahsilat tutarını aşamaz.
+- Tahsilat tutarı müşterinin toplam açık borcundan fazla olamaz.
+- Dağıtım toplamı tahsilat tutarına eşit olmalıdır.
 - Bir borca kalan tutarından fazla dağıtım yapılamaz.
-- Dağıtım yapılmayan kısım avans/alacak olarak cariye işlenir.
+- Açık borç yoksa tahsilat kaydedilemez.
 - Aynı formun tekrar gönderilmesi tek kullanımlık form belirteciyle engellenir.
 - Gelecek tarihli tahsilat kabul edilmez.
 

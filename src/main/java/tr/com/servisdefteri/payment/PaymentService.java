@@ -128,6 +128,11 @@ public class PaymentService {
                 .orElseThrow(() -> NotFoundException.of("Müşteri", form.getCustomerId()));
 
         BigDecimal amount = money(form.getAmount());
+        BigDecimal openDebtTotal = accountService.openDebtTotal(customer.getId());
+        if (amount.compareTo(openDebtTotal) > 0) {
+            throw new BusinessRuleException("Tahsilat tutarı açık borçtan fazla olamaz. Açık borç: "
+                    + openDebtTotal.setScale(2, RoundingMode.HALF_UP) + " TL");
+        }
         Payment payment = new Payment();
         payment.setCustomer(customer);
         payment.setReceiptNo(nextReceiptNo(form.getPaymentDate()));
@@ -209,7 +214,8 @@ public class PaymentService {
 
     private void saveAllocations(Payment payment, List<AllocationForm> allocationForms) {
         if (allocationForms == null || allocationForms.isEmpty()) {
-            return;
+            throw new BusinessRuleException("Tahsilatın tamamı açık borçlara dağıtılmalıdır. "
+                    + "Tahsilat tutarı borçlara dağıtılmadan kaydedilemez.");
         }
         Map<Long, BigDecimal> remainingByTransaction = new java.util.HashMap<>();
         for (OpenDebt debt : accountService.openDebts(payment.getCustomer().getId())) {
@@ -260,6 +266,11 @@ public class PaymentService {
             allocation.setAmount(allocationAmount);
             allocation.setCancelled(false);
             allocationRepository.save(allocation);
+        }
+        if (allocatedTotal.compareTo(payment.getAmount()) < 0) {
+            throw new BusinessRuleException("Tahsilatın tamamı açık borçlara dağıtılmalıdır. Dağıtılmayan: "
+                    + payment.getAmount().subtract(allocatedTotal)
+                    .setScale(2, RoundingMode.HALF_UP) + " TL");
         }
     }
 

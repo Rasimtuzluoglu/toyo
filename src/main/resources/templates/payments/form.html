@@ -171,13 +171,12 @@
                             <div class="empty-state" th:if="${allocationViews.isEmpty()}">
                                 <i class="bi bi-check2-circle"></i>
                                 <strong>Açık borç yok</strong>
-                                Tahsilat, cari hesaba fazla ödeme olarak işlenecek.
+                                Tahsilat kaydedilemez; önce hizmet karşılığı bir borç oluşmalıdır.
                             </div>
                             <div id="allocationSummary" class="toast-inline mx-3 mt-3"
                                  th:if="${!allocationViews.isEmpty()}"></div>
                             <div class="sd-card-footer record-meta">
-                                Dağıtım tutarları toplamı tahsilat tutarını aşamaz. Boş bırakılan borçlara dağıtım yapılmaz;
-                                kalan tutar avans olarak cari hesaba işlenir.
+                                Tahsilatın tamamı açık borçlara dağıtılmalıdır. Açık borçtan fazla tahsilat kaydedilemez.
                             </div>
                         </div>
 

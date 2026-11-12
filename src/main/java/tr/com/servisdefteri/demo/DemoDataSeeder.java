@@ -294,7 +294,12 @@ public class DemoDataSeeder implements ApplicationRunner {
         if (debts.isEmpty()) {
             return;
         }
-        BigDecimal remaining = new BigDecimal(amount);
+        BigDecimal totalOpen = debts.stream().map(OpenDebt::getRemaining)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal remaining = new BigDecimal(amount).min(totalOpen);
+        if (remaining.signum() <= 0) {
+            return;
+        }
         List<AllocationForm> allocations = new ArrayList<>();
         for (OpenDebt debt : debts) {
             if (remaining.signum() <= 0) {
