@@ -90,6 +90,28 @@ class DailyReportIT extends BusinessTestSupport {
     }
 
     @Test
+    void cancelledWorkOrderDoesNotInflateReportTotals() {
+        createUser("servis", "Servis", Role.SERVIS);
+        Customer customer = createCustomer("İptal Rapor Müşteri", "0555 710 00 05");
+        Vehicle vehicle = createVehicle(customer, "34 DLY 005");
+        LocalDateTime openedAt = LocalDate.now().atTime(12, 0);
+
+        WorkOrder cancelled = orderWithAmount(customer, vehicle, openedAt, "1000.00", true);
+        runAsSystemPatron(() ->
+                workOrderService.changeStatus(cancelled.getId(), WorkOrderStatus.IPTAL));
+        orderWithAmount(customer, vehicle, openedAt, "500.00", false);
+
+        DailyReportView view = dailyReportService.load(LocalDate.now());
+        DailyReportRow cancelledRow = view.rows().stream()
+                .filter(row -> row.orderNo().equals(cancelled.getOrderNo()))
+                .findFirst().orElseThrow();
+
+        assertThat(cancelledRow.remaining()).isEqualByComparingTo("0.00");
+        assertThat(view.totalAmount()).isEqualByComparingTo("500.00");
+        assertThat(view.totalRemaining()).isEqualByComparingTo("500.00");
+    }
+
+    @Test
     void exportsDailyReportAsExcelAndPdf() throws Exception {
         User servis = createUser("servis", "Servis", Role.SERVIS);
         Customer customer = createCustomer("Dışa Aktarım Müşteri", "0555 710 00 02");

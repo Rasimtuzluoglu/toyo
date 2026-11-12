@@ -123,6 +123,7 @@ public class WorkOrderController {
     }
 
     @GetMapping("/export.csv")
+    @PreAuthorize("hasAnyRole('PATRON','MUHASEBE')")
     public ResponseEntity<byte[]> exportCsv(@RequestParam(required = false) String status,
                                             @RequestParam(required = false) String q,
                                             @RequestParam(required = false) Long customerId,
@@ -140,6 +141,7 @@ public class WorkOrderController {
     }
 
     @GetMapping("/export.xlsx")
+    @PreAuthorize("hasAnyRole('PATRON','MUHASEBE')")
     public ResponseEntity<byte[]> exportExcel(@RequestParam(required = false) String status,
                                               @RequestParam(required = false) String q,
                                               @RequestParam(required = false) Long customerId,
@@ -764,6 +766,6 @@ public class WorkOrderController {
         }
     }
 
-    private record StoredImport(String fileName, byte[] content) {
+    private record StoredImport(String fileName, byte[] content) implements java.io.Serializable {
     }
 }

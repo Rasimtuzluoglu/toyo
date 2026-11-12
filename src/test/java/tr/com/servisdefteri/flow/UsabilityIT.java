@@ -692,6 +692,22 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void deliveryMileageCannotBeLowerThanWorkOrderMileage() {
+        Customer customer = createCustomer("Teslim Km", "0555 444 33 22");
+        Vehicle vehicle = createVehicle(customer, "34 TKM 001");
+        WorkOrder order = createCompletedOrder(customer, vehicle, "500.00");
+
+        VehicleDeliveryForm form = new VehicleDeliveryForm();
+        form.setReceiverName("Teslim Km");
+        form.setMileage(100);
+        form.setFuelLevel(FuelLevel.YARIM);
+
+        assertThatThrownBy(() -> vehicleDocumentService.saveDelivery(order.getId(), form))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("kilometresinden düşük");
+    }
+
+    @Test
     void dailyAppointmentsCanBeCreatedAndCancelled() {
         User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
         Customer customer = createCustomer("Randevu Müşteri", "0555 888 99 00");
@@ -721,6 +737,50 @@ class UsabilityIT extends BusinessTestSupport {
 
         Appointment cancelled = appointmentService.cancel(appointment.getId());
         assertThat(cancelled.getStatus()).isEqualTo(AppointmentStatus.IPTAL);
+    }
+
+    @Test
+    void appointmentEditPageLoadsWithLazyCustomerAndVehicle() {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Randevu Düzenle", "0555 777 66 55");
+        Vehicle vehicle = createVehicle(customer, "34 RND 002");
+        AppointmentForm form = new AppointmentForm();
+        form.setCustomerId(customer.getId());
+        form.setVehicleId(vehicle.getId());
+        form.setStartsAt(LocalDate.now().plusDays(2).atTime(9, 0));
+        Appointment appointment = appointmentService.create(form);
+
+        try {
+            mockMvc.perform(get("/appointments/" + appointment.getId() + "/edit")
+                            .with(user(principal(patron))))
+                    .andExpect(status().isOk());
+        } catch (Exception ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
+    @Test
+    void servisCannotSeeCustomerTotalBalanceOnDeliveryPage() {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        Customer customer = createCustomer("Bakiye Müşteri", "0555 321 45 67");
+        Vehicle vehicle = createVehicle(customer, "34 BKY 001");
+        WorkOrder order = createCompletedOrder(customer, vehicle, "1500.00");
+
+        try {
+            mockMvc.perform(get("/work-orders/" + order.getId() + "/delivery")
+                            .with(user(principal(patron))))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(org.hamcrest.Matchers
+                            .containsString("Müşterinin toplam cari bakiyesi")));
+            mockMvc.perform(get("/work-orders/" + order.getId() + "/delivery")
+                            .with(user(principal(servis))))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(org.hamcrest.Matchers.not(
+                            org.hamcrest.Matchers.containsString("Müşterinin toplam cari bakiyesi"))));
+        } catch (Exception ex) {
+            throw new AssertionError(ex);
+        }
     }
 
     @Test

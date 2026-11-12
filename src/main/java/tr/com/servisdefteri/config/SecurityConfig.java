@@ -4,9 +4,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import tr.com.servisdefteri.audit.AuditAction;
 import tr.com.servisdefteri.audit.AuditService;
@@ -23,10 +26,21 @@ public class SecurityConfig {
     }
 
     @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
+    }
+
+    @Bean
+    public HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    LoginSuccessHandler successHandler,
                                                    LoginFailureHandler failureHandler,
-                                                   AuditService auditService) throws Exception {
+                                                   AuditService auditService,
+                                                   SessionRegistry sessionRegistry) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/webjars/**", "/images/**", "/favicon.ico",
@@ -55,7 +69,9 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID"))
                 .sessionManagement(session -> session
                         .sessionFixation().migrateSession()
-                        .maximumSessions(5))
+                        .maximumSessions(5)
+                        .sessionRegistry(sessionRegistry)
+                        .expiredUrl("/login?expired"))
                 .exceptionHandling(exception -> exception.accessDeniedPage("/403"))
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp.policyDirectives(

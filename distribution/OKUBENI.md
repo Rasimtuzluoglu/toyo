@@ -37,7 +37,7 @@ Uygulama Docker imajı olarak gelir; Java/Maven/PostgreSQL kurmanız gerekmez.
    - Uygulama imajını Docker'a yükler.
    - `C:\ToyotaServis` altında çalışma dosyalarını ve rastgele veritabanı parolasını oluşturur.
    - Veritabanını ve uygulamayı başlatır.
-   - Windows güvenlik duvarında 18080 portunu yerel ağa açar.
+   - Windows güvenlik duvarında ek bir port açmaz; uygulama yalnızca bu bilgisayardan kullanılır.
    - Masaüstüne **Toyota Servis** kısayolunu ve oturum açılışında başlatan görevi ekler.
 5. Kurulum sonunda tarayıcıda **http://localhost:18080/setup** açılır.
 6. İlk PATRON (işletme sahibi) hesabını oluşturun. Bu ekran yalnızca bir kez açılır.
@@ -51,16 +51,14 @@ Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlat�
 |---|---|
 | Bu bilgisayar | `http://localhost:18080` |
 | İlk kurulum | `http://localhost:18080/setup` |
-| Yerel ağdaki diğer cihazlar | `http://BILGISAYAR-IP:18080` |
 | Giriş | `http://localhost:18080/login` |
 
-Kurulum sonunda yerel ağ IP'si ekranda gösterilir. Telefon/tablet aynı Wi-Fi veya
-kablolu ağa bağlıysa bu adresi kullanabilir.
+Uygulama yalnızca bu bilgisayardan (`127.0.0.1`) erişilebilir. Yerel ağa veya internete
+açılmaz; bu nedenle telefon/tablet ile uzaktan kullanım desteklenmez.
 
-> **Güvenlik:** Varsayılan olarak uygulama yalnızca bu bilgisayara (`127.0.0.1`) bağlanır.
-> Yerel ağdaki tablet/telefon için `.env` içinde `APP_BIND_ADDRESS=0.0.0.0` yapın; yalnızca
-> güvenilir bir ağda kullanın. TLS sonlandıran reverse proxy arkasında
-> `SESSION_COOKIE_SECURE=true` ayarlayın.
+> **Güvenlik:** Uygulama HTTP üzerinde yerel olarak çalışır ve yalnızca `127.0.0.1` adresine
+> bağlanır. Uygulamayı yerel ağa açmayın; uzaktan erişim gerekiyorsa TLS sonlandıran bir
+> reverse proxy ve `SESSION_COOKIE_SECURE=true` yapılandırması ayrıca ele alınmalıdır.
 
 ## Günlük kullanım
 
@@ -76,7 +74,9 @@ kablolu ağa bağlıysa bu adresi kullanabilir.
 2. `ToyotaServis-Guncelle.cmd` dosyasını çalıştırın.
 3. Güncelleme öncesi veritabanı yedeği otomatik alınır.
 4. Yeni imaj yüklenir, uygulama yeniden başlatılır ve sağlık kontrolü yapılır.
-5. Yeni sürüm sağlıklı başlamazsa eski imaja otomatik geri dönülür.
+5. Yeni sürüm sağlıklı başlamazsa eski imaja otomatik geri dönülür. Veritabanı şeması
+   değiştiyse imaj geri dönüşü tek başına yeterli olmaz; güncelleme öncesi yedeği geri
+   yüklemeniz gerekir.
 
 ## Yedekleme
 
@@ -98,12 +98,12 @@ Uygulamayı durdurmak verileri silmez:
 C:\ToyotaServis\ToyotaServis-Durdur.cmd
 ```
 
-Tamamen kaldırmak için önce durdurun, sonra Docker Desktop'ta şu volume'ları silin:
+Tamamen kaldırmak için önce durdurun, sonra Docker Desktop'ta şu volume'u silin:
 
 - `toyota-servis-pgdata`
-- `toyota-servis-backups`
 
-**Bu işlem veritabanını ve yedekleri kalıcı olarak siler.** Gerekirse önce yedek indirin.
+Yedekler Docker volume'unda değil, `.env` içindeki `BACKUP_HOST_DIR` klasöründe tutulur.
+**Volume'u silmek veritabanını kalıcı olarak siler.** Gerekirse önce yedek indirin.
 Ardından `C:\ToyotaServis` klasörünü kaldırabilirsiniz.
 
 ## Kaynak kod ve güvenlik
@@ -112,7 +112,7 @@ Ardından `C:\ToyotaServis` klasörünü kaldırabilirsiniz.
   ve kurulum betikleri vardır.
 - Kaynak deponuzu müşteriyle paylaşmayın. GitHub deposunu **private** yapmanız önerilir;
   aksi halde kaynak kod GitHub üzerinden görülebilir.
-- Uygulama internete açılmaz; yalnızca yerel ağda çalışır.
+- Uygulama internete açılmaz; yalnızca bu bilgisayarda (`127.0.0.1`) çalışır.
 - İlk kurulumdan sonra PATRON hesabının parolasını güçlü tutun.
 - Docker imajı teknik olarak incelenebilir; Java kaynak dosyaları derlenmiş olarak gelir.
 

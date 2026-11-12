@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -60,6 +61,15 @@ public class GlobalExceptionHandler {
     public ModelAndView accessDenied() {
         ModelAndView mav = new ModelAndView("error/403");
         mav.setStatus(HttpStatus.FORBIDDEN);
+        return mav;
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ModelAndView uploadTooLarge() {
+        ModelAndView mav = new ModelAndView("error/business");
+        mav.setStatus(HttpStatus.BAD_REQUEST);
+        mav.addObject("errorTitle", "Dosya çok büyük");
+        mav.addObject("errorMessage", "Yüklenen dosya izin verilen boyutu aşıyor (en fazla 2 MB).");
         return mav;
     }
 

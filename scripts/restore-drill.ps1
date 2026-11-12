@@ -1,32 +1,80 @@
 $ErrorActionPreference = "Stop"
 
-# Bu betik yedegi ayri bir veritabanina geri yukler ve temel tablolari dogrular.
+# Bu betik yedegi ayri bir veritabanina geri yukler, kayit sayilarini ve cari toplamini
+# uretim veritabaniyla karsilastirir. Uretim veritabanina yazmaz.
 # Kullanim: powershell -ExecutionPolicy Bypass -File .\scripts\restore-drill.ps1
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $projectRoot
 
-$backupFile = "restore-drill.dump"
+$backupFile = "restore-drill-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".dump"
 $testDatabase = "servisdefteri_restore_test"
 
-Write-Host "1/5 Yedek aliniyor..."
-docker compose exec -T app sh -lc "PGPASSWORD=`$DB_PASSWORD pg_dump -h `$DB_HOST -p `$DB_PORT -U `$DB_USERNAME -Fc -f /app/backups/$backupFile `$DB_NAME"
-if ($LASTEXITCODE -ne 0) { throw "Yedek alinamadi." }
+function DbShell($command) {
+    docker compose exec -T db sh -lc $command
+    if ($LASTEXITCODE -ne 0) {
+        throw "Veritabani komutu basarisiz: $command"
+    }
+}
 
-Write-Host "2/5 Test veritabani hazirlaniyor..."
-docker compose exec -T db psql -U servisdefteri -d postgres -c "DROP DATABASE IF EXISTS $testDatabase;"
-docker compose exec -T db psql -U servisdefteri -d postgres -c "CREATE DATABASE $testDatabase;"
-if ($LASTEXITCODE -ne 0) { throw "Test veritabani olusturulamadi." }
+function CountRows($database, $table) {
+    $value = (docker compose exec -T db sh -lc `
+        "PGPASSWORD=`$POSTGRES_PASSWORD psql -U `$POSTGRES_USER -d $database -t -A -c 'select count(*) from $table'").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        throw "$table sayisi okunamadi."
+    }
+    return $value
+}
 
-Write-Host "3/5 Yedek geri yukleniyor..."
-docker compose exec -T app sh -lc "PGPASSWORD=`$DB_PASSWORD pg_restore -h `$DB_HOST -p `$DB_PORT -U `$DB_USERNAME -d $testDatabase /app/backups/$backupFile"
-if ($LASTEXITCODE -ne 0) { throw "Geri yukleme basarisiz." }
+function LedgerTotal($database) {
+    $value = (docker compose exec -T db sh -lc `
+        "PGPASSWORD=`$POSTGRES_PASSWORD psql -U `$POSTGRES_USER -d $database -t -A -c 'select coalesce(sum(amount),0) from account_transactions'").Trim()
+    if ($LASTEXITCODE -ne 0) {
+        throw "Cari toplami okunamadi."
+    }
+    return $value
+}
 
-Write-Host "4/5 Dogrulama yapiliyor..."
-docker compose exec -T db psql -U servisdefteri -d $testDatabase -c "select (select count(*) from users) users, (select count(*) from customers) customers, (select count(*) from vehicles) vehicles, (select count(*) from work_orders) work_orders, (select count(*) from business_settings) settings;"
-if ($LASTEXITCODE -ne 0) { throw "Dogrulama sorgusu basarisiz." }
+try {
+    Write-Host "1/6 Veritabani hazirlaniyor ve yedek aliniyor..."
+    docker compose up -d db | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "Veritabani baslatilamadi." }
+    DbShell "PGPASSWORD=`$POSTGRES_PASSWORD pg_dump -h 127.0.0.1 -p 5432 -U `$POSTGRES_USER -Fc -f /tmp/$backupFile `$POSTGRES_DB"
 
-Write-Host "5/5 Test veritabani temizleniyor..."
-docker compose exec -T db psql -U servisdefteri -d postgres -c "DROP DATABASE IF EXISTS $testDatabase;"
-docker compose exec -T app sh -lc "rm -f /app/backups/$backupFile"
+    Write-Host "2/6 Uretim sayilari okunuyor..."
+    $tables = @("customers", "vehicles", "work_orders", "payments", "account_transactions")
+    $before = @{}
+    foreach ($table in $tables) {
+        $before[$table] = CountRows '$POSTGRES_DB' $table
+    }
+    $beforeLedger = LedgerTotal '$POSTGRES_DB'
 
-Write-Host "Yedek geri yukleme tatbikati BASARILI."
+    Write-Host "3/6 Test veritabani hazirlaniyor..."
+    DbShell "PGPASSWORD=`$POSTGRES_PASSWORD psql -U `$POSTGRES_USER -d postgres -c 'DROP DATABASE IF EXISTS $testDatabase'"
+    DbShell "PGPASSWORD=`$POSTGRES_PASSWORD psql -U `$POSTGRES_USER -d postgres -c 'CREATE DATABASE $testDatabase'"
+
+    Write-Host "4/6 Yedek geri yukleniyor..."
+    DbShell "PGPASSWORD=`$POSTGRES_PASSWORD pg_restore -h 127.0.0.1 -p 5432 -U `$POSTGRES_USER -d $testDatabase /tmp/$backupFile"
+
+    Write-Host "5/6 Dogrulama yapiliyor..."
+    foreach ($table in $tables) {
+        $after = CountRows $testDatabase $table
+        Write-Host ("  {0}: uretim={1}, geri yuklenen={2}" -f $table, $before[$table], $after)
+        if ($after -ne $before[$table]) {
+            throw "Geri yukleme sonrasi $table sayisi uretimle ayni degil."
+        }
+    }
+    $afterLedger = LedgerTotal $testDatabase
+    Write-Host ("  cari toplam: uretim={0}, geri yuklenen={1}" -f $beforeLedger, $afterLedger)
+    if ($afterLedger -ne $beforeLedger) {
+        throw "Geri yukleme sonrasi cari toplam uretimle ayni degil."
+    }
+    if ([int]$before["customers"] -eq 0) {
+        Write-Host "UYARI: Uretim veritabani bos; tatbikat bos veriyle dogrulandi."
+    }
+
+    Write-Host "6/6 Temizlik yapiliyor..."
+    Write-Host "Yedek geri yukleme tatbikati BASARILI."
+} finally {
+    docker compose exec -T db sh -lc "rm -f /tmp/$backupFile" 2>$null | Out-Null
+    docker compose exec -T db sh -lc "PGPASSWORD=`$POSTGRES_PASSWORD psql -U `$POSTGRES_USER -d postgres -c 'DROP DATABASE IF EXISTS $testDatabase'" 2>$null | Out-Null
+}

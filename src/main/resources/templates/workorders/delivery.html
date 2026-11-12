@@ -40,7 +40,7 @@
                 Teslim tutanağı için iş emri tamamlanmış olmalıdır.
             </div>
 
-            <div class="sd-card" th:if="${customerBalance != null}">
+            <div class="sd-card" th:if="${customerBalance != null or workOrderDebt != null}">
                 <div class="sd-card-header">
                     <h2><i class="bi bi-cash-stack me-2 text-success"></i>Teslim öncesi özet</h2>
                     <span class="record-meta">Bakiye ve ödeme durumu</span>

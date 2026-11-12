@@ -48,10 +48,36 @@ class PurgeIT extends BusinessTestSupport {
         assertThat(count("select count(*) from account_transactions where customer_id = ?", customer.getId()))
                 .isZero();
         assertThat(count("select count(*) from audit_logs where action = 'CUSTOMER_PURGED'")).isEqualTo(1);
+        assertThat(jdbcTemplate.queryForObject(
+                "select details from audit_logs where action = 'CUSTOMER_PURGED'", String.class))
+                .doesNotContain(customer.getName());
 
         assertThat(count("select count(*) from customers where id = ?", other.getId())).isEqualTo(1);
         assertThat(count("select count(*) from vehicles where id = ?", otherVehicle.getId())).isEqualTo(1);
         assertThat(count("select count(*) from work_orders where id = ?", otherOrder.getId())).isEqualTo(1);
+    }
+
+    @Test
+    void purgeCustomerFailsClearlyWhenTransferredVehicleHasOtherOwnersOrders() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer previousOwner = createCustomer("Eski Sahip", "0555 700 00 10");
+        Vehicle vehicle = createVehicle(previousOwner, "34 PUR 010");
+        WorkOrder historical = createOpenOrder(previousOwner, vehicle);
+
+        Customer newOwner = createCustomer("Yeni Sahip", "0555 700 00 11");
+        jdbcTemplate.update("update vehicles set customer_id = ? where id = ?",
+                newOwner.getId(), vehicle.getId());
+
+        mockMvc.perform(post("/purge/customer/{id}", newOwner.getId())
+                        .with(user(principal(patron)))
+                        .with(csrf())
+                        .param("confirmation", newOwner.getName()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers
+                        .containsString("başka müşterilere ait iş emirleri")));
+
+        assertThat(count("select count(*) from customers where id = ?", newOwner.getId())).isEqualTo(1);
+        assertThat(count("select count(*) from work_orders where id = ?", historical.getId())).isEqualTo(1);
     }
 
     @Test

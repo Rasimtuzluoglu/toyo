@@ -211,8 +211,7 @@ public class WorkOrderService {
         if (order.isDebited() && (!order.getCustomer().getId().equals(customer.getId())
                 || !order.getVehicle().getId().equals(vehicle.getId()))) {
             throw new BusinessRuleException("Borçlandırılmış iş emrinin müşterisi veya aracı değiştirilemez.");
-        }
-        if (order.getMileage() != null && form.getMileage() != null
+        }        if (order.getMileage() != null && form.getMileage() != null
                 && form.getMileage() < order.getMileage()) {
             throw new BusinessRuleException("İş emri kilometresi geriye alınamaz.");
         }
@@ -232,7 +231,11 @@ public class WorkOrderService {
         order.setCustomer(customer);
         order.setVehicle(vehicle);
         order.setAssignedName(blankToNull(form.getAssignedName()));
-        order.setOpenedAt(form.getOpenedAt());
+        if (!order.isDebited()) {
+            // Borçlandırılmış (tamamlanmış) iş emrinin açılış tarihi, günlük/aylık
+            // rapor dönemlerini bozmamak için değiştirilemez.
+            order.setOpenedAt(form.getOpenedAt());
+        }
         applyDescriptiveFields(order, form);
         syncVehicleMileage(vehicle, form.getMileage());
         WorkOrder saved = workOrderRepository.save(order);

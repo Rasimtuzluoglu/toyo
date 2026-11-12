@@ -9,6 +9,7 @@ import tr.com.servisdefteri.common.ExcelUtil;
 import tr.com.servisdefteri.workorder.WorkOrder;
 import tr.com.servisdefteri.workorder.WorkOrderItem;
 import tr.com.servisdefteri.workorder.WorkOrderRepository;
+import tr.com.servisdefteri.workorder.WorkOrderStatus;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -50,7 +51,8 @@ public class DailyReportService {
             WorkOrderDebt debt = accountService.workOrderDebt(order.getId());
             BigDecimal total = scale(order.getTotalAmount());
             BigDecimal paid = debt == null ? BigDecimal.ZERO : scale(debt.paid());
-            BigDecimal remaining = scale(total.subtract(paid));
+            boolean cancelled = order.getStatus() == WorkOrderStatus.IPTAL;
+            BigDecimal remaining = cancelled ? BigDecimal.ZERO : scale(total.subtract(paid));
             if (remaining.signum() < 0) {
                 remaining = BigDecimal.ZERO;
             }
@@ -69,9 +71,9 @@ public class DailyReportService {
                     total,
                     paid,
                     remaining));
-            totalAmount = totalAmount.add(total);
-            totalPaid = totalPaid.add(paid);
-            totalRemaining = totalRemaining.add(remaining);
+            totalAmount = cancelled ? totalAmount : totalAmount.add(total);
+            totalPaid = cancelled ? totalPaid : totalPaid.add(paid);
+            totalRemaining = cancelled ? totalRemaining : totalRemaining.add(remaining);
         }
         return new DailyReportView(date, rows, scale(totalAmount), scale(totalPaid),
                 scale(totalRemaining));

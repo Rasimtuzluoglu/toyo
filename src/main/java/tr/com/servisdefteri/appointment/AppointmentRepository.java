@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
@@ -24,6 +25,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             order by a.startsAt asc, a.id asc
             """)
     List<Appointment> findBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("""
+            select a from Appointment a
+            join fetch a.customer join fetch a.vehicle
+            where a.id = :id
+            """)
+    Optional<Appointment> findDetailedById(@Param("id") Long id);
 
     @Query("""
             select count(a) from Appointment a

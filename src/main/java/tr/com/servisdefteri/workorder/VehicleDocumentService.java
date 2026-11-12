@@ -83,7 +83,12 @@ public class VehicleDocumentService {
             return created;
         });
         delivery.setReceiverName(form.getReceiverName().trim());
-        delivery.setMileage(form.getMileage() == null ? order.getMileage() : form.getMileage());
+        Integer mileage = form.getMileage() == null ? order.getMileage() : form.getMileage();
+        if (mileage != null && order.getMileage() != null && mileage < order.getMileage()) {
+            throw new BusinessRuleException(
+                    "Teslim kilometresi iş emri kilometresinden düşük olamaz.");
+        }
+        delivery.setMileage(mileage);
         delivery.setFuelLevel(form.getFuelLevel());
         delivery.setNotes(blankToNull(form.getNotes()));
         delivery.setSignatureData(signature(form.getSignatureData()));

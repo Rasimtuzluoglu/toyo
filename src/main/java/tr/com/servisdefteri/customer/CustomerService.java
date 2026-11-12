@@ -70,6 +70,9 @@ public class CustomerService {
     @Transactional
     public Customer create(CustomerForm form) {
         String phoneNormalized = PhoneNormalizer.normalize(form.getPhone());
+        if (!PhoneNormalizer.isValid(form.getPhone())) {
+            throw new BusinessRuleException("Geçerli bir telefon numarası girin (en az 10 hane).");
+        }
         String name = form.getName().trim();
         if (customerRepository.existsByPhoneNormalizedAndNameIgnoreCase(phoneNormalized, name)) {
             throw new BusinessRuleException("Bu telefon ve isimle kayıtlı bir müşteri zaten var. "
@@ -89,6 +92,9 @@ public class CustomerService {
     public Customer update(Long id, CustomerForm form, boolean canChangeActive) {
         Customer customer = findById(id);
         String phoneNormalized = PhoneNormalizer.normalize(form.getPhone());
+        if (!PhoneNormalizer.isValid(form.getPhone())) {
+            throw new BusinessRuleException("Geçerli bir telefon numarası girin (en az 10 hane).");
+        }
         String name = form.getName().trim();
         if (customerRepository.existsByPhoneNormalizedAndNameIgnoreCaseAndIdNot(phoneNormalized, name, id)) {
             throw new BusinessRuleException("Bu telefon ve isimle kayıtlı başka bir müşteri var.");

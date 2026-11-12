@@ -54,6 +54,10 @@
             <div class="alert alert-success" th:if="${param.logout}" role="status">
                 Güvenli biçimde çıkış yaptınız.
             </div>
+            <div class="alert alert-warning" th:if="${param.expired}" role="alert">
+                <i class="bi bi-clock-history me-1" aria-hidden="true"></i>
+                Oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.
+            </div>
             <div class="alert alert-success" th:if="${successMessage}" role="status"
                  th:text="${successMessage}"></div>
 

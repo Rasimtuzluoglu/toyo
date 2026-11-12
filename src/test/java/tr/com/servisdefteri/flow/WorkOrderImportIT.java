@@ -154,6 +154,47 @@ class WorkOrderImportIT extends BusinessTestSupport {
     }
 
     @Test
+    void headerOnlyFileIsRejectedWithoutCreatingRecords() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        String csv = "Fiş No;Plaka;Müşteri;Telefon;Şikâyet;Yapılacak İş\n";
+        MockMultipartFile file = new MockMultipartFile("file", "bos.csv", "text/csv",
+                csv.getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/work-orders/import").file(file)
+                        .with(user(principal(servis)))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers
+                        .containsString("veri satırı bulunamadı")));
+
+        assertThat(count("select count(*) from work_orders")).isZero();
+    }
+
+    @Test
+    void invalidMileageRejectsWholeFile() throws Exception {
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+        var customer = createCustomer("Km Müşteri", "0555 443 55 66");
+        createVehicle(customer, "34 IMP 005");
+        String csv = """
+                Fiş No;Plaka;Müşteri;Telefon;Şikâyet;Yapılacak İş;Kilometre
+                IMP-KM-001;34 IMP 005;;;Fren;Fren bakımı;12000
+                IMP-KM-002;34 IMP 005;;;Yağ;Yağ değişimi;1.5
+                """;
+        MockMultipartFile file = new MockMultipartFile("file", "km.csv", "text/csv",
+                csv.getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/work-orders/import").file(file)
+                        .with(user(principal(servis)))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers
+                        .containsString("Kilometre 0 ile 9.999.999")));
+
+        assertThat(count("select count(*) from work_orders where order_no like 'IMP-KM-%'"))
+                .isZero();
+    }
+
+    @Test
     void templateDownloadHasUtf8BomAndExpectedColumns() throws Exception {
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
 
@@ -169,7 +210,10 @@ class WorkOrderImportIT extends BusinessTestSupport {
         assertThat(body[0]).isEqualTo((byte) 0xEF);
         assertThat(body[1]).isEqualTo((byte) 0xBB);
         assertThat(body[2]).isEqualTo((byte) 0xBF);
-        assertThat(new String(body, StandardCharsets.UTF_8)).contains("Fiş No;Plaka");
+        String text = new String(body, StandardCharsets.UTF_8);
+        assertThat(text).contains("Fiş No;Plaka");
+        assertThat(text.lines().count()).isEqualTo(1);
+        assertThat(text).doesNotContain("Ahmet Yılmaz");
     }
 
     @Test

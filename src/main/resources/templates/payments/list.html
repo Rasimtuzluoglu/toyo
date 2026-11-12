@@ -111,7 +111,8 @@
                             <div class="mobile-data-head">
                                 <a class="mobile-data-title" th:href="@{/payments/{id}(id=${payment.id})}"
                                    th:text="${payment.receiptNo}">TH-0000</a>
-                                <strong class="money money-credit"
+                                <strong class="money"
+                                        th:classappend="${payment.status.name() == 'AKTIF'} ? ' money-credit' : ' text-muted text-decoration-line-through'"
                                         th:text="${fmt.money(payment.amount)}">0,00 ₺</strong>
                             </div>
                             <div class="mobile-data-meta">
@@ -162,7 +163,9 @@
                                           th:classappend="${payment.status.name() == 'AKTIF'} ? ' sd-badge-aktif' : ' sd-badge-iptal'"
                                           th:text="${payment.status.label}">Aktif</span>
                                 </td>
-                                <td class="text-end money money-credit fw-semibold" th:text="${fmt.money(payment.amount)}">0,00 ₺</td>
+                                <td class="text-end money fw-semibold"
+                                    th:classappend="${payment.status.name() == 'AKTIF'} ? ' money-credit' : ' text-muted text-decoration-line-through'"
+                                    th:text="${fmt.money(payment.amount)}">0,00 ₺</td>
                                 <td class="text-end">
                                     <div class="action-row justify-content-end">
                                         <a class="btn btn-outline-secondary btn-sm"

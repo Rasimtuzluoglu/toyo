@@ -324,7 +324,7 @@ public class ReportController {
                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
                          Model model) {
         LocalDate endDate = end == null ? LocalDate.now(clock) : end;
-        LocalDate startDate = start == null ? LocalDate.of(2000, 1, 1) : start;
+        LocalDate startDate = start == null ? LocalDate.now(clock).minusMonths(12) : start;
         model.addAttribute("customers", customerService.allCustomers());
         model.addAttribute("customerId", customerId);
         model.addAttribute("start", startDate);
@@ -344,7 +344,7 @@ public class ReportController {
                                             @RequestParam(required = false)
                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         LocalDate endDate = end == null ? LocalDate.now(clock) : end;
-        LocalDate startDate = start == null ? LocalDate.of(2000, 1, 1) : start;
+        LocalDate startDate = start == null ? LocalDate.now(clock).minusMonths(12) : start;
         LedgerStatement statement = reportService.ledger(customerId, startDate, endDate);
         return csv(reportService.ledgerCsv(statement),
                 "cari-hareketler-" + customerId + "-" + startDate + "-" + endDate + ".csv");
@@ -357,7 +357,7 @@ public class ReportController {
                                               @RequestParam(required = false)
                                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
         LocalDate endDate = end == null ? LocalDate.now(clock) : end;
-        LocalDate startDate = start == null ? LocalDate.of(2000, 1, 1) : start;
+        LocalDate startDate = start == null ? LocalDate.now(clock).minusMonths(12) : start;
         LedgerStatement statement = reportService.ledger(customerId, startDate, endDate);
         return DownloadUtil.xlsx(reportService.ledgerExcel(statement),
                 "cari-hareketler-" + customerId + "-" + startDate + "-" + endDate + ".xlsx");

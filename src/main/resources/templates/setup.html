@@ -43,6 +43,7 @@
             <p class="lead">Bu hesap PATRON yetkisiyle oluşturulur ve tüm işlemleri görebilir.</p>
 
             <form th:action="@{/setup}" th:object="${setupForm}" method="post" data-submit-once>
+                <input type="hidden" name="token" th:value="${setupToken}">
                 <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}" role="alert">
                     <div th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
                 </div>

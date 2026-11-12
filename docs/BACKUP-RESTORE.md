@@ -8,7 +8,9 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 - Manuel: **Ayarlar → Sunucuda Yedekle** veya **Yedek Al ve İndir** (yalnızca PATRON)
 - Dosya adı: `servisdefteri-YYYYMMdd-HHmmss.dump`
 - Konum: Kurulumda seçilen **bilgisayardaki yedek klasörü** (`BACKUP_HOST_DIR`); Docker içinde `/app/backups` yoluna bağlanır
-- Saklama: varsayılan 14 gün (`BACKUP_RETENTION_DAYS`); süresi dolan `.dump` dosyaları silinir, veritabanındaki `backup_runs` kayıtları kalır
+- İkinci kopya: `BACKUP_COPY_DIR` tanımlanırsa her başarılı yedek ayrıca bu klasöre (harici disk/NAS) yazılır
+- Saklama: varsayılan 14 gün (`BACKUP_RETENTION_DAYS`); süresi dolan `.dump` dosyaları silinir, ancak en yeni 5 yedek (`BACKUP_MIN_COPIES`) her zaman korunur, veritabanındaki `backup_runs` kayıtları kalır
+- Her yedek, başarılı sayılmadan önce `pg_restore --list` ile okunabilirlik açısından doğrulanır; yarım kalan dosyalar silinir
 - Sonuçlar `backup_runs` tablosuna ve denetim kaydına yazılır
 - Bilgisayar 02:00'de kapalıysa, sonraki açılışta son başarılı yedek 36 saatten eskiyse **telafi yedeği** otomatik alınır
 - Yedek dosyaları web kökünde değildir; indirme yalnızca PATRON oturumuyla yapılır
@@ -17,12 +19,12 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 
 ## Tatbikat Sonucu
 
-- Tarih: **05.11.2026**
-- Yöntem: `scripts/restore-drill.ps1` ile yeni yedek alındı, `servisdefteri_restore_test` veritabanına `pg_restore` ile geri yüklendi.
-- Doğrulama: `users=1`, `customers=0`, `vehicles=0`, `work_orders=0`, `business_settings=1`; test veritabanı temizlendi.
+- Tarih: **12.11.2026**
+- Yöntem: `scripts/restore-drill.ps1` ile üretim veritabanından yedek alındı, `servisdefteri_restore_test` veritabanına `pg_restore` ile geri yüklendi. Betik üretim ve geri yüklenen veritabanının kayıt sayılarını ve cari toplamını otomatik karşılaştırır.
+- Doğrulama: `customers=1/1`, `vehicles=1/1`, `work_orders=1/1`, `payments=1/1`, `account_transactions=1/1`, cari toplam `1555.00/1555.00` (üretim/geri yüklenen). Test veritabanı ve geçici dump `finally` bloğunda temizlendi.
 - Sonuç: **BAŞARILI**
 
-> Bu tatbikat, yedeğin geri yüklenebildiğini gösterir; üretim verisiyle gerçek geri yükleme öncesinde yine yedek alınmalıdır.
+> Bu tatbikat, yedeğin geri yüklenebildiğini ve kayıt sayıları ile cari toplamın korunduğunu gösterir; üretim verisiyle gerçek geri yükleme öncesinde yine yedek alınmalıdır.
 
 ## Manuel Yedek (Arayüz)
 

@@ -19,6 +19,10 @@ services:
       start_period: 20s
     networks:
       - demo-internal
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1024m
+    cpus: 2.0
     logging:
       driver: json-file
       options:
@@ -53,6 +57,10 @@ services:
       - "127.0.0.1:18081:18080"
     volumes:
       - "${DEMO_BACKUP_HOST_DIR:-./demo-backups}:/app/backups"
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1536m
+    cpus: 2.0
     networks:
       - demo-internal
     logging:

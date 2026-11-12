@@ -118,13 +118,28 @@
         var toggle = document.querySelector('[data-sidebar-toggle]');
         var overlay = document.querySelector('[data-sidebar-overlay]');
         var sidebar = document.querySelector('.sd-sidebar');
+        var setSidebarState = function (open) {
+            body.classList.toggle('sidebar-open', open);
+            if (toggle) {
+                toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+            if (sidebar) {
+                var offCanvas = window.matchMedia('(max-width: 991px)').matches;
+                var hidden = offCanvas && !open;
+                sidebar.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+                if ('inert' in sidebar) {
+                    sidebar.inert = hidden;
+                }
+            }
+        };
         var closeSidebar = function () {
-            body.classList.remove('sidebar-open');
+            setSidebarState(false);
         };
 
+        setSidebarState(body.classList.contains('sidebar-open'));
         if (toggle) {
             toggle.addEventListener('click', function () {
-                body.classList.toggle('sidebar-open');
+                setSidebarState(!body.classList.contains('sidebar-open'));
             });
         }
         if (overlay) {
@@ -214,6 +229,7 @@
         document.querySelectorAll('form[data-submit-once]').forEach(function (form) {
             form.addEventListener('submit', function (event) {
                 if (event.defaultPrevented || form.dataset.submitting) {
+                    event.preventDefault();
                     return;
                 }
                 var button = event.submitter || form.querySelector('button[type="submit"]');
@@ -788,7 +804,7 @@
                 || (target && target.isContentEditable);
             if (event.key === '/' && !typing) {
                 var search = document.querySelector('.sd-search input[type="search"]');
-                if (search) {
+                if (search && search.offsetParent !== null) {
                     event.preventDefault();
                     search.focus();
                 }

@@ -5,7 +5,7 @@
 <h1 align="center">Toyota Plaza Öztoprak · Servis Yönetimi</h1>
 
 <p align="center">
-  Müşteri, araç, iş emri, cari hesap, tahsilat ve randevuları tek defterde toplayan yerel ağ uygulaması.
+  Müşteri, araç, iş emri, cari hesap, tahsilat ve randevuları tek defterde toplayan yerel uygulama.
   <br>
   <strong>Bulut yok. Dış servis yok. Veri işletmenin bilgisayarında.</strong>
 </p>
@@ -15,11 +15,11 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
-  <img alt="134 test" src="https://img.shields.io/badge/tests-134%20passing-brightgreen">
+  <img alt="153 test" src="https://img.shields.io/badge/tests-153%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ve demo ortamı çalışıyor · **134 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ve demo ortamı çalışıyor · **153 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Bir bakışta
 
@@ -84,7 +84,7 @@
 - Günlük otomatik yedek; kaçırılan yedek açılışta telafi edilir.
 - Güncelleme öncesi yedek, GitHub son commit kontrolü ve host ajanıyla Docker güncellemesi.
 
-> **Ağ notu:** Varsayılan olarak uygulama yalnızca **bu bilgisayara** (`127.0.0.1`) bağlanır. Yerel ağdaki tablet/telefon için `APP_BIND_ADDRESS=0.0.0.0` yapın; bu durumda güvenilir bir ağ kullanın, TLS sonlandıran reverse proxy ekleyin ve `SESSION_COOKIE_SECURE=true` ayarlayın.
+> **Ağ notu:** Uygulama yalnızca **bu bilgisayara** (`127.0.0.1`) bağlanır ve yerel ağa/internete açılmaz. Uygulamayı `0.0.0.0` adresine bağlayarak yerel ağa açmayın; HTTP üzerinde oturum bilgileri açık gider. Uzaktan erişim gerekiyorsa TLS sonlandıran bir reverse proxy ve `SESSION_COOKIE_SECURE=true` ayrıca yapılandırılmalıdır.
 
 ## Mimari
 
@@ -192,11 +192,11 @@ docker compose -f docker-compose.demo.yml up -d
 mvn clean package
 ```
 
-- **134 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
+- **153 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
 - Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
 - Pre-push hook: `scripts/install-ci-hook.ps1`.
-- GitHub Actions kullanılmaz; kalite kapısı yerel makinede ve push öncesinde çalışır.
+- GitHub Actions ile `mvn clean verify` + Docker imaj derleme kapısı çalışır (`.github/workflows/ci.yml`); yerel `ci-local.ps1` ve pre-push hook da kullanılabilir.
 
 ## Belgeler
 

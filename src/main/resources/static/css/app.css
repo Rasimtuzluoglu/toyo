@@ -49,7 +49,7 @@ a:hover {
 }
 
 :focus-visible {
-    outline: 3px solid rgba(235, 10, 30, 0.28);
+    outline: 2px solid var(--sd-accent);
     outline-offset: 2px;
 }
 

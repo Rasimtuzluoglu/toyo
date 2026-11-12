@@ -15,8 +15,8 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     @Test
     void allMigrationsAreAppliedAndExpectedTablesExist() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("18");
-        assertThat(flyway.info().applied()).hasSize(18);
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("19");
+        assertThat(flyway.info().applied()).hasSize(19);
 
         Long tables = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.tables
@@ -56,6 +56,17 @@ class FlywayMigrationIT extends IntegrationTestSupport {
                 "select count(*) from pg_indexes where schemaname = 'public' "
                         + "and indexname = 'uk_vehicles_plate'", Long.class);
         assertThat(plateUnique).isEqualTo(1L);
+
+        for (String index : new String[]{
+                "uk_work_orders_order_no_lower", "uk_customers_phone_name",
+                "uk_appointments_vehicle_slot", "idx_audit_action_created",
+                "idx_payments_status_date", "idx_work_orders_status_opened",
+                "idx_account_tx_customer_date", "idx_account_tx_reversal"}) {
+            Long count = jdbcTemplate.queryForObject(
+                    "select count(*) from pg_indexes where schemaname = 'public' and indexname = ?",
+                    Long.class, index);
+            assertThat(count).as(index).isEqualTo(1L);
+        }
 
         Long checkConstraints = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.table_constraints

@@ -55,17 +55,15 @@ Beklenen durum:
 
 Uygulama: `http://localhost:18080`
 
-### Yerel ağda kullanım (VPS / internete açma yok)
-Bu kurulum yalnızca yerel bilgisayar ve aynı ağdaki cihazlar için tasarlanmıştır. Uygulama internete açılmaz; PostgreSQL portu da dışarı yayınlanmaz.
+### Yerel kullanım (yalnızca bu bilgisayar)
+Bu kurulum yalnızca üzerinde çalıştığı bilgisayar için tasarlanmıştır. Uygulama `127.0.0.1` adresine bağlanır; yerel ağdan veya internetten erişilemez. PostgreSQL portu da dışarı yayınlanmaz.
 
-- **Varsayılan:** `APP_BIND_ADDRESS=127.0.0.1`; uygulama yalnızca bu bilgisayardan açılır.
-- **Tablet/telefon aynı Wi-Fi üzerinden bağlanacaksa:** `.env` içinde `APP_BIND_ADDRESS=0.0.0.0` yapın.
-- Sunucu bilgisayarın yerel IP'sini `ipconfig` ile bulun ve tabletten `http://192.168.x.x:18080` adresini açın.
-- Windows Güvenlik Duvarı'nda yalnızca **özel ağ** profili için TCP **18080** portuna izin verin; genel ağ profiline izin vermeyin.
-- Modem/router üzerinde bu port için **port yönlendirme yapmayın**. Dışarıdan erişim gerekirse VPS veya port açmak yerine VPN kullanın.
-- Yerel ağda HTTPS yoktur; güvenilir ve parola korumalı bir Wi-Fi kullanın.
-- TLS sonlandıran bir reverse proxy kullanırsanız `.env` içinde `SESSION_COOKIE_SECURE=true` yapın.
-- Yedekleri aynı bilgisayarda tutmayın; **Yedek Al ve İndir** ile harici disk/NAS'a kopyalayın.
+- **Varsayılan ve önerilen:** `APP_BIND_ADDRESS=127.0.0.1`; uygulama yalnızca bu bilgisayardan açılır.
+- Uygulamayı `0.0.0.0` adresine bağlayarak yerel ağa açmayın; HTTP üzerinde çalıştığı için oturum bilgileri ağda açık gider. Uzaktan erişim gerekiyorsa TLS sonlandıran bir reverse proxy ayrıca kurulmalıdır.
+- **İlk kurulum:** `.env` içinde `SETUP_TOKEN` tanımlarsanız `/setup` ekranı yalnızca `http://localhost:18080/setup?token=...` ile açılır. Boş bırakılırsa kurulum yalnızca loopback portundan erişilebilir.
+- Windows Güvenlik Duvarı'nda 18080 portu için gelen kural açmayın; gerekmiyor.
+- Modem/router üzerinde bu port için **port yönlendirme yapmayın**.
+- Yedekleri aynı bilgisayarda tutmayın; `BACKUP_COPY_DIR` ile harici disk/NAS'a otomatik ikinci kopya yazdırın veya **Yedek Al ve İndir** ile dışa alın.
 
 ### Windows'ta otomatik başlatma
 
@@ -120,10 +118,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-update-agent.ps1
 
 Bu betik ajanı **Windows Görev Zamanlayıcı**'ya ekler ve hemen başlatır. Görev oturum açılışında çalışır; ajan beklenmedik şekilde kapanırsa Windows 1 dakika içinde yeniden başlatır. Ajan her 10 saniyede `updates/agent.status` dosyasına heartbeat yazar; Ayarlar ekranında **Ajan hazır** görünür.
 
-- **Manuel güncelleme:** Ayarlar → **Kontrol Et** → **Güncelle ve Yeniden Başlat**. Uygulama 1-3 dakika erişilemez olabilir ve oturumlar kapanır.
-- **Otomatik güncelleme:** Ajanı `UPDATE_AUTO=true` ortam değişkeniyle başlatırsanız 5 dakikada bir GitHub kontrol edilir ve yeni commit otomatik uygulanır. Canlı kullanımda mesai saatleri dışında tercih edin.
-- Her güncellemeden önce seçilen yedek klasörüne `pre-update-YYYYMMDD-HHmmss.dump` yedeği otomatik alınır. Yedek alınamazsa güncelleme **durdurulur**.
-- Ajan, yalnızca hızlı ileri alma (`git pull --ff-only`) yapar. Yerel değişiklik varsa güncelleme **hata** olarak durur; önce commit/stash yapılmalıdır.
+- **Manuel güncelleme:** Ayarlar → **Kontrol Et** → **Güncelle ve Yeniden Başlat**. Uygulama 1-3 dakika erişilemez olabilir ve oturumlar kapanır. Otomatik güncelleme varsayılan olarak **kapalıdır** (`APP_UPDATE_ENABLED=false`); açmadan önce aşağıdaki imza şartını okuyun.
+- **Otomatik güncelleme:** `APP_UPDATE_ENABLED=true` ve ajan `UPDATE_AUTO=true` ile başlatılırsa 5 dakikada bir kontrol edilir. Yalnızca mesai dışında tercih edin.
+- **Commit imzası zorunlu:** `UPDATE_REQUIRE_SIGNED=true` (varsayılan) iken ajan yalnızca GPG ile imzalanmış commit'leri uygular (`git verify-commit`). İmzasız commit gelirse güncelleme durdurulur. Geliştirme ortamında `.env` içinde `UPDATE_REQUIRE_SIGNED=false` yapılabilir; üretimde yapmayın.
+- Her güncellemeden önce seçilen yedek klasörüne `pre-update-YYYYMMDD-HHmmss.dump` yedeği otomatik alınır. Yedek, app kapalı olsa bile `db` konteynerinden alınır; alınamazsa güncelleme **durdurulur**.
+- Ajan, yalnızca hızlı ileri alma (`git pull --ff-only`) yapar. Kirli çalışma ağacı varsa güncelleme **hata** olarak durur; önce commit/stash yapılmalıdır.
+- Sağlık kontrolü başarısız olursa önceki imaja ve önceki commit'e otomatik dönülür. Veritabanı şeması değiştiyse imaj geri dönüşü tek başına yetmez; güncelleme öncesi yedeği geri yükleyin.
 - GitHub deposu özel ise `APP_UPDATE_GITHUB_TOKEN` ortam değişkenini tanımlayın.
 - Güncelleme günlükleri: `updates/update.log` ve `updates/agent.log`.
 
@@ -139,7 +139,7 @@ docker compose restart app
 docker compose down
 ```
 
-> **Uyarı:** `docker compose down -v` komutu `servisdefteri-pgdata` ve `servisdefteri-backups` volume'larını siler. Veritabanı kayıtları ve yedekler geri döndürülemez biçimde kaybolur. Normal kapatma için `docker compose down` kullanın.
+> **Uyarı:** `docker compose down -v` komutu `servisdefteri-pgdata` volume'ını siler; veritabanı kayıtları geri döndürülemez biçimde kaybolur. Yedekler `BACKUP_HOST_DIR` ile belirtilen host klasöründe tutulduğu için `down -v` bu dosyaları silmez. Normal kapatma için `docker compose down` kullanın.
 
 ### Demo / sunum ortamı
 

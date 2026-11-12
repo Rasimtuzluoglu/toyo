@@ -75,6 +75,44 @@ class LoginAttemptServiceTest {
     }
 
     @Test
+    void blockedAttemptsDoNotExtendTheLock() {
+        for (int i = 0; i < LoginAttemptService.MAX_FAILURES; i++) {
+            service.failure("demo", "10.0.0.1");
+        }
+        clock.advance(Duration.ofMinutes(10));
+
+        // Kilitliyken gelen denemeler kilidi uzatmamalı.
+        service.failure("demo", "10.0.0.1");
+
+        clock.advance(Duration.ofMinutes(5).plusSeconds(2));
+        assertThat(service.isBlocked("demo", "10.0.0.1")).isFalse();
+    }
+
+    @Test
+    void expiredLockStartsCountingFromZero() {
+        for (int i = 0; i < LoginAttemptService.MAX_FAILURES; i++) {
+            service.failure("demo", "10.0.0.1");
+        }
+        clock.advance(LoginAttemptService.LOCK_DURATION.plusSeconds(1));
+
+        service.failure("demo", "10.0.0.1");
+
+        assertThat(service.isBlocked("demo", "10.0.0.1")).isFalse();
+    }
+
+    @Test
+    void fillingTheStoreDoesNotResetActiveLocks() {
+        for (int i = 0; i < LoginAttemptService.MAX_FAILURES; i++) {
+            service.failure("kurban", "10.0.0.1");
+        }
+        for (int i = 0; i < LoginAttemptService.MAX_ENTRIES + 50; i++) {
+            service.failure("dolgu-" + i, "10.0.1." + (i % 250));
+        }
+
+        assertThat(service.isBlocked("kurban", "10.0.0.1")).isTrue();
+    }
+
+    @Test
     void blankUsernameIsIgnored() {
         service.failure(null);
         service.failure("  ");

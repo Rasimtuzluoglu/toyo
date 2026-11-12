@@ -2,8 +2,13 @@ package tr.com.servisdefteri.security;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.test.web.servlet.MvcResult;
 import tr.com.servisdefteri.support.IntegrationTestSupport;
 
@@ -29,6 +34,12 @@ class SecurityIT extends IntegrationTestSupport {
 
     @Value("${server.servlet.session.timeout:}")
     private String sessionTimeout;
+
+    @Autowired
+    private SessionRegistry sessionRegistry;
+
+    @Autowired
+    private UserService userService;
 
     @BeforeEach
     void createUsers() {
@@ -75,6 +86,10 @@ class SecurityIT extends IntegrationTestSupport {
         mockMvc.perform(get("/vehicles/export.csv").with(user(principal(servis))))
                 .andExpect(status().isForbidden());
         mockMvc.perform(get("/vehicles/export.xlsx").with(user(principal(servis))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/work-orders/export.csv").with(user(principal(servis))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/work-orders/export.xlsx").with(user(principal(servis))))
                 .andExpect(status().isForbidden());
     }
 
@@ -246,6 +261,61 @@ class SecurityIT extends IntegrationTestSupport {
                         .param("password", "wrong-password"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?error"));
+    }
+
+    @Test
+    void disablingUserExpiresTheirActiveSession() throws Exception {
+        mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "servis")
+                        .param("password", "TestPass1234"))
+                .andExpect(status().is3xxRedirection());
+
+        AppUserPrincipal servisPrincipal = sessionRegistry.getAllPrincipals().stream()
+                .filter(AppUserPrincipal.class::isInstance)
+                .map(AppUserPrincipal.class::cast)
+                .filter(principal -> principal.getUsername().equals("servis"))
+                .filter(principal -> !sessionRegistry.getAllSessions(principal, false).isEmpty())
+                .findFirst()
+                .orElseThrow();
+        assertThat(sessionRegistry.getAllSessions(servisPrincipal, false)).isNotEmpty();
+
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                principal(patron), null, principal(patron).getAuthorities()));
+        UserEditForm form = new UserEditForm();
+        form.setFullName(servis.getFullName());
+        form.setRole(Role.SERVIS);
+        form.setEnabled(false);
+        userService.update(servis.getId(), form);
+
+        assertThat(sessionRegistry.getAllSessions(servisPrincipal, true))
+                .isNotEmpty()
+                .allMatch(SessionInformation::isExpired);
+    }
+
+    @Test
+    void resettingPasswordExpiresActiveSession() throws Exception {
+        mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "servis")
+                        .param("password", "TestPass1234"))
+                .andExpect(status().is3xxRedirection());
+
+        AppUserPrincipal servisPrincipal = sessionRegistry.getAllPrincipals().stream()
+                .filter(AppUserPrincipal.class::isInstance)
+                .map(AppUserPrincipal.class::cast)
+                .filter(principal -> principal.getUsername().equals("servis"))
+                .filter(principal -> !sessionRegistry.getAllSessions(principal, false).isEmpty())
+                .findFirst()
+                .orElseThrow();
+
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                principal(patron), null, principal(patron).getAuthorities()));
+        userService.changePassword(servis.getId(), "NewPass1234");
+
+        assertThat(sessionRegistry.getAllSessions(servisPrincipal, true))
+                .isNotEmpty()
+                .allMatch(SessionInformation::isExpired);
     }
 
     @Test

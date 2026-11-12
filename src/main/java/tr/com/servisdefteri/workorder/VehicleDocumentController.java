@@ -16,6 +16,7 @@ import tr.com.servisdefteri.account.AccountService;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.DownloadUtil;
 import tr.com.servisdefteri.pdf.PdfService;
+import tr.com.servisdefteri.security.CurrentUserService;
 import tr.com.servisdefteri.settings.BusinessSettingsService;
 
 @Controller
@@ -27,17 +28,20 @@ public class VehicleDocumentController {
     private final BusinessSettingsService businessSettingsService;
     private final PdfService pdfService;
     private final AccountService accountService;
+    private final CurrentUserService currentUserService;
 
     public VehicleDocumentController(WorkOrderService workOrderService,
                                      VehicleDocumentService documentService,
                                      BusinessSettingsService businessSettingsService,
                                      PdfService pdfService,
-                                     AccountService accountService) {
+                                     AccountService accountService,
+                                     CurrentUserService currentUserService) {
         this.workOrderService = workOrderService;
         this.documentService = documentService;
         this.businessSettingsService = businessSettingsService;
         this.pdfService = pdfService;
         this.accountService = accountService;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping("/intake")
@@ -107,7 +111,9 @@ public class VehicleDocumentController {
         model.addAttribute("delivery", delivery);
         model.addAttribute("deliveryForm", documentService.toForm(delivery, order));
         model.addAttribute("fuelLevels", FuelLevel.values());
-        model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
+        if (currentUserService.canManageFinances()) {
+            model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
+        }
         model.addAttribute("workOrderDebt", accountService.workOrderDebt(orderId));
         model.addAttribute("activeMenu", "workorders");
         return "workorders/delivery";
@@ -173,7 +179,9 @@ public class VehicleDocumentController {
         model.addAttribute("order", order);
         model.addAttribute("delivery", documentService.findDelivery(orderId));
         model.addAttribute("fuelLevels", FuelLevel.values());
-        model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
+        if (currentUserService.canManageFinances()) {
+            model.addAttribute("customerBalance", accountService.balance(order.getCustomer().getId()));
+        }
         model.addAttribute("workOrderDebt", accountService.workOrderDebt(orderId));
         model.addAttribute("activeMenu", "workorders");
     }

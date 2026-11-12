@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tr.com.servisdefteri.audit.AuditAction;
 import tr.com.servisdefteri.audit.AuditService;
+import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.NotFoundException;
 
 import java.math.BigDecimal;
@@ -96,8 +97,25 @@ public class PurgeService {
         Set<Long> transactionIds = new LinkedHashSet<>(
                 ids("select id from account_transactions where customer_id = ?", id));
 
+        // Araç başka bir müşteriye devredilmişse eski sahibin iş emirleri hâlâ
+        // vehicle_id ile bu araca bağlıdır. Bunları sessizce silmek başka bir
+        // müşterinin finansal geçmişini yok eder; bu yüzden erken ve açık hata ver.
+        List<String> foreignOrders = jdbc.queryForList("""
+                select o.order_no
+                from work_orders o
+                join vehicles v on v.id = o.vehicle_id
+                where v.customer_id = ? and o.customer_id <> ?
+                order by o.order_no
+                """, String.class, id, id);
+        if (!foreignOrders.isEmpty()) {
+            throw new BusinessRuleException("Bu müşterinin araçlarında başka müşterilere ait iş emirleri var: "
+                    + String.join(", ", foreignOrders)
+                    + ". Bu araçlar silinemediği için müşteri kalıcı olarak silinemez; "
+                    + "önce ilgili iş emirlerini tek tek kalıcı silin.");
+        }
+
         auditService.record(AuditAction.CUSTOMER_PURGED, "Müşteri", id,
-                "Müşteri kalıcı silindi: " + name + ", araç=" + vehicleIds.size()
+                "Müşteri kalıcı silindi: id=" + id + ", araç=" + vehicleIds.size()
                         + ", iş=" + workOrderIds.size() + ", tahsilat=" + paymentIds.size());
 
         deleteAllocations(paymentIds, transactionIds);
@@ -126,7 +144,7 @@ public class PurgeService {
         transactionIds = withReversals(transactionIds);
 
         auditService.record(AuditAction.VEHICLE_PURGED, "Araç", id,
-                "Araç kalıcı silindi: " + plate + ", iş=" + workOrderIds.size()
+                "Araç kalıcı silindi: id=" + id + ", iş=" + workOrderIds.size()
                         + ", tahsilat=" + paymentIds.size());
 
         deleteAllocations(paymentIds, transactionIds);
@@ -153,7 +171,7 @@ public class PurgeService {
         transactionIds = withReversals(transactionIds);
 
         auditService.record(AuditAction.WORK_ORDER_PURGED, "İşEmri", id,
-                "İş emri kalıcı silindi: " + orderNo + ", tahsilat=" + paymentIds.size());
+                "İş emri kalıcı silindi: id=" + id + ", tahsilat=" + paymentIds.size());
 
         deleteAllocations(paymentIds, transactionIds);
         deleteTransactions(transactionIds);
@@ -170,7 +188,7 @@ public class PurgeService {
                 ids("select id from account_transactions where payment_id = ?", id)));
 
         auditService.record(AuditAction.PAYMENT_PURGED, "Tahsilat", id,
-                "Tahsilat kalıcı silindi: " + receiptNo + ", tutar=" + amount);
+                "Tahsilat kalıcı silindi: id=" + id + ", tutar=" + amount);
 
         deleteAllocations(List.of(id), transactionIds);
         deleteTransactions(transactionIds);

@@ -157,4 +157,4 @@ Finansal ve kayıt oluşturan formlarda tek kullanımlık `FormToken` kullanıl�
 6. **Flyway + validate:** Prod'da otomatik `ddl-auto=update` yok; şema yalnızca migration ile değişir.
 7. **Tek kullanımlık form belirteci:** Finansal formların kazara iki kez gönderilmesini engeller.
 8. **Tek satırlık işletme ayarı:** İşletme adı ve iletişim bilgileri ayrı tabloda tutulur; çıktılarda kullanılır.
-9. **Docker volume:** PostgreSQL ve yedekler kalıcı volume üzerindedir; `down -v` veri kaybettirir.
+9. **Docker volume:** PostgreSQL kalıcı volume üzerindedir; `down -v` veritabanını siler. Yedekler host klasörüne (bind mount) yazılır ve `down -v` ile silinmez.

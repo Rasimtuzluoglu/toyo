@@ -20,6 +20,7 @@ import tr.com.servisdefteri.common.CsvUtil;
 import tr.com.servisdefteri.payment.Payment;
 import tr.com.servisdefteri.payment.PaymentAllocation;
 import tr.com.servisdefteri.payment.PaymentService;
+import tr.com.servisdefteri.payment.PaymentStatus;
 import tr.com.servisdefteri.report.DailyReportRow;
 import tr.com.servisdefteri.report.DailyReportView;
 import tr.com.servisdefteri.settings.BusinessSettings;
@@ -182,6 +183,14 @@ public class PdfService {
             addHeader(document, business, "TAHSİLAT MAKBUZU", payment.getReceiptNo(),
                     payment.getPaymentDate() == null ? "" : DATE.format(payment.getPaymentDate()),
                     payment.getStatus().getLabel(), baseFont);
+
+            if (payment.getStatus() != PaymentStatus.AKTIF) {
+                Paragraph stamp = new Paragraph("İPTAL EDİLMİŞTİR",
+                        new Font(baseFont, 14, Font.BOLD, Color.RED));
+                stamp.setAlignment(Element.ALIGN_CENTER);
+                stamp.setSpacingBefore(8);
+                document.add(stamp);
+            }
 
             PdfPTable parties = new PdfPTable(new float[]{1.4f, 0.8f});
             parties.setWidthPercentage(100);

@@ -21,17 +21,20 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
     private final CurrentUserService currentUserService;
+    private final SessionRevocationService sessionRevocationService;
     private final Clock clock;
 
     public UserService(UserRepository userRepository,
                        InstallationStateRepository installationStateRepository,
                        PasswordEncoder passwordEncoder,
-                       AuditService auditService, CurrentUserService currentUserService, Clock clock) {
+                       AuditService auditService, CurrentUserService currentUserService,
+                       SessionRevocationService sessionRevocationService, Clock clock) {
         this.userRepository = userRepository;
         this.installationStateRepository = installationStateRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditService = auditService;
         this.currentUserService = currentUserService;
+        this.sessionRevocationService = sessionRevocationService;
         this.clock = clock;
     }
 
@@ -114,10 +117,15 @@ public class UserService {
             throw new BusinessRuleException("Sistemde en az bir aktif işletme sahibi (patron) kalmalıdır.");
         }
 
+        boolean roleChanged = user.getRole() != form.getRole();
+        boolean enabledChanged = user.isEnabled() != form.isEnabled();
         user.setFullName(form.getFullName().trim());
         user.setRole(form.getRole());
         user.setEnabled(form.isEnabled());
         User saved = userRepository.save(user);
+        if (roleChanged || enabledChanged) {
+            sessionRevocationService.revokeAllSessions(saved.getUsername());
+        }
         auditService.record(AuditAction.USER_UPDATED, "Kullanıcı", saved.getId(),
                 "Kullanıcı güncellendi: " + saved.getUsername() + ", rol=" + saved.getRole()
                         + ", aktif=" + saved.isEnabled());
@@ -130,6 +138,7 @@ public class UserService {
         PasswordPolicy.requireStrong(rawPassword);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         userRepository.save(user);
+        sessionRevocationService.revokeAllSessions(user.getUsername());
         auditService.record(AuditAction.USER_PASSWORD_RESET, "Kullanıcı", user.getId(),
                 "Parola yönetici tarafından sıfırlandı: " + user.getUsername());
     }

@@ -3,6 +3,19 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $projectRoot
 
+$envPath = Join-Path $projectRoot ".env"
+$appPort = "18080"
+if (Test-Path $envPath) {
+    $portLine = Get-Content $envPath | Where-Object { $_ -match '^APP_PORT=' } | Select-Object -Last 1
+    if ($portLine) {
+        $candidate = $portLine.Substring($portLine.IndexOf('=') + 1).Trim().Trim('"')
+        if ($candidate -match '^\d+$') {
+            $appPort = $candidate
+        }
+    }
+}
+$appUrl = "http://localhost:$appPort"
+
 Write-Host "Docker kontrol ediliyor..."
 docker info *> $null
 if ($LASTEXITCODE -ne 0) {
@@ -21,7 +34,7 @@ $deadline = (Get-Date).AddSeconds(120)
 $ready = $false
 while ((Get-Date) -lt $deadline) {
     try {
-        $response = Invoke-WebRequest -UseBasicParsing "http://localhost:18080/actuator/health" -TimeoutSec 3
+        $response = Invoke-WebRequest -UseBasicParsing "$appUrl/actuator/health" -TimeoutSec 3
         if ($response.StatusCode -eq 200) {
             $ready = $true
             break
@@ -36,5 +49,5 @@ if (-not $ready) {
     exit 1
 }
 
-Start-Process "http://localhost:18080"
-Write-Host "Uygulama hazir: http://localhost:18080"
+Start-Process $appUrl
+Write-Host "Uygulama hazir: $appUrl"

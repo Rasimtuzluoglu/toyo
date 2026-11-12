@@ -254,6 +254,12 @@ public class AccountService {
 
     @Transactional
     public void reverseWorkOrderDebt(WorkOrder workOrder, String descriptionPrefix) {
+        // Kilit, tahsilat kontrolünden ÖNCE alınmalı. Aksi halde eşzamanlı bir
+        // tahsilat, kontrol ile ters kayıt arasında bu borca dağıtılabilir ve
+        // sistemde aktif tahsilata bağlı, ters kaydedilmiş bir borç kalır.
+        customerRepository.findByIdForUpdate(workOrder.getCustomer().getId())
+                .orElseThrow(() -> NotFoundException.of("Müşteri", workOrder.getCustomer().getId()));
+
         AccountTransaction original = activeWorkOrderDebt(workOrder.getId());
         if (original == null) {
             return;
@@ -263,9 +269,6 @@ public class AccountService {
             throw new BusinessRuleException("Bu iş emrine bağlı aktif tahsilat var. "
                     + "İş emrini iptal etmeden önce ilgili tahsilatı iptal edin.");
         }
-
-        customerRepository.findByIdForUpdate(workOrder.getCustomer().getId())
-                .orElseThrow(() -> NotFoundException.of("Müşteri", workOrder.getCustomer().getId()));
 
         AccountTransaction reversal = new AccountTransaction();
         reversal.setCustomer(original.getCustomer());

@@ -1,5 +1,7 @@
 package tr.com.servisdefteri.workorder;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -37,13 +39,16 @@ public class WorkOrderImportService {
     private final QuickWorkOrderService quickWorkOrderService;
     private final WorkOrderRepository workOrderRepository;
     private final VehicleService vehicleService;
+    private final Validator validator;
 
     public WorkOrderImportService(QuickWorkOrderService quickWorkOrderService,
                                   WorkOrderRepository workOrderRepository,
-                                  VehicleService vehicleService) {
+                                  VehicleService vehicleService,
+                                  Validator validator) {
         this.quickWorkOrderService = quickWorkOrderService;
         this.workOrderRepository = workOrderRepository;
         this.vehicleService = vehicleService;
+        this.validator = validator;
     }
 
     @Transactional
@@ -104,6 +109,10 @@ public class WorkOrderImportService {
             throw new WorkOrderImportException(List.of(
                     new WorkOrderImportException.ImportError(0, "Dosyada veri satırı bulunamadı.")));
         }
+        if (rows.size() < 2) {
+            throw new WorkOrderImportException(List.of(
+                    new WorkOrderImportException.ImportError(0, "Dosyada veri satırı bulunamadı.")));
+        }
         if (rows.size() > MAX_ROWS + 1) {
             throw new WorkOrderImportException(List.of(
                     new WorkOrderImportException.ImportError(0,
@@ -139,9 +148,7 @@ public class WorkOrderImportService {
     }
 
     public byte[] template() {
-        String csv = "\uFEFFFiş No;Plaka;Müşteri;Telefon;Şikâyet;Yapılacak İş;İlgilenen;Kilometre\r\n"
-                + "IS-2026-000013;34 ABC 123;Ahmet Yılmaz;0532 000 00 00;"
-                + "Fren sesi;Fren bakımı;Ahmet Usta;62000\r\n";
+        String csv = "\uFEFFFiş No;Plaka;Müşteri;Telefon;Şikâyet;Yapılacak İş;İlgilenen;Kilometre\r\n";
         return csv.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -206,12 +213,12 @@ public class WorkOrderImportService {
 
         Integer mileage = null;
         if (!mileageText.isBlank()) {
-            try {
-                mileage = Integer.parseInt(mileageText.replaceAll("[^0-9]", ""));
-            } catch (NumberFormatException ex) {
+            if (!mileageText.trim().matches("\\d{1,7}")) {
                 errors.add(new WorkOrderImportException.ImportError(rowNo,
-                        "Kilometre sayı olmalıdır."));
+                        "Kilometre 0 ile 9.999.999 arasında bir tam sayı olmalıdır."));
                 valid = false;
+            } else {
+                mileage = Integer.parseInt(mileageText.trim());
             }
         }
         if (!valid) {
@@ -228,6 +235,16 @@ public class WorkOrderImportService {
         form.setAssignedName(assignedName);
         form.setMileage(mileage);
         form.setCompleteNow(false);
+
+        List<String> violations = validator.validate(form).stream()
+                .map(ConstraintViolation::getMessage)
+                .distinct()
+                .toList();
+        if (!violations.isEmpty()) {
+            violations.forEach(message ->
+                    errors.add(new WorkOrderImportException.ImportError(rowNo, message)));
+            return null;
+        }
         return form;
     }
 
@@ -312,6 +329,11 @@ public class WorkOrderImportService {
                 }
                 if (!isBlankRow(values)) {
                     rows.add(values);
+                    if (rows.size() > MAX_ROWS + 1) {
+                        throw new WorkOrderImportException(List.of(
+                                new WorkOrderImportException.ImportError(0,
+                                        "Tek seferde en fazla " + MAX_ROWS + " iş emri aktarılabilir.")));
+                    }
                 }
             }
             return rows;

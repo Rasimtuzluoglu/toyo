@@ -23,7 +23,7 @@ public class LoginAttemptService {
 
     static final int MAX_FAILURES = 5;
     static final Duration LOCK_DURATION = Duration.ofMinutes(15);
-    private static final int MAX_ENTRIES = 10_000;
+    static final int MAX_ENTRIES = 10_000;
 
     private final Map<String, Attempt> attempts = new ConcurrentHashMap<>();
     private final Clock clock;
@@ -82,14 +82,38 @@ public class LoginAttemptService {
             return;
         }
         if (attempts.size() >= MAX_ENTRIES) {
-            attempts.clear();
+            // Tüm kayıtları silmek aktif kilitleri de sıfırlar. Yalnızca süresi
+            // dolmuş/sayaçsız kayıtları temizle; yeni anahtar için yer yoksa
+            // mevcut kilitleri korumak adına yeni kayıt açma.
+            attempts.entrySet().removeIf(entry -> {
+                Attempt attempt = entry.getValue();
+                synchronized (attempt) {
+                    Instant now = Instant.now(clock);
+                    return attempt.lockedUntil == null
+                            || !now.isBefore(attempt.lockedUntil);
+                }
+            });
+            if (attempts.size() >= MAX_ENTRIES && !attempts.containsKey(key)) {
+                return;
+            }
         }
         attempts.compute(key, (ignored, current) -> {
             Attempt attempt = current == null ? new Attempt() : current;
             synchronized (attempt) {
+                Instant now = Instant.now(clock);
+                if (attempt.lockedUntil != null) {
+                    if (now.isBefore(attempt.lockedUntil)) {
+                        // Zaten kilitliyse sayacı ve kilidi uzatma; aksi halde
+                        // saldırgan 15 dakikada bir deneme yaparak hesabı süresiz
+                        // kilitli tutabilir.
+                        return attempt;
+                    }
+                    attempt.failures = 0;
+                    attempt.lockedUntil = null;
+                }
                 attempt.failures++;
                 if (attempt.failures >= MAX_FAILURES) {
-                    attempt.lockedUntil = Instant.now(clock).plus(LOCK_DURATION);
+                    attempt.lockedUntil = now.plus(LOCK_DURATION);
                 }
             }
             return attempt;

@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum AppointmentStatus {
 
-    PLANLANDI("Planlandı", "secondary"),
-    GELDI("Geldi", "success"),
-    IPTAL("İptal", "danger");
+    PLANLANDI("Planlandı", "neutral"),
+    GELDI("Geldi", "aktif"),
+    IPTAL("İptal", "iptal");
 
     private final String label;
     private final String badgeClass;

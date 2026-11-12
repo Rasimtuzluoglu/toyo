@@ -52,7 +52,8 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
-    public Appointment findById(Long id) {        return appointmentRepository.findById(id)
+    public Appointment findById(Long id) {
+        return appointmentRepository.findDetailedById(id)
                 .orElseThrow(() -> NotFoundException.of("Randevu", id));
     }
 

@@ -17,7 +17,7 @@
                     <p class="page-subtitle">Açık işleri, durumları ve servis tutarlarını takip edin.</p>
                 </div>
                 <div class="page-actions">
-                    <div class="dropdown">
+                    <div class="dropdown" sec:authorize="hasAnyRole('PATRON','MUHASEBE')">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button"
                                 data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-download me-1"></i> Dışa Aktar
