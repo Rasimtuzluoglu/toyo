@@ -22,7 +22,6 @@
                     <div class="hero-meta">
                         <span><strong th:text="${view.activeCustomers}">0</strong> aktif müşteri</span>
                         <span><strong th:text="${view.activeVehicles}">0</strong> aktif araç</span>
-                        <span><strong th:text="${view.openWorkOrders}">0</strong> açık iş</span>
                     </div>
                 </div>
                 <div class="page-actions" sec:authorize="hasAnyRole('PATRON','SERVIS')">
@@ -70,7 +69,7 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-xl-7">
+                <div class="col-xl-7" th:if="${!view.todayAppointments.isEmpty()}">
                     <div class="sd-card h-100">
                         <div class="sd-card-header">
                             <h2><i class="bi bi-calendar3 me-2 text-danger"></i>Bugünkü randevular</h2>
@@ -98,7 +97,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-5">
+                <div th:class="${view.todayAppointments.isEmpty()} ? 'col-12' : 'col-xl-5'">
                     <div class="sd-card h-100">
                         <div class="sd-card-header">
                             <h2><i class="bi bi-box-seam me-2 text-danger"></i>Teslimata hazır</h2>
@@ -169,14 +168,14 @@
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span>
                                             <span class="status-dot"
-                                                  th:classappend="${' dot-' + #strings.toLowerCase(status.status.name())}"></span>
+                                                  th:classappend="${' dot-' + status.status.cssName}"></span>
                                             <span th:text="${status.status.label}">İşlemde</span>
                                         </span>
                                         <strong th:text="${status.count}">0</strong>
                                     </div>
                                     <div class="status-track">
                                         <div class="status-fill"
-                                             th:classappend="${' fill-' + #strings.toLowerCase(status.status.name())}"
+                                             th:classappend="${' fill-' + status.status.cssName}"
                                              th:style="|width:${status.count * 100.0 / view.totalWorkOrders}%|"></div>
                                     </div>
                                 </div>
@@ -218,7 +217,26 @@
                             <a class="link-quiet" th:href="@{/work-orders/board}">Tümünü gör</a>
                         </div>
                         <div class="sd-card-body p-0" th:if="${!view.pendingWorkOrders.isEmpty()}">
-                            <div class="table-responsive">
+                            <div class="d-md-none">
+                                <div class="mobile-data-card" th:each="order : ${view.pendingWorkOrders}">
+                                    <div class="mobile-data-head">
+                                        <a class="mobile-data-title" th:href="@{/work-orders/{id}(id=${order.id})}"
+                                           th:text="${order.orderNo}">IS-000000</a>
+                                        <span class="sd-badge"
+                                              th:classappend="${' sd-badge-' + order.status.cssName}"
+                                              th:text="${order.status.label}">İşlemde</span>
+                                    </div>
+                                    <div class="mobile-data-meta">
+                                        <span th:text="${order.customer.name}">Müşteri</span>
+                                        <span th:text="${order.vehicle.plate}">34ABC123</span>
+                                    </div>
+                                    <div class="mobile-data-foot">
+                                        <span class="record-meta">Tutar</span>
+                                        <strong class="money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive d-none d-md-block">
                                 <table class="table align-middle">
                                     <thead>
                                     <tr>
@@ -240,7 +258,7 @@
                                         </td>
                                         <td>
                                             <span class="sd-badge"
-                                                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                                  th:classappend="${' sd-badge-' + order.status.cssName}"
                                                   th:text="${order.status.label}">İşlemde</span>
                                         </td>
                                         <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>

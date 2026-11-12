@@ -2,7 +2,7 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('İş Emirleri')}"></head>
-<body>
+<body class="has-page-search">
 <div class="sd-shell">
     <aside th:replace="~{fragments/layout :: sidebar('workorders')}"></aside>
     <div class="sd-main">
@@ -53,6 +53,12 @@
 
             <div class="sd-card">
                 <div class="sd-card-body">
+                    <button class="btn btn-outline-secondary w-100 d-md-none mb-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#workOrderFilters"
+                            aria-expanded="false" aria-controls="workOrderFilters">
+                        <i class="bi bi-funnel me-1"></i> Filtreler
+                    </button>
+                    <div class="collapse d-md-block" id="workOrderFilters">
                     <form class="filter-bar" method="get" th:action="@{/work-orders}">
                         <input type="hidden" name="customerId" th:if="${customerId != null}" th:value="${customerId}">
                         <input type="hidden" name="vehicleId" th:if="${vehicleId != null}" th:value="${vehicleId}">
@@ -87,6 +93,7 @@
                             <a class="btn btn-outline-secondary" th:href="@{/work-orders}">Temizle</a>
                         </div>
                     </form>
+                    </div>
                 </div>
             </div>
 
@@ -102,7 +109,7 @@
                                 <a class="mobile-data-title" th:href="@{/work-orders/{id}(id=${order.id})}"
                                    th:text="${order.orderNo}">IS-0000</a>
                                 <span class="sd-badge"
-                                      th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                      th:classappend="${' sd-badge-' + order.status.cssName}"
                                       th:text="${order.status.label}">Durum</span>
                             </div>
                             <div class="mobile-data-meta">
@@ -160,7 +167,7 @@
                                     th:text="${order.assigneeDisplay == null ? '—' : order.assigneeDisplay}">—</td>
                                 <td>
                                     <span class="sd-badge"
-                                          th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                          th:classappend="${' sd-badge-' + order.status.cssName}"
                                           th:text="${order.status.label}">Durum</span>
                                 </td>
                                 <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>

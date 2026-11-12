@@ -22,6 +22,14 @@ class WorkOrderStatusTest {
     }
 
     @Test
+    void cssNamesAreAsciiLowerCase() {
+        assertThat(WorkOrderStatus.ISLEMDE.getCssName()).isEqualTo("islemde");
+        assertThat(WorkOrderStatus.TAMAMLANDI.getCssName()).isEqualTo("tamamlandi");
+        assertThat(WorkOrderStatus.TESLIM_EDILDI.getCssName()).isEqualTo("teslim_edildi");
+        assertThat(WorkOrderStatus.IPTAL.getCssName()).isEqualTo("iptal");
+    }
+
+    @Test
     void statusCannotTransitionToItself() {
         for (WorkOrderStatus status : WorkOrderStatus.values()) {
             assertThat(status.canTransitionTo(status)).isFalse();

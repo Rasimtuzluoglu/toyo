@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="tr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Tahsilatlar')}"></head>
-<body>
+<body class="has-page-search">
 <div class="sd-shell">
     <aside th:replace="~{fragments/layout :: sidebar('payments')}"></aside>
     <div class="sd-main">
@@ -44,6 +44,12 @@
 
             <div class="sd-card">
                 <div class="sd-card-body">
+                    <button class="btn btn-outline-secondary w-100 d-md-none mb-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#paymentFilters"
+                            aria-expanded="false" aria-controls="paymentFilters">
+                        <i class="bi bi-funnel me-1"></i> Filtreler
+                    </button>
+                    <div class="collapse d-md-block" id="paymentFilters">
                     <form class="filter-bar" method="get" th:action="@{/payments}">
                         <div>
                             <label class="form-label" for="q">Ara</label>
@@ -90,6 +96,7 @@
                             <a class="btn btn-outline-secondary" th:href="@{/payments}">Temizle</a>
                         </div>
                     </form>
+                    </div>
                 </div>
             </div>
 

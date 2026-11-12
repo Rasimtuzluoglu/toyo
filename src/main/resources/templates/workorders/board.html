@@ -2,7 +2,7 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head(${currentUser != null and currentUser.role.name() == 'SERVIS' ? 'Bugün' : 'Günlük İşler'})}"></head>
-<body class="board-page">
+<body class="has-page-search">
 <div class="sd-shell">
     <aside th:replace="~{fragments/layout :: sidebar('board')}"></aside>
     <div class="sd-main">

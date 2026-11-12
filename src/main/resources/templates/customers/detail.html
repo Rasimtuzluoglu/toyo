@@ -110,19 +110,9 @@
                     <div class="sd-card">
                         <div class="sd-card-header">
                             <h2>Müşteri bilgileri</h2>
-                            <a class="link-quiet" sec:authorize="hasAnyRole('PATRON','SERVIS')"
-                               th:href="@{/customers/{id}/edit(id=${customer.id})}">Düzenle</a>
                         </div>
                         <div class="sd-card-body">
                             <dl class="detail-list">
-                                <div>
-                                    <dt>Telefon</dt>
-                                    <dd class="money" th:text="${customer.phone}">0555</dd>
-                                </div>
-                                <div>
-                                    <dt>E-posta</dt>
-                                    <dd th:text="${customer.email == null ? '—' : customer.email}">—</dd>
-                                </div>
                                 <div>
                                     <dt>Vergi dairesi</dt>
                                     <dd th:text="${customer.taxOffice == null ? '—' : customer.taxOffice}">—</dd>
@@ -171,7 +161,27 @@
                             <a class="link-quiet" th:href="@{/vehicles(customerId=${customer.id})}">Araç listesi</a>
                         </div>
                         <div class="sd-card-body p-0" th:if="${!vehicles.isEmpty()}">
-                            <div class="table-responsive">
+                            <div class="d-md-none">
+                                <div class="mobile-data-card" th:each="vehicle : ${vehicles}">
+                                    <div class="mobile-data-head">
+                                        <a class="mobile-data-title" th:href="@{/vehicles/{id}(id=${vehicle.id})}"
+                                           th:text="${vehicle.plate}">34ABC123</a>
+                                        <span class="record-meta" th:text="${fmt.number(vehicle.currentMileage) + ' km'}">0 km</span>
+                                    </div>
+                                    <div class="mobile-data-meta">
+                                        <span th:text="${(vehicle.brand == null ? '' : vehicle.brand) + ' ' + (vehicle.model == null ? '' : vehicle.model)}">Marka Model</span>
+                                        <span th:text="${vehicle.modelYear == null ? '—' : vehicle.modelYear}">2020</span>
+                                    </div>
+                                    <div class="mobile-data-actions">
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/vehicles/{id}(id=${vehicle.id})}">Detay</a>
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                                           th:href="@{/work-orders/new(customerId=${customer.id},vehicleId=${vehicle.id})}">İş Emri</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive d-none d-md-block">
                                 <table class="table align-middle">
                                     <thead>
                                     <tr>
@@ -216,7 +226,30 @@
                             <a class="link-quiet" th:href="@{/work-orders(customerId=${customer.id})}">Tümü</a>
                         </div>
                         <div class="sd-card-body p-0" th:if="${!workOrders.isEmpty()}">
-                            <div class="table-responsive">
+                            <div class="d-md-none">
+                                <div class="mobile-data-card" th:each="order : ${workOrders}">
+                                    <div class="mobile-data-head">
+                                        <a class="mobile-data-title" th:href="@{/work-orders/{id}(id=${order.id})}"
+                                           th:text="${order.orderNo}">IS-0000</a>
+                                        <span class="sd-badge"
+                                              th:classappend="${' sd-badge-' + order.status.cssName}"
+                                              th:text="${order.status.label}">Durum</span>
+                                    </div>
+                                    <div class="mobile-data-meta">
+                                        <span th:text="${order.vehicle.plate}">34ABC123</span>
+                                        <span th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</span>
+                                    </div>
+                                    <div class="mobile-data-foot">
+                                        <span class="record-meta">Toplam</span>
+                                        <strong class="money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</strong>
+                                    </div>
+                                    <div class="mobile-data-actions">
+                                        <a class="btn btn-outline-secondary btn-sm"
+                                           th:href="@{/work-orders/{id}(id=${order.id})}">Detay</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive d-none d-md-block">
                                 <table class="table align-middle">
                                     <thead>
                                     <tr>
@@ -237,7 +270,7 @@
                                         <td class="record-meta" th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</td>
                                         <td>
                                             <span class="sd-badge"
-                                                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                                  th:classappend="${' sd-badge-' + order.status.cssName}"
                                                   th:text="${order.status.label}">Durum</span>
                                         </td>
                                         <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>

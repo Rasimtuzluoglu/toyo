@@ -182,7 +182,7 @@
                                             th:text="${order.complaint == null ? '—' : #strings.abbreviate(order.complaint, 60)}">—</td>
                                         <td>
                                             <span class="sd-badge"
-                                                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                                                  th:classappend="${' sd-badge-' + order.status.cssName}"
                                                   th:text="${order.status.label}">Durum</span>
                                         </td>
                                         <td class="text-end money" th:text="${fmt.money(order.totalAmount)}">0,00 ₺</td>

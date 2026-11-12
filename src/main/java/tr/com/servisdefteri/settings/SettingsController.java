@@ -55,8 +55,9 @@ public class SettingsController {
     }
 
     @GetMapping
-    public String settings(HttpSession session, Model model) {
+    public String settings(@RequestParam(required = false) String tab, HttpSession session, Model model) {
         populateSettings(model, session);
+        model.addAttribute("activeTab", normalizeTab(tab));
         return "settings/index";
     }
 
@@ -68,6 +69,7 @@ public class SettingsController {
                                  RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             populateSettings(model, session);
+            model.addAttribute("activeTab", "business");
             return "settings/index";
         }
         try {
@@ -75,6 +77,7 @@ public class SettingsController {
         } catch (BusinessRuleException ex) {
             bindingResult.reject("business.failed", ex.getMessage());
             populateSettings(model, session);
+            model.addAttribute("activeTab", "business");
             return "settings/index";
         }
         redirectAttributes.addFlashAttribute("successMessage", "İşletme bilgileri güncellendi.");
@@ -104,7 +107,7 @@ public class SettingsController {
         } catch (BusinessRuleException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/settings";
+        return "redirect:/settings?tab=backup";
     }
 
     @PostMapping("/backup-directory")
@@ -119,7 +122,7 @@ public class SettingsController {
         } catch (BusinessRuleException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/settings";
+        return "redirect:/settings?tab=backup";
     }
 
     @PostMapping("/update/check")
@@ -133,7 +136,7 @@ public class SettingsController {
         } catch (BusinessRuleException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/settings";
+        return "redirect:/settings?tab=advanced";
     }
 
     @PostMapping("/update/apply")
@@ -149,7 +152,7 @@ public class SettingsController {
         } catch (BusinessRuleException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/settings";
+        return "redirect:/settings?tab=advanced";
     }
 
     @GetMapping("/backups/{id}/download")
@@ -182,16 +185,29 @@ public class SettingsController {
         if (!model.containsAttribute("businessForm")) {
             model.addAttribute("businessForm", businessSettingsService.toForm(businessSettingsService.get()));
         }
-        model.addAttribute("backupRuns", backupService.recentRuns());
+        var backupRuns = backupService.recentRuns();
+        model.addAttribute("backupRuns", backupRuns);
+        model.addAttribute("lastSuccessfulBackup", backupRuns.stream()
+                .filter(run -> run.getStatus() == BackupStatus.BASARILI)
+                .findFirst()
+                .orElse(null));
         model.addAttribute("backupEnabled", backupService.isEnabled());
         model.addAttribute("backupDirectory", backupService.currentDirectory());
         model.addAttribute("retentionDays", backupService.getProperties().getRetentionDays());
         model.addAttribute("backupCron", backupService.getProperties().getCron());
         model.addAttribute("recentAudit", auditLogRepository.findAllByOrderByCreatedAtDesc(
-                PageRequest.of(0, 10)).getContent());
+                PageRequest.of(0, 5)).getContent());
         model.addAttribute("updateInfo", updateService.info());
         model.addAttribute("formToken", formTokenService.issue(session));
+        model.addAttribute("activeTab", "business");
         model.addAttribute("activeMenu", "settings");
+    }
+
+    private String normalizeTab(String tab) {
+        if ("backup".equals(tab) || "audit".equals(tab) || "advanced".equals(tab)) {
+            return tab;
+        }
+        return "business";
     }
 
     private AuditAction parseAction(String value) {

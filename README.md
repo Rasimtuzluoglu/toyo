@@ -15,11 +15,11 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
-  <img alt="133 test" src="https://img.shields.io/badge/tests-133%20passing-brightgreen">
+  <img alt="134 test" src="https://img.shields.io/badge/tests-134%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ve demo ortamı çalışıyor · **133 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ve demo ortamı çalışıyor · **134 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Bir bakışta
 
@@ -192,7 +192,7 @@ docker compose -f docker-compose.demo.yml up -d
 mvn clean package
 ```
 
-- **133 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
+- **134 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
 - Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
 - Pre-push hook: `scripts/install-ci-hook.ps1`.

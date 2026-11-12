@@ -9,7 +9,7 @@
         <a class="kanban-plate" th:href="@{/work-orders/{id}(id=${order.id})}"
            th:text="${order.vehicle.plate}">34ABC123</a>
         <span class="sd-badge"
-              th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+              th:classappend="${' sd-badge-' + order.status.cssName}"
               th:text="${order.status.label}">İşlemde</span>
     </div>
     <a class="kanban-order" th:href="@{/work-orders/{id}(id=${order.id})}"
@@ -27,6 +27,9 @@
                   data-submit-once class="d-inline">
                 <input type="hidden" name="status" th:value="${next.name()}">
                 <input type="hidden" name="returnTo" value="board">
+                <span th:if="${next.name() == 'TAMAMLANDI'}"
+                      sec:authorize="hasAnyRole('PATRON','MUHASEBE')"
+                      class="kanban-payment-label">Tahsilat</span>
                 <select th:if="${next.name() == 'TAMAMLANDI'}"
                         sec:authorize="hasAnyRole('PATRON','MUHASEBE')"
                         name="paymentMethod" class="form-select form-select-sm kanban-payment"
@@ -53,7 +56,7 @@
         <a class="kanban-plate" th:href="@{/work-orders/{id}(id=${order.id})}"
            th:text="${order.vehicle.plate}">34ABC123</a>
         <span class="sd-badge"
-              th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+              th:classappend="${' sd-badge-' + order.status.cssName}"
               th:text="${order.status.label}">Tamamlandı</span>
     </div>
     <a class="kanban-order" th:href="@{/work-orders/{id}(id=${order.id})}"

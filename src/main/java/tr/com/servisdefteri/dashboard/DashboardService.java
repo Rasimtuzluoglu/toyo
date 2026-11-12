@@ -68,7 +68,7 @@ public class DashboardService {
                 .limit(5)
                 .toList();
         List<AccountTransaction> recent = financialVisible
-                ? transactionRepository.findRecent(PageRequest.of(0, 8)) : List.of();
+                ? transactionRepository.findRecent(PageRequest.of(0, 5)) : List.of();
         List<AccountTransaction> recentPayments = recent.stream()
                 .filter(tx -> tx.getType() == TransactionType.ALACAK)
                 .limit(5)

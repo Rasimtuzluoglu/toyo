@@ -326,8 +326,8 @@ a:hover {
     margin: 0 auto;
 }
 
-/* Panoda tek arama kutusu: üst bardaki genel arama gizlenir. */
-body.board-page .sd-search {
+/* Sayfa içi araması olan ekranlarda üst bardaki genel arama gizlenir. */
+body.has-page-search .sd-search {
     display: none;
 }
 
@@ -581,10 +581,10 @@ body.board-page .sd-search {
     background: var(--sd-accent);
 }
 
-.fill-islemde { background: #2f6fed; }
-.fill-tamamlandi { background: var(--sd-success); }
-.fill-teslim_edildi { background: var(--sd-navy); }
-.fill-iptal { background: var(--sd-danger); }
+.fill-islemde { background: #2f6fed !important; }
+.fill-tamamlandi { background: var(--sd-success) !important; }
+.fill-teslim_edildi { background: var(--sd-navy) !important; }
+.fill-iptal { background: var(--sd-danger) !important; }
 
 .today-list {
     display: flex;
@@ -1293,6 +1293,99 @@ body.board-page .sd-search {
 
 .mobile-data-actions .btn {
     flex: 1 1 auto;
+}
+
+/* Ayarlar sekmeleri */
+.settings-tabs {
+    margin-bottom: 18px;
+}
+
+.settings-tab-content > .tab-pane {
+    padding-top: 2px;
+}
+
+.settings-tab-content .sd-card + .sd-card {
+    margin-top: 18px;
+}
+
+.backup-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid rgba(31, 138, 91, 0.28);
+    border-radius: var(--sd-radius);
+    background: rgba(31, 138, 91, 0.06);
+}
+
+.backup-summary .stat-icon {
+    flex: 0 0 auto;
+}
+
+/* Raporlar açılış grupları */
+.report-groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.report-group {
+    overflow: hidden;
+}
+
+.report-group:last-child {
+    grid-column: 1 / -1;
+}
+
+.report-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.report-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 20px;
+    border-top: 1px solid var(--sd-border);
+    color: var(--sd-text);
+    text-decoration: none;
+}
+
+.report-link:hover {
+    background: #fafbfd;
+    color: var(--sd-text);
+}
+
+.report-link-text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.report-link-text strong {
+    font-size: 0.9rem;
+}
+
+.report-link-text small {
+    color: var(--sd-muted);
+    font-size: 0.75rem;
+}
+
+.report-link > .bi-chevron-right {
+    color: var(--sd-muted);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 991.98px) {
+    .report-groups {
+        grid-template-columns: 1fr;
+    }
+
+    .report-group:last-child {
+        grid-column: auto;
+    }
 }
 
 .text-muted-soft {
@@ -2447,6 +2540,14 @@ body.command-open {
     font-size: 0.72rem;
 }
 
+.kanban-payment-label {
+    display: inline-flex;
+    align-items: center;
+    color: var(--sd-muted);
+    font-size: 0.68rem;
+    margin-right: 2px;
+}
+
 @media (max-width: 575.98px) {
     .undo-toast {
         left: 12px;
@@ -2915,6 +3016,14 @@ body.command-open {
     .quick-actions {
         position: static;
         margin-top: 12px;
+    }
+
+    body.form-page .sd-mobile-nav {
+        display: none;
+    }
+
+    body.form-page .sd-content {
+        padding-bottom: 28px;
     }
 
     .undo-toast {

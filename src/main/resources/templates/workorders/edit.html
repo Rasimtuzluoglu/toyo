@@ -2,7 +2,7 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('İş Emrini Düzenle')}"></head>
-<body>
+<body class="form-page">
 <div class="sd-shell">
     <aside th:replace="~{fragments/layout :: sidebar('workorders')}"></aside>
     <div class="sd-main">
@@ -16,7 +16,7 @@
                     <h1 class="page-title">
                         İş Emrini Düzenle
                         <span class="sd-badge ms-2"
-                              th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                              th:classappend="${' sd-badge-' + order.status.cssName}"
                               th:text="${order.status.label}">Durum</span>
                     </h1>
                     <p class="page-subtitle">

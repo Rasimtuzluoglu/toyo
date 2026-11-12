@@ -3,6 +3,7 @@ package tr.com.servisdefteri.workorder;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Locale;
 
 @Getter
 public enum WorkOrderStatus {
@@ -20,6 +21,14 @@ public enum WorkOrderStatus {
         this.label = label;
         this.badgeClass = badgeClass;
         this.actionLabel = actionLabel;
+    }
+
+    /**
+     * CSS sınıf adları için ASCII küçük harf. Türkçe yerel ayarda "ISLEMDE"
+     * ifadesinin "ıslemde" olmasını engeller.
+     */
+    public String getCssName() {
+        return name().toLowerCase(Locale.ROOT);
     }
 
     public boolean canTransitionTo(WorkOrderStatus target) {

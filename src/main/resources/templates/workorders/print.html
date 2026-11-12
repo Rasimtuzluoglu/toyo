@@ -33,7 +33,7 @@
             <span th:text="${order.orderNo}">IS-0000</span><br>
             <span th:text="${fmt.dateTime(order.openedAt)}">01.01.2026</span><br>
             <span class="sd-badge"
-                  th:classappend="${' sd-badge-' + #strings.toLowerCase(order.status.name())}"
+                  th:classappend="${' sd-badge-' + order.status.cssName}"
                   th:text="${order.status.label}">Durum</span>
         </div>
     </div>

@@ -13,197 +13,139 @@
                 <div>
                     <div class="page-eyebrow">Yönetim</div>
                     <h1 class="page-title">Ayarlar</h1>
-                    <p class="page-subtitle">Yedekleme durumu ve sistem denetim kayıtları.</p>
-                </div>
-                <div class="page-actions">
-                    <a class="btn btn-outline-secondary" th:href="@{/settings/audit}">
-                        <i class="bi bi-shield-check me-1"></i> Tüm Denetim Kayıtları
-                    </a>
+                    <p class="page-subtitle">İşletme, yedekleme, denetim ve sistem ayarları.</p>
                 </div>
             </div>
 
-            <div class="sd-card" th:if="${updateInfo != null}">
-                <div class="sd-card-header">
-                    <h2><i class="bi bi-cloud-arrow-down me-2"></i>Yazılım Güncellemesi</h2>
-                    <span class="sd-badge"
-                          th:classappend="${updateInfo.agentOnline} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
-                          th:text="${updateInfo.agentOnline ? 'Ajan hazır' : 'Ajan kapalı'}">Ajan kapalı</span>
-                </div>
-                <div class="sd-card-body">
-                    <div class="summary-strip">
-                        <div class="summary-item">
-                            <span>Kurulu sürüm</span>
-                            <strong class="money" th:text="${updateInfo.currentCommitLabel}">bilinmiyor</strong>
-                        </div>
-                        <div class="summary-item">
-                            <span>Son GitHub sürümü</span>
-                            <strong class="money"
-                                    th:text="${updateInfo.latestCommitLabel != null ? updateInfo.latestCommitLabel : 'Kontrol edilmedi'}">
-                                Kontrol edilmedi
-                            </strong>
-                        </div>
-                        <div class="summary-item">
-                            <span>Otomatik güncelleme</span>
-                            <strong th:text="${updateInfo.autoUpdate ? 'Açık' : 'Kapalı'}">Kapalı</strong>
-                        </div>
-                    </div>
+            <ul class="nav nav-tabs settings-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" type="button" role="tab"
+                            data-bs-toggle="tab" data-bs-target="#tab-business"
+                            th:classappend="${activeTab == 'business'} ? ' active'">
+                        <i class="bi bi-shop me-1"></i> İşletme
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" type="button" role="tab"
+                            data-bs-toggle="tab" data-bs-target="#tab-backup"
+                            th:classappend="${activeTab == 'backup'} ? ' active'">
+                        <i class="bi bi-hdd-stack me-1"></i> Yedekleme
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" type="button" role="tab"
+                            data-bs-toggle="tab" data-bs-target="#tab-audit"
+                            th:classappend="${activeTab == 'audit'} ? ' active'">
+                        <i class="bi bi-shield-lock me-1"></i> Denetim
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" type="button" role="tab"
+                            data-bs-toggle="tab" data-bs-target="#tab-advanced"
+                            th:classappend="${activeTab == 'advanced'} ? ' active'">
+                        <i class="bi bi-gear me-1"></i> Gelişmiş
+                    </button>
+                </li>
+            </ul>
 
-                    <div class="mt-3" th:if="${updateInfo.latestMessage != null}">
-                        <div class="form-section-title">Son commit</div>
-                        <div th:text="${updateInfo.latestMessage}">Commit mesajı</div>
-                        <div class="record-meta" th:if="${updateInfo.latestDate != null}"
-                             th:text="${updateInfo.latestDate}">01.01.2026 10:00</div>
-                    </div>
-
-                    <div class="mt-3">
-                        <span class="sd-badge"
-                              th:classappend="${updateInfo.statusState == 'success' ? ' sd-badge-aktif' : (updateInfo.statusState == 'error' ? ' sd-badge-iptal' : ' sd-badge-neutral')}"
-                              th:text="${updateInfo.statusLabel}">Durum</span>
-                        <span class="record-meta ms-2" th:if="${updateInfo.statusCommit != null and updateInfo.statusCommit != 'bilinmiyor'}"
-                              th:text="${updateInfo.statusCommit}">abc1234</span>
-                        <div class="mt-2" th:if="${updateInfo.statusMessage != null and !updateInfo.statusMessage.isEmpty()}"
-                             th:text="${updateInfo.statusMessage}">Güncelleme durumu</div>
-                        <div class="record-meta mt-1"
-                             th:if="${updateInfo.statusFinishedAt != null}"
-                             th:text="${'Bitiş: ' + updateInfo.statusFinishedAt}">Bitiş</div>
-                    </div>
-
-                    <div class="alert alert-warning mt-3" th:if="${!updateInfo.agentOnline}" role="note">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                        Güncelleme ajanı çalışmıyor. Sunucu bilgisayarında
-                        <code>scripts/install-update-agent.ps1</code> betiğini bir kez çalıştırın.
-                    </div>
-                    <div class="alert alert-danger mt-3" th:if="${updateInfo.checkError != null}" role="alert"
-                         th:text="${updateInfo.checkError}">GitHub kontrol hatası</div>
-                    <div class="alert alert-info mt-3" th:if="${updateInfo.updateAvailable}" role="status">
-                        <i class="bi bi-arrow-up-circle me-1"></i>
-                        Yeni sürüm mevcut. Güncelleme sırasında uygulama 1-3 dakika erişilemez olabilir.
-                    </div>
-                    <div class="alert alert-success mt-3"
-                         th:if="${updateInfo.latestCommit != null and !updateInfo.updateAvailable}" role="status">
-                        <i class="bi bi-check2-circle me-1"></i> Kurulu sürüm güncel.
-                    </div>
-                </div>
-                <div class="sd-card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <span class="record-meta">
-                        Güncelleme yalnızca PATRON tarafından başlatılır; host ajanı git ve Docker işlemini yapar.
-                    </span>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <form th:action="@{/settings/update/check}" method="post" data-submit-once>
-                            <input type="hidden" name="formToken" th:value="${formToken}">
-                            <button class="btn btn-outline-secondary" type="submit"
-                                    th:disabled="${!updateInfo.enabled}">
-                                <i class="bi bi-arrow-repeat me-1"></i> Kontrol Et
-                            </button>
-                        </form>
-                        <form th:action="@{/settings/update/apply}" method="post" data-submit-once
-                              data-confirm="Uygulama güncellenecek ve yeniden başlatılacak. Devam edilsin mi?">
-                            <input type="hidden" name="formToken" th:value="${formToken}">
-                            <button class="btn btn-primary" type="submit"
-                                    th:disabled="${!updateInfo.enabled or !updateInfo.agentOnline}">
-                                <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
-                                <i class="bi bi-cloud-arrow-down me-1"></i> Güncelle ve Yeniden Başlat
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <form th:action="@{/settings/business}" method="post" enctype="multipart/form-data"
-                  th:object="${businessForm}" data-submit-once>
-                <div class="sd-card">
-                    <div class="sd-card-header">
-                        <h2><i class="bi bi-shop me-2"></i>İşletme bilgileri</h2>
-                        <span class="record-meta">İş emri, makbuz ve ekstre çıktılarında görünür</span>
-                    </div>
-                    <div class="sd-card-body">
-                        <div th:replace="~{fragments/layout :: globalErrors}"></div>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label" for="businessName">İşletme adı <span class="required">*</span></label>
-                                <input class="form-control" id="businessName" type="text" th:field="*{name}"
-                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" maxlength="200" required>
-                                <div class="invalid-feedback" th:errors="*{name}"></div>
+            <div class="tab-content settings-tab-content">
+                <div class="tab-pane fade" id="tab-business" role="tabpanel"
+                     th:classappend="${activeTab == 'business'} ? ' show active'">
+                    <form th:action="@{/settings/business}" method="post" enctype="multipart/form-data"
+                          th:object="${businessForm}" data-submit-once>
+                        <div class="sd-card">
+                            <div class="sd-card-header">
+                                <h2><i class="bi bi-shop me-2"></i>İşletme bilgileri</h2>
+                                <span class="record-meta">İş emri, makbuz ve ekstre çıktılarında görünür</span>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="businessTagline">Slogan / alt başlık</label>
-                                <input class="form-control" id="businessTagline" type="text" th:field="*{tagline}"
-                                       th:classappend="${#fields.hasErrors('tagline')} ? 'is-invalid'" maxlength="120">
-                                <div class="invalid-feedback" th:errors="*{tagline}"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="businessPrimaryColor">Ana renk</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <span class="color-dot"
-                                              th:style="'background:' + *{primaryColor}"></span>
-                                    </span>
-                                    <input class="form-control" id="businessPrimaryColor" type="text"
-                                           th:field="*{primaryColor}"
-                                           th:classappend="${#fields.hasErrors('primaryColor')} ? 'is-invalid'"
-                                           maxlength="7" placeholder="#eb0a1e">
-                                </div>
-                                <div class="invalid-feedback d-block" th:errors="*{primaryColor}"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="businessLogo">Logo</label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <img th:src="${brand.logoUrl}" alt="Mevcut logo" class="brand-preview">
-                                    <div class="flex-grow-1">
-                                        <input class="form-control" id="businessLogo" name="logo" type="file"
-                                               accept="image/png,image/jpeg,image/webp">
-                                        <div class="form-check mt-2" th:if="${brand.logoData != null}">
-                                            <input class="form-check-input" type="checkbox" id="removeLogo"
-                                                   th:field="*{removeLogo}">
-                                            <label class="form-check-label" for="removeLogo">Mevcut logoyu kaldır</label>
+                            <div class="sd-card-body">
+                                <div th:replace="~{fragments/layout :: globalErrors}"></div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="businessName">İşletme adı <span class="required">*</span></label>
+                                        <input class="form-control" id="businessName" type="text" th:field="*{name}"
+                                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" maxlength="200" required>
+                                        <div class="invalid-feedback" th:errors="*{name}"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="businessTagline">Slogan / alt başlık</label>
+                                        <input class="form-control" id="businessTagline" type="text" th:field="*{tagline}"
+                                               th:classappend="${#fields.hasErrors('tagline')} ? 'is-invalid'" maxlength="120">
+                                        <div class="invalid-feedback" th:errors="*{tagline}"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="businessPrimaryColor">Ana renk</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <span class="color-dot" th:style="'background:' + *{primaryColor}"></span>
+                                            </span>
+                                            <input class="form-control" id="businessPrimaryColor" type="text"
+                                                   th:field="*{primaryColor}"
+                                                   th:classappend="${#fields.hasErrors('primaryColor')} ? 'is-invalid'"
+                                                   maxlength="7" placeholder="#eb0a1e">
                                         </div>
-                                        <div class="form-text">PNG, JPEG veya WebP; en fazla 2 MB.</div>
+                                        <div class="invalid-feedback d-block" th:errors="*{primaryColor}"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="businessLogo">Logo</label>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img th:src="${brand.logoUrl}" alt="Mevcut logo" class="brand-preview">
+                                            <div class="flex-grow-1">
+                                                <input class="form-control" id="businessLogo" name="logo" type="file"
+                                                       accept="image/png,image/jpeg,image/webp">
+                                                <div class="form-check mt-2" th:if="${brand.logoData != null}">
+                                                    <input class="form-check-input" type="checkbox" id="removeLogo"
+                                                           th:field="*{removeLogo}">
+                                                    <label class="form-check-label" for="removeLogo">Mevcut logoyu kaldır</label>
+                                                </div>
+                                                <div class="form-text">PNG, JPEG veya WebP; en fazla 2 MB.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="businessPhone">Telefon</label>
+                                        <input class="form-control" id="businessPhone" type="tel" th:field="*{phone}"
+                                               th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'" maxlength="30">
+                                        <div class="invalid-feedback" th:errors="*{phone}"></div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="businessEmail">E-posta</label>
+                                        <input class="form-control" id="businessEmail" type="email" th:field="*{email}"
+                                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" maxlength="150">
+                                        <div class="invalid-feedback" th:errors="*{email}"></div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="businessTaxOffice">Vergi dairesi</label>
+                                        <input class="form-control" id="businessTaxOffice" type="text" th:field="*{taxOffice}"
+                                               th:classappend="${#fields.hasErrors('taxOffice')} ? 'is-invalid'" maxlength="100">
+                                        <div class="invalid-feedback" th:errors="*{taxOffice}"></div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="businessTaxNumber">Vergi / TC kimlik no</label>
+                                        <input class="form-control" id="businessTaxNumber" type="text" th:field="*{taxNumber}"
+                                               th:classappend="${#fields.hasErrors('taxNumber')} ? 'is-invalid'" maxlength="20">
+                                        <div class="invalid-feedback" th:errors="*{taxNumber}"></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="businessAddress">Adres</label>
+                                        <textarea class="form-control" id="businessAddress" rows="2" th:field="*{address}"
+                                                  th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'" maxlength="500"></textarea>
+                                        <div class="invalid-feedback" th:errors="*{address}"></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label" for="businessPhone">Telefon</label>
-                                <input class="form-control" id="businessPhone" type="tel" th:field="*{phone}"
-                                       th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'" maxlength="30">
-                                <div class="invalid-feedback" th:errors="*{phone}"></div>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label" for="businessEmail">E-posta</label>
-                                <input class="form-control" id="businessEmail" type="email" th:field="*{email}"
-                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" maxlength="150">
-                                <div class="invalid-feedback" th:errors="*{email}"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="businessTaxOffice">Vergi dairesi</label>
-                                <input class="form-control" id="businessTaxOffice" type="text" th:field="*{taxOffice}"
-                                       th:classappend="${#fields.hasErrors('taxOffice')} ? 'is-invalid'" maxlength="100">
-                                <div class="invalid-feedback" th:errors="*{taxOffice}"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label" for="businessTaxNumber">Vergi / TC kimlik no</label>
-                                <input class="form-control" id="businessTaxNumber" type="text" th:field="*{taxNumber}"
-                                       th:classappend="${#fields.hasErrors('taxNumber')} ? 'is-invalid'" maxlength="20">
-                                <div class="invalid-feedback" th:errors="*{taxNumber}"></div>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label" for="businessAddress">Adres</label>
-                                <textarea class="form-control" id="businessAddress" rows="2" th:field="*{address}"
-                                          th:classappend="${#fields.hasErrors('address')} ? 'is-invalid'" maxlength="500"></textarea>
-                                <div class="invalid-feedback" th:errors="*{address}"></div>
+                            <div class="sd-card-footer d-flex justify-content-end">
+                                <button class="btn btn-navy" type="submit">
+                                    <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                                    <i class="bi bi-check2 me-1"></i> İşletme Bilgilerini Kaydet
+                                </button>
                             </div>
                         </div>
-                    </div>
-                    <div class="sd-card-footer d-flex justify-content-end">
-                        <button class="btn btn-navy" type="submit">
-                            <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
-                            <i class="bi bi-check2 me-1"></i> İşletme Bilgilerini Kaydet
-                        </button>
-                    </div>
+                    </form>
                 </div>
-            </form>
 
-            <div class="row g-4">
-                <div class="col-xl-7">
+                <div class="tab-pane fade" id="tab-backup" role="tabpanel"
+                     th:classappend="${activeTab == 'backup'} ? ' show active'">
                     <div class="sd-card">
                         <div class="sd-card-header">
                             <h2><i class="bi bi-hdd-stack me-2"></i>PostgreSQL Yedekleme</h2>
@@ -212,11 +154,24 @@
                                   th:text="${backupEnabled ? 'Otomatik: Açık' : 'Otomatik: Kapalı'}">Otomatik: Açık</span>
                         </div>
                         <div class="sd-card-body">
-                            <dl class="detail-list">
+                            <div class="backup-summary" th:if="${lastSuccessfulBackup != null}">
+                                <span class="stat-icon green"><i class="bi bi-check2-circle"></i></span>
                                 <div>
-                                    <dt>Yedek dizini</dt>
-                                    <dd class="money" th:text="${backupDirectory}">/app/backups</dd>
+                                    <strong>Son başarılı yedek</strong>
+                                    <div class="record-meta">
+                                        <span th:text="${fmt.dateTime(lastSuccessfulBackup.startedAt)}">01.01.2026</span>
+                                        · <span th:text="${lastSuccessfulBackup.fileName}">dosya.dump</span>
+                                        · <span th:text="${fmt.fileSize(lastSuccessfulBackup.fileSizeBytes)}">0 KB</span>
+                                    </div>
                                 </div>
+                            </div>
+                            <div class="empty-state py-3" th:if="${lastSuccessfulBackup == null}">
+                                <i class="bi bi-hdd"></i>
+                                <strong>Henüz başarılı yedek yok</strong>
+                                İlk yedeği aşağıdaki “Sunucuda Yedekle” düğmesiyle alabilirsiniz.
+                            </div>
+
+                            <dl class="detail-list mt-3">
                                 <div>
                                     <dt>Saklama süresi</dt>
                                     <dd th:text="${retentionDays} + ' gün'">14 gün</dd>
@@ -231,6 +186,7 @@
                                     <dd>PostgreSQL yedeği (.dump)</dd>
                                 </div>
                             </dl>
+
                             <form method="post" th:action="@{/settings/backup-directory}" class="mt-3"
                                   data-submit-once>
                                 <input type="hidden" name="formToken" th:value="${formToken}">
@@ -243,20 +199,20 @@
                                 </div>
                                 <div class="form-text">
                                     Docker kullanıyorsanız bu yol container içindedir ve kalıcı olması için volume gerekir.
-                                    Bilgisayarınızda istediğiniz klasöre kaydetmek için <strong>Yedek Al ve İndir</strong>
-                                    düğmesini kullanın. Boş bırakılırsa sunucu varsayılanı kullanılır.
+                                    Boş bırakılırsa sunucu varsayılanı kullanılır.
                                 </div>
                             </form>
+
                             <div class="alert alert-warning mt-3 mb-0" role="note">
                                 <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                Otomatik yedek alınması, geri yüklemenin doğrulandığı anlamına gelmez.
-                                Geri yükleme testi <code>docs/BACKUP-RESTORE.md</code> adımlarıyla ayrıca yapılmalıdır.
-                                Bilgisayar 02:00'de kapalıysa, sonraki açılışta 36 saatten eski yedek telafi edilir.
+                                Otomatik yedek, geri yükleme testi değildir. Geri yükleme adımları
+                                <code>docs/BACKUP-RESTORE.md</code> içindedir. Bilgisayar 02:00'de kapalıysa
+                                36 saatten eski yedek açılışta telafi edilir.
                             </div>
                         </div>
                         <div class="sd-card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <span class="record-meta">
-                                Manuel yedek, otomatik yedekleme kapalı olsa da kullanılabilir; boyutuna göre birkaç saniye sürebilir.
+                                Manuel yedek, otomatik yedekleme kapalı olsa da kullanılabilir.
                             </span>
                             <div class="d-flex gap-2 flex-wrap">
                                 <form th:action="@{/settings/backup}" method="post" data-submit-once>
@@ -346,11 +302,12 @@
                     </div>
                 </div>
 
-                <div class="col-xl-5">
+                <div class="tab-pane fade" id="tab-audit" role="tabpanel"
+                     th:classappend="${activeTab == 'audit'} ? ' show active'">
                     <div class="sd-card">
                         <div class="sd-card-header">
-                            <h2><i class="bi bi-shield-lock me-2"></i>Denetim kaydı (son 10)</h2>
-                            <a class="link-quiet" th:href="@{/settings/audit}">Tümü</a>
+                            <h2><i class="bi bi-shield-lock me-2"></i>Denetim kaydı (son 5)</h2>
+                            <a class="link-quiet" th:href="@{/settings/audit}">Tüm Denetim Kayıtları</a>
                         </div>
                         <div class="sd-card-body p-0" th:if="${!recentAudit.isEmpty()}">
                             <div class="list-group list-group-flush">
@@ -369,6 +326,99 @@
                         <div class="empty-state" th:if="${recentAudit.isEmpty()}">
                             <i class="bi bi-shield"></i>
                             <strong>Denetim kaydı yok</strong>
+                        </div>
+                        <div class="sd-card-footer">
+                            <span class="record-meta">Parola ve oturum belirteçleri loglanmaz.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-advanced" role="tabpanel"
+                     th:classappend="${activeTab == 'advanced'} ? ' show active'">
+                    <div class="sd-card" th:if="${updateInfo != null}">
+                        <div class="sd-card-header">
+                            <h2><i class="bi bi-cloud-arrow-down me-2"></i>Yazılım Güncellemesi</h2>
+                            <span class="sd-badge"
+                                  th:classappend="${updateInfo.agentOnline} ? ' sd-badge-aktif' : ' sd-badge-pasif'"
+                                  th:text="${updateInfo.agentOnline ? 'Ajan hazır' : 'Ajan kapalı'}">Ajan kapalı</span>
+                        </div>
+                        <div class="sd-card-body">
+                            <div class="summary-strip">
+                                <div class="summary-item">
+                                    <span>Kurulu sürüm</span>
+                                    <strong class="money" th:text="${updateInfo.currentCommitLabel}">bilinmiyor</strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Son GitHub sürümü</span>
+                                    <strong class="money"
+                                            th:text="${updateInfo.latestCommitLabel != null ? updateInfo.latestCommitLabel : 'Kontrol edilmedi'}">
+                                        Kontrol edilmedi
+                                    </strong>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Otomatik güncelleme</span>
+                                    <strong th:text="${updateInfo.autoUpdate ? 'Açık' : 'Kapalı'}">Kapalı</strong>
+                                </div>
+                            </div>
+
+                            <div class="mt-3" th:if="${updateInfo.latestMessage != null}">
+                                <div class="form-section-title">Son commit</div>
+                                <div th:text="${updateInfo.latestMessage}">Commit mesajı</div>
+                                <div class="record-meta" th:if="${updateInfo.latestDate != null}"
+                                     th:text="${updateInfo.latestDate}">01.01.2026 10:00</div>
+                            </div>
+
+                            <div class="mt-3">
+                                <span class="sd-badge"
+                                      th:classappend="${updateInfo.statusState == 'success' ? ' sd-badge-aktif' : (updateInfo.statusState == 'error' ? ' sd-badge-iptal' : ' sd-badge-neutral')}"
+                                      th:text="${updateInfo.statusLabel}">Durum</span>
+                                <span class="record-meta ms-2" th:if="${updateInfo.statusCommit != null and updateInfo.statusCommit != 'bilinmiyor'}"
+                                      th:text="${updateInfo.statusCommit}">abc1234</span>
+                                <div class="mt-2" th:if="${updateInfo.statusMessage != null and !updateInfo.statusMessage.isEmpty()}"
+                                     th:text="${updateInfo.statusMessage}">Güncelleme durumu</div>
+                                <div class="record-meta mt-1"
+                                     th:if="${updateInfo.statusFinishedAt != null}"
+                                     th:text="${'Bitiş: ' + updateInfo.statusFinishedAt}">Bitiş</div>
+                            </div>
+
+                            <div class="alert alert-warning mt-3" th:if="${!updateInfo.agentOnline}" role="note">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                Güncelleme ajanı çalışmıyor. Sunucu bilgisayarında
+                                <code>scripts/install-update-agent.ps1</code> betiğini bir kez çalıştırın.
+                            </div>
+                            <div class="alert alert-danger mt-3" th:if="${updateInfo.checkError != null}" role="alert"
+                                 th:text="${updateInfo.checkError}">GitHub kontrol hatası</div>
+                            <div class="alert alert-info mt-3" th:if="${updateInfo.updateAvailable}" role="status">
+                                <i class="bi bi-arrow-up-circle me-1"></i>
+                                Yeni sürüm mevcut. Güncelleme sırasında uygulama 1-3 dakika erişilemez olabilir.
+                            </div>
+                            <div class="alert alert-success mt-3"
+                                 th:if="${updateInfo.latestCommit != null and !updateInfo.updateAvailable}" role="status">
+                                <i class="bi bi-check2-circle me-1"></i> Kurulu sürüm güncel.
+                            </div>
+                        </div>
+                        <div class="sd-card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span class="record-meta">
+                                Güncelleme yalnızca PATRON tarafından başlatılır; host ajanı git ve Docker işlemini yapar.
+                            </span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <form th:action="@{/settings/update/check}" method="post" data-submit-once>
+                                    <input type="hidden" name="formToken" th:value="${formToken}">
+                                    <button class="btn btn-outline-secondary" type="submit"
+                                            th:disabled="${!updateInfo.enabled}">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Kontrol Et
+                                    </button>
+                                </form>
+                                <form th:action="@{/settings/update/apply}" method="post" data-submit-once
+                                      data-confirm="Uygulama güncellenecek ve yeniden başlatılacak. Devam edilsin mi?">
+                                    <input type="hidden" name="formToken" th:value="${formToken}">
+                                    <button class="btn btn-primary" type="submit"
+                                            th:disabled="${!updateInfo.enabled or !updateInfo.agentOnline}">
+                                        <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>
+                                        <i class="bi bi-cloud-arrow-down me-1"></i> Güncelle ve Yeniden Başlat
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
 
@@ -391,7 +441,7 @@
                                     <dd>Europe/Istanbul</dd>
                                 </div>
                                 <div>
-                                    <dt>Veritabanı geçmişi</dt>
+                                    <dt>Veritabanı sürümü</dt>
                                     <dd>Flyway migration</dd>
                                 </div>
                             </dl>

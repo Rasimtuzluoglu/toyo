@@ -2,7 +2,7 @@
 <html lang="tr" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('Araçlar')}"></head>
-<body>
+<body class="has-page-search">
 <div class="sd-shell">
     <aside th:replace="~{fragments/layout :: sidebar('vehicles')}"></aside>
     <div class="sd-main">
@@ -46,6 +46,12 @@
 
             <div class="sd-card">
                 <div class="sd-card-body">
+                    <button class="btn btn-outline-secondary w-100 d-md-none mb-2" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#vehicleFilters"
+                            aria-expanded="false" aria-controls="vehicleFilters">
+                        <i class="bi bi-funnel me-1"></i> Filtreler
+                    </button>
+                    <div class="collapse d-md-block" id="vehicleFilters">
                     <form class="filter-bar" method="get" th:action="@{/vehicles}">
                         <div>
                             <label class="form-label" for="q">Ara</label>
@@ -75,6 +81,7 @@
                             <a class="btn btn-outline-secondary" th:href="@{/vehicles}">Temizle</a>
                         </div>
                     </form>
+                    </div>
                 </div>
             </div>
 
