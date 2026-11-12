@@ -107,16 +107,20 @@ try {
         throw "Güncelleme öncesi yedek alınamadı; güncelleme durduruldu."
     }
 
-    $backupMount = (docker inspect servisdefteri-app --format '{{range .Mounts}}{{if eq .Destination "/app/backups"}}{{.Source}}{{end}}{{end}}').Trim()
-    $alreadyOnHost = $false
-    if ($backupMount) {
+    $backupMountType = ""
+    $mountJson = docker inspect servisdefteri-app --format '{{json .Mounts}}' 2>$null
+    if ($mountJson) {
         try {
-            $alreadyOnHost = [System.IO.Path]::GetFullPath($backupMount) -eq [System.IO.Path]::GetFullPath($backupHostDir)
+            $mounts = $mountJson | ConvertFrom-Json
+            $backupMount = $mounts | Where-Object { $_.Destination -eq "/app/backups" } | Select-Object -First 1
+            if ($backupMount) {
+                $backupMountType = [string]$backupMount.Type
+            }
         } catch {
-            $alreadyOnHost = $false
+            $backupMountType = ""
         }
     }
-    if (-not $alreadyOnHost) {
+    if ($backupMountType -ne "bind") {
         docker cp "servisdefteri-app:/app/backups/$backupName" $hostBackupPath *>> $logFile
         if ($LASTEXITCODE -ne 0) {
             throw "Güncelleme öncesi yedek seçilen klasöre kopyalanamadı; güncelleme durduruldu."
