@@ -760,6 +760,30 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void dashboardShowsDebtorNetBalanceInRedAndFooterStaysClean() {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Bakiye Renk Müşteri", "0555 121 21 21");
+        Vehicle vehicle = createVehicle(customer, "34 REN 001");
+        createCompletedOrder(customer, vehicle, "1000.00");
+
+        try {
+            mockMvc.perform(get("/").with(user(principal(patron))))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(org.hamcrest.Matchers.containsString("Net cari bakiye")))
+                    .andExpect(content().string(org.hamcrest.Matchers
+                            .containsString("stat-value money  money-debt")))
+                    .andExpect(content().string(org.hamcrest.Matchers
+                            .not(org.hamcrest.Matchers.containsString("Kalan net alacak"))))
+                    .andExpect(content().string(org.hamcrest.Matchers
+                            .not(org.hamcrest.Matchers.containsString("Para birimi: TRY"))))
+                    .andExpect(content().string(org.hamcrest.Matchers
+                            .not(org.hamcrest.Matchers.containsString("Servis ve cari hesap yönetimi"))));
+        } catch (Exception ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
+    @Test
     void servisCannotSeeCustomerTotalBalanceOnDeliveryPage() {
         User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);

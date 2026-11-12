@@ -201,9 +201,7 @@
 </div>
 
 <footer class="sd-footer" th:fragment="footer">
-    <span th:text="${(brand != null ? brand.name : 'Servis Yönetimi') + ' · Servis ve cari hesap yönetimi'}">Servis ve cari hesap yönetimi</span>
-    <span class="sd-footer-right">
-        <span>Para birimi: TRY · Saat dilimi: Europe/Istanbul</span>
+    <span class="sd-footer-right ms-auto">
         <span th:replace="~{fragments/layout :: poweredBy}"></span>
     </span>
 </footer>
