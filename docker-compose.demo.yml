@@ -50,6 +50,7 @@ services:
       DB_NAME: servisdefteri_demo
       BACKUP_ENABLED: "false"
       BACKUP_HOST_DIR: ${DEMO_BACKUP_HOST_DIR:-./demo-backups}
+      BACKUP_COPY_DIR: /app/backup-copy
       APP_UPDATE_ENABLED: "false"
       THYMELEAF_CACHE: "false"
       TZ: Europe/Istanbul
@@ -57,6 +58,7 @@ services:
       - "127.0.0.1:18081:18080"
     volumes:
       - "${DEMO_BACKUP_HOST_DIR:-./demo-backups}:/app/backups"
+      - "${DEMO_BACKUP_COPY_HOST_DIR:-./demo-backup-copy}:/app/backup-copy"
     security_opt:
       - no-new-privileges:true
     mem_limit: 1536m

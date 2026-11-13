@@ -63,7 +63,8 @@ Bu kurulum yalnızca üzerinde çalıştığı bilgisayar için tasarlanmıştı
 - **İlk kurulum:** `.env` içinde `SETUP_TOKEN` tanımlarsanız `/setup` ekranı yalnızca `http://localhost:18080/setup?token=...` ile açılır. Boş bırakılırsa kurulum yalnızca loopback portundan erişilebilir.
 - Windows Güvenlik Duvarı'nda 18080 portu için gelen kural açmayın; gerekmiyor.
 - Modem/router üzerinde bu port için **port yönlendirme yapmayın**.
-- Yedekleri aynı bilgisayarda tutmayın; `BACKUP_COPY_DIR` ile harici disk/NAS'a otomatik ikinci kopya yazdırın veya **Yedek Al ve İndir** ile dışa alın.
+- Yedekleri aynı bilgisayarda tutmayın; harici disk/NAS için `scripts/setup-backup-copy.ps1` çalıştırın veya **Yedek Al ve İndir** ile dışa alın.
+- Harici disk sonradan takıldıysa kaçırılan yedekleri `scripts/offline-backup.ps1` ile kopyalayın.
 
 ### Windows'ta otomatik başlatma
 

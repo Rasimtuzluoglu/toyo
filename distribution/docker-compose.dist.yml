@@ -50,7 +50,7 @@ services:
       BACKUP_ENABLED: "true"
       BACKUP_DIR: /app/backups
       BACKUP_HOST_DIR: ${BACKUP_HOST_DIR:-./yedekler}
-      BACKUP_COPY_DIR: ${BACKUP_COPY_DIR:-}
+      BACKUP_COPY_DIR: ${BACKUP_COPY_DIR:-/app/backup-copy}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       BACKUP_CRON: ${BACKUP_CRON:-0 0 2 * * *}
       APP_UPDATE_ENABLED: "false"
@@ -61,6 +61,7 @@ services:
       - "127.0.0.1:${APP_PORT:-18080}:18080"
     volumes:
       - "${BACKUP_HOST_DIR:-./yedekler}:/app/backups"
+      - "${BACKUP_COPY_HOST_DIR:-./yedekler-ikinci-kopya}:/app/backup-copy"
     security_opt:
       - no-new-privileges:true
     mem_limit: 1536m

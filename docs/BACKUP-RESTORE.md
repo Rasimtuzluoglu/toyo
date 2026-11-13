@@ -8,7 +8,7 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 - Manuel: **Ayarlar → Sunucuda Yedekle** veya **Yedek Al ve İndir** (yalnızca PATRON)
 - Dosya adı: `servisdefteri-YYYYMMdd-HHmmss.dump`
 - Konum: Kurulumda seçilen **bilgisayardaki yedek klasörü** (`BACKUP_HOST_DIR`); Docker içinde `/app/backups` yoluna bağlanır
-- İkinci kopya: `BACKUP_COPY_DIR` tanımlanırsa her başarılı yedek ayrıca bu klasöre (harici disk/NAS) yazılır
+- İkinci kopya: `BACKUP_COPY_HOST_DIR` ile seçilen host klasörü (harici disk/NAS) container içinde `/app/backup-copy` yoluna bağlanır; her başarılı yedek buraya da yazılır
 - Saklama: varsayılan 14 gün (`BACKUP_RETENTION_DAYS`); süresi dolan `.dump` dosyaları silinir, ancak en yeni 5 yedek (`BACKUP_MIN_COPIES`) her zaman korunur, veritabanındaki `backup_runs` kayıtları kalır
 - Her yedek, başarılı sayılmadan önce `pg_restore --list` ile okunabilirlik açısından doğrulanır; yarım kalan dosyalar silinir
 - Sonuçlar `backup_runs` tablosuna ve denetim kaydına yazılır
