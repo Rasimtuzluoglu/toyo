@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 
 public interface PaymentAllocationRepository extends JpaRepository<PaymentAllocation, Long> {
@@ -25,6 +26,16 @@ public interface PaymentAllocationRepository extends JpaRepository<PaymentAlloca
             """)
     List<Object[]> sumActiveByCustomer(@Param("customerId") Long customerId,
                                        @Param("status") PaymentStatus status);
+
+    @Query("""
+            select t.workOrder.id, coalesce(sum(a.amount), 0)
+            from PaymentAllocation a join a.transaction t
+            where a.cancelled = false and a.payment.status = :status
+              and t.workOrder.id in :workOrderIds
+            group by t.workOrder.id
+            """)
+    List<Object[]> sumActiveByWorkOrderIds(@Param("workOrderIds") Collection<Long> workOrderIds,
+                                           @Param("status") PaymentStatus status);
 
     @Query("""
             select a from PaymentAllocation a join fetch a.transaction t

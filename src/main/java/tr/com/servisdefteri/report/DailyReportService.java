@@ -3,7 +3,6 @@ package tr.com.servisdefteri.report;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tr.com.servisdefteri.account.AccountService;
-import tr.com.servisdefteri.account.WorkOrderDebt;
 import tr.com.servisdefteri.common.CsvUtil;
 import tr.com.servisdefteri.common.ExcelUtil;
 import tr.com.servisdefteri.workorder.WorkOrder;
@@ -18,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -47,10 +47,12 @@ public class DailyReportService {
         BigDecimal totalPaid = BigDecimal.ZERO;
         BigDecimal totalRemaining = BigDecimal.ZERO;
 
+        Map<Long, BigDecimal> paidByOrder = accountService.paidTotalsByWorkOrderIds(
+                orders.stream().map(WorkOrder::getId).toList());
+
         for (WorkOrder order : orders) {
-            WorkOrderDebt debt = accountService.workOrderDebt(order.getId());
             BigDecimal total = scale(order.getTotalAmount());
-            BigDecimal paid = debt == null ? BigDecimal.ZERO : scale(debt.paid());
+            BigDecimal paid = scale(paidByOrder.getOrDefault(order.getId(), BigDecimal.ZERO));
             boolean cancelled = order.getStatus() == WorkOrderStatus.IPTAL;
             BigDecimal remaining = cancelled ? BigDecimal.ZERO : scale(total.subtract(paid));
             if (remaining.signum() < 0) {

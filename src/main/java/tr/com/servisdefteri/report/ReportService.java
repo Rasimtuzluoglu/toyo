@@ -7,6 +7,7 @@ import tr.com.servisdefteri.account.AccountService;
 import tr.com.servisdefteri.account.CustomerBalance;
 import tr.com.servisdefteri.account.LedgerRow;
 import tr.com.servisdefteri.account.LedgerStatement;
+import tr.com.servisdefteri.account.OpenDebtAging;
 import tr.com.servisdefteri.common.CsvUtil;
 import tr.com.servisdefteri.common.ExcelUtil;
 import tr.com.servisdefteri.payment.CollectionSummary;
@@ -33,6 +34,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Service
 public class ReportService {
@@ -142,6 +144,8 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public List<AgingRow> aging(LocalDate today) {
+        Map<Long, List<OpenDebtAging>> debtsByCustomer = accountService.openDebtAgingRows().stream()
+                .collect(java.util.stream.Collectors.groupingBy(OpenDebtAging::customerId));
         List<AgingRow> result = new ArrayList<>();
         for (CustomerBalance balance : balances()) {
             if (!balance.isDebtor()) {
@@ -150,20 +154,20 @@ public class ReportService {
             BigDecimal current = BigDecimal.ZERO;
             BigDecimal mid = BigDecimal.ZERO;
             BigDecimal old = BigDecimal.ZERO;
-            for (var debt : accountService.openDebts(balance.customerId())) {
-                long age = java.time.temporal.ChronoUnit.DAYS.between(debt.date(), today);
+            for (OpenDebtAging debt : debtsByCustomer.getOrDefault(balance.customerId(), List.of())) {
+                long age = ChronoUnit.DAYS.between(debt.date(), today);
                 if (age <= 30) {
-                    current = current.add(debt.getRemaining());
+                    current = current.add(debt.remaining());
                 } else if (age <= 60) {
-                    mid = mid.add(debt.getRemaining());
+                    mid = mid.add(debt.remaining());
                 } else {
-                    old = old.add(debt.getRemaining());
+                    old = old.add(debt.remaining());
                 }
             }
             result.add(new AgingRow(balance.customerId(), balance.name(), balance.phone(),
                     current, mid, old));
         }
-        result.sort(java.util.Comparator.comparing(AgingRow::total).reversed());
+        result.sort(Comparator.comparing(AgingRow::total).reversed());
         return result;
     }
 

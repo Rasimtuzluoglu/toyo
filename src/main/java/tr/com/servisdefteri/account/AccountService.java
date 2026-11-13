@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -134,6 +135,47 @@ public class AccountService {
         return openDebts(customerId).stream()
                 .map(OpenDebt::getRemaining)
                 .reduce(ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Günlük rapor için tüm iş emirlerinin aktif tahsilat toplamını tek sorguda getirir.
+     */
+    @Transactional(readOnly = true)
+    public Map<Long, BigDecimal> paidTotalsByWorkOrderIds(Collection<Long> workOrderIds) {
+        if (workOrderIds == null || workOrderIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, BigDecimal> result = new HashMap<>();
+        for (Object[] row : allocationRepository.sumActiveByWorkOrderIds(workOrderIds, PaymentStatus.AKTIF)) {
+            result.put(((Number) row[0]).longValue(), (BigDecimal) row[1]);
+        }
+        return result;
+    }
+
+    /**
+     * Yaşlandırma raporu için açık borçları müşteri bazında tek sorguda getirir.
+     */
+    @Transactional(readOnly = true)
+    public List<OpenDebtAging> openDebtAgingRows() {
+        List<OpenDebtAging> rows = new ArrayList<>();
+        for (Object[] row : transactionRepository.openDebtAgingRows()) {
+            BigDecimal remaining = (BigDecimal) row[2];
+            if (remaining == null || remaining.signum() <= 0) {
+                continue;
+            }
+            rows.add(new OpenDebtAging(((Number) row[0]).longValue(), toLocalDate(row[1]), remaining));
+        }
+        return rows;
+    }
+
+    private LocalDate toLocalDate(Object value) {
+        if (value instanceof LocalDate date) {
+            return date;
+        }
+        if (value instanceof java.sql.Date date) {
+            return date.toLocalDate();
+        }
+        return LocalDate.parse(value.toString());
     }
 
     @Transactional(readOnly = true)

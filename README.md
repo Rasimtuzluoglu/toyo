@@ -15,11 +15,11 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
-  <img alt="155 test" src="https://img.shields.io/badge/tests-155%20passing-brightgreen">
+  <img alt="156 test" src="https://img.shields.io/badge/tests-156%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ve demo ortamı çalışıyor · **155 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ve demo ortamı çalışıyor · **156 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Bir bakışta
 
@@ -129,6 +129,8 @@ Modüler monolit: tek Spring Boot uygulaması, tek PostgreSQL veritabanı, sunuc
    ```
 
 2. `.env` içinde en az `POSTGRES_PASSWORD` değerini değiştirin. İlk işletme sahibini ortam değişkeninden oluşturmak isterseniz `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` ve `INITIAL_ADMIN_FULL_NAME` değerlerini de doldurun. **Varsayılan parola yoktur.**
+   - `.env` izinlerini sıkılaştırın: `powershell -ExecutionPolicy Bypass -File .\scripts\harden-env.ps1`
+   - Parola değiştirmek için: `powershell -ExecutionPolicy Bypass -File .\scripts\rotate-db-password.ps1`
 
 3. Servisleri başlatın:
 
@@ -192,7 +194,7 @@ docker compose -f docker-compose.demo.yml up -d
 mvn clean package
 ```
 
-- **155 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
+- **156 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
 - Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
 - Pre-push hook: `scripts/install-ci-hook.ps1`.

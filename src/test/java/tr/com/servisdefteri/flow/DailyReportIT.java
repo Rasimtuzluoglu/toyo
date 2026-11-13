@@ -7,6 +7,7 @@ import tr.com.servisdefteri.customer.Customer;
 import tr.com.servisdefteri.report.DailyReportRow;
 import tr.com.servisdefteri.report.DailyReportService;
 import tr.com.servisdefteri.report.DailyReportView;
+import tr.com.servisdefteri.report.ReportService;
 import tr.com.servisdefteri.security.Role;
 import tr.com.servisdefteri.security.User;
 import tr.com.servisdefteri.support.BusinessTestSupport;
@@ -36,6 +37,9 @@ class DailyReportIT extends BusinessTestSupport {
 
     @Autowired
     private DailyReportService dailyReportService;
+
+    @Autowired
+    private ReportService reportService;
 
     @Test
     void listsOnlyWorkOrdersOpenedOnSelectedDay() throws Exception {
@@ -132,6 +136,27 @@ class DailyReportIT extends BusinessTestSupport {
                 .andReturn();
         byte[] body = pdf.getResponse().getContentAsByteArray();
         assertThat(new String(body, 0, 4, StandardCharsets.US_ASCII)).isEqualTo("%PDF");
+    }
+
+    @Test
+    void agingReportBucketsOpenDebtsByAge() {
+        Customer customer = createCustomer("Yaşlandırma Müşteri", "0555 710 00 09");
+        LocalDate today = LocalDate.now();
+        accountService.createManualDebt(customer.getId(), new BigDecimal("100.00"),
+                today.minusDays(10), "Güncel borç");
+        accountService.createManualDebt(customer.getId(), new BigDecimal("200.00"),
+                today.minusDays(45), "Orta borç");
+        accountService.createManualDebt(customer.getId(), new BigDecimal("300.00"),
+                today.minusDays(90), "Eski borç");
+
+        var row = reportService.aging(today).stream()
+                .filter(item -> item.customerId().equals(customer.getId()))
+                .findFirst().orElseThrow();
+
+        assertThat(row.current()).isEqualByComparingTo("100.00");
+        assertThat(row.mid()).isEqualByComparingTo("200.00");
+        assertThat(row.old()).isEqualByComparingTo("300.00");
+        assertThat(row.total()).isEqualByComparingTo("600.00");
     }
 
     private LocalDateTime todayAtSafeTime() {

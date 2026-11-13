@@ -583,6 +583,7 @@
         var commandEmpty = document.getElementById('commandEmpty');
         var commandItems = Array.prototype.slice.call(document.querySelectorAll('[data-command-item]'));
         var commandActive = 0;
+        var lastFocused = null;
 
         var visibleCommandItems = function () {
             return commandItems.filter(function (item) {
@@ -617,6 +618,7 @@
             if (!palette) {
                 return;
             }
+            lastFocused = document.activeElement;
             palette.hidden = false;
             document.body.classList.add('command-open');
             commandInput.value = '';
@@ -624,13 +626,38 @@
             commandInput.focus();
         };
         var closePalette = function () {
-            if (!palette) {
+            if (!palette || palette.hidden) {
                 return;
             }
             palette.hidden = true;
             document.body.classList.remove('command-open');
+            if (lastFocused && typeof lastFocused.focus === 'function') {
+                lastFocused.focus();
+            }
         };
         if (palette) {
+            palette.addEventListener('keydown', function (event) {
+                if (event.key !== 'Tab') {
+                    return;
+                }
+                var focusable = Array.prototype.filter.call(
+                    palette.querySelectorAll('input, button, a[href], [tabindex]:not([tabindex="-1"])'),
+                    function (element) {
+                        return !element.disabled && element.offsetParent !== null;
+                    });
+                if (!focusable.length) {
+                    return;
+                }
+                var first = focusable[0];
+                var last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first.focus();
+                }
+            });
             document.querySelectorAll('[data-command-open]').forEach(function (button) {
                 button.addEventListener('click', openPalette);
             });
@@ -679,7 +706,7 @@
                 text: 'Açık işler, bugünkü tahsilat, alacak ve randevular tek ekranda. Grafikler son 7 günü ve iş durumlarını gösterir.'},
             {url: '/work-orders/board', selector: '.kanban-board', title: 'Kanban iş panosu',
                 text: 'Araçları sürükleyerek veya tek tıkla İşleme Al, Tamamla ve Teslim Et adımlarını ilerletin.'},
-            {url: '/work-orders/new', selector: '.quick-start-card', title: 'Plaka ile hızlı iş emri',
+            {url: '/work-orders/new', selector: '#quickPlate', title: 'Plaka ile hızlı iş emri',
                 text: 'Plakayı yazın; kayıtlıysa müşteri ve araç otomatik gelir. Kayıtlı değilse müşteri, araç ve iş emri tek adımda oluşur.'},
             {url: '/appointments/week', selector: '.week-grid', title: 'Haftalık randevu planı',
                 text: 'Haftanın tamamını görün; güne tıklayarak randevu ekleyin veya mevcut randevuları yönetin.'},

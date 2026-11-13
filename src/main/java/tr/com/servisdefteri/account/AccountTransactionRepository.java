@@ -38,6 +38,20 @@ public interface AccountTransactionRepository extends JpaRepository<AccountTrans
                                         @Param("start") LocalDate start,
                                         @Param("end") LocalDate end);
 
+    @Query(value = """
+            select t.customer_id, t.transaction_date,
+                   t.amount - coalesce(p.paid, 0) - coalesce(r.reversed, 0) as remaining
+            from account_transactions t
+            left join (select transaction_id, sum(amount) as paid
+                       from payment_allocations where cancelled = false
+                       group by transaction_id) p on p.transaction_id = t.id
+            left join (select reversal_of_id, sum(amount) as reversed
+                       from account_transactions where reversal_of_id is not null
+                       group by reversal_of_id) r on r.reversal_of_id = t.id
+            where t.type = 'BORC' and t.reversal_of_id is null
+            """, nativeQuery = true)
+    List<Object[]> openDebtAgingRows();
+
     @Query("""
             select t from AccountTransaction t
             left join fetch t.workOrder
