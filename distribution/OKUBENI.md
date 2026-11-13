@@ -13,6 +13,7 @@ Uygulama Docker imajı olarak gelir; Java/Maven/PostgreSQL kurmanız gerekmez.
 | `ToyotaServis-Baslat.cmd` | Docker ve uygulamayı başlatır |
 | `ToyotaServis-Durdur.cmd` | Uygulamayı durdurur (veriler korunur) |
 | `ToyotaServis-Guncelle.cmd` | Yeni imaj paketiyle güncelleme |
+| `scripts/` | Yedek kopyası, parola rotasyonu ve `.env` izin araçları |
 | `OKUBENI.md` | Bu dosya |
 
 ## Gereksinimler
@@ -35,12 +36,14 @@ Uygulama Docker imajı olarak gelir; Java/Maven/PostgreSQL kurmanız gerekmez.
    - Docker Desktop yoksa kurmayı dener (winget veya resmi installer).
    - Docker Desktop'ı başlatır ve hazır olmasını bekler.
    - Uygulama imajını Docker'a yükler.
-   - `C:\ToyotaServis` altında çalışma dosyalarını ve rastgele veritabanı parolasını oluşturur.
+   - `C:\ToyotaServis` altında çalışma dosyalarını, rastgele veritabanı parolasını ve tek kullanımlık kurulum tokenını oluşturur.
+   - Birincil ve ikinci yedek klasörlerini sorar (ikinci kopya için harici disk önerilir).
    - Veritabanını ve uygulamayı başlatır.
    - Windows güvenlik duvarında ek bir port açmaz; uygulama yalnızca bu bilgisayardan kullanılır.
+   - `.env` dosyasının erişim izinlerini sıkılaştırır.
    - Masaüstüne **Toyota Servis** kısayolunu ve oturum açılışında başlatan görevi ekler.
-5. Kurulum sonunda tarayıcıda **http://localhost:18080/setup** açılır.
-6. İlk PATRON (işletme sahibi) hesabını oluşturun. Bu ekran yalnızca bir kez açılır.
+5. Kurulum sonunda tarayıcıda **token içeren `/setup` adresi** açılır.
+6. İlk PATRON (işletme sahibi) hesabını oluşturun. Bu ekran yalnızca bir kez açılır. Token `C:\ToyotaServis\.env` içindeki `SETUP_TOKEN` değeridir.
 
 Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlatın ve
 `ToyotaServis-Kurulum.cmd` dosyasını tekrar çalıştırın. Kurulu adımlar atlanır.
@@ -50,7 +53,7 @@ Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlat�
 | Kullanım | Adres |
 |---|---|
 | Bu bilgisayar | `http://localhost:18080` |
-| İlk kurulum | `http://localhost:18080/setup` |
+| İlk kurulum | `http://localhost:18080/setup?token=...` (token `.env` içinde) |
 | Giriş | `http://localhost:18080/login` |
 
 Uygulama yalnızca bu bilgisayardan (`127.0.0.1`) erişilebilir. Yerel ağa veya internete
@@ -84,11 +87,22 @@ açılmaz; bu nedenle telefon/tablet ile uzaktan kullanım desteklenmez.
 - Bilgisayar 02:00'de kapalıysa sonraki açılışta 36 saatten eski yedek telafi edilir.
 - Ayarlar → Yedekleme ekranından manuel yedek alabilir ve yedeği indirebilirsiniz.
 - Kurulum sırasında seçtiğiniz klasöre otomatik yedek yazılır (varsayılan: `%USERPROFILE%\ToyotaServis-Yedekler`).
-- Yedek klasörünü değiştirmek için `.env` içindeki `BACKUP_HOST_DIR` değerini güncelleyip servisleri yeniden başlatın.
+- İkinci kopya da yazılır (varsayılan: `%USERPROFILE%\ToyotaServis-Yedekler-2`); harici disk/NAS için kurulumda o yolu seçin.
+- Harici diski sonradan bağlarsanız:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\setup-backup-copy.ps1 -DriveLetter E
+  ```
+- Diskte kaçırılan yedekleri tamamlamak için:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\offline-backup.ps1
+  ```
+- Yedek klasörünü değiştirmek için `.env` içindeki `BACKUP_HOST_DIR` / `BACKUP_COPY_HOST_DIR` değerlerini güncelleyip servisleri yeniden başlatın.
 - Veritabanı verisi `toyota-servis-pgdata` volume'undadır.
 
-> `C:\ToyotaServis\.env` dosyasını kaybetmeyin. Veritabanı parolası burada tutulur.
-> Bu dosyayı yedekleyin; üçüncü kişilerle paylaşmayın.
+> `C:\ToyotaServis\.env` dosyasını kaybetmeyin. Veritabanı parolası ve kurulum tokenı burada tutulur.
+> Bu dosyayı yedekleyin; üçüncü kişilerle paylaşmayın. İzinleri sıkılaştırmak için:
+> `powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\harden-env.ps1`
+> Parola değiştirmek için: `...\scripts\rotate-db-password.ps1`
 
 ## Kaldırma
 
@@ -124,7 +138,6 @@ Ardından `C:\ToyotaServis` klasörünü kaldırabilirsiniz.
 | `docker` komutu bulunamadı | Docker Desktop'ı açın veya bilgisayarı yeniden başlatın |
 | 18080 portu kullanımda | Başka bir uygulamayı kapatın veya `C:\ToyotaServis\.env` içinde `APP_PORT` değiştirip yeniden başlatın |
 | Uygulama açılmıyor | `docker compose -f C:\ToyotaServis\docker-compose.dist.yml --env-file C:\ToyotaServis\.env logs app` |
-| Yerel ağdan erişilemiyor | Güvenlik duvarı kuralını ve aynı ağda olduğunuzu kontrol edin |
-| Telefonda açılmıyor | `localhost` yerine bilgisayarın yerel IP adresini kullanın |
+| Kurulum ekranı açılmıyor | Adresin sonundaki `?token=...` bölümünün `.env` içindeki `SETUP_TOKEN` ile aynı olduğunu kontrol edin |
 
 Kurulum günlüğü: `C:\ToyotaServis\kurulum.log`

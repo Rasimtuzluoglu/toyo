@@ -46,10 +46,15 @@ if errorlevel 1 (
 echo [2/6] Kurulum dosyalari hazirlaniyor...
 if /I not "%ROOT%"=="%INSTALL_DIR%\" (
     copy /Y "%ROOT%docker-compose.dist.yml" "%COMPOSE%" >nul
+    copy /Y "%ROOT%docker-compose.dist.yml" "%INSTALL_DIR%\docker-compose.yml" >nul
     copy /Y "%ROOT%ToyotaServis-Baslat.cmd" "%INSTALL_DIR%\ToyotaServis-Baslat.cmd" >nul
     copy /Y "%ROOT%ToyotaServis-Durdur.cmd" "%INSTALL_DIR%\ToyotaServis-Durdur.cmd" >nul
     copy /Y "%ROOT%ToyotaServis-Guncelle.cmd" "%INSTALL_DIR%\ToyotaServis-Guncelle.cmd" >nul
     if exist "%ROOT%OKUBENI.md" copy /Y "%ROOT%OKUBENI.md" "%INSTALL_DIR%\OKUBENI.md" >nul
+    if exist "%ROOT%scripts" (
+        if not exist "%INSTALL_DIR%\scripts" mkdir "%INSTALL_DIR%\scripts"
+        xcopy /E /I /Y "%ROOT%scripts" "%INSTALL_DIR%\scripts" >nul
+    )
 )
 if not exist "%COMPOSE%" (
     echo HATA: docker-compose.dist.yml bulunamadi.
@@ -73,10 +78,23 @@ if defined BACKUP_INPUT set "TOYOTA_BACKUP_DIR=%BACKUP_INPUT%"
 if not exist "%TOYOTA_BACKUP_DIR%" mkdir "%TOYOTA_BACKUP_DIR%" >nul 2>&1
 set "BACKUP_ENV_DIR=%TOYOTA_BACKUP_DIR:\=/%"
 
+if not defined TOYOTA_BACKUP_COPY_DIR set "TOYOTA_BACKUP_COPY_DIR=%USERPROFILE%\ToyotaServis-Yedekler-2"
+echo.
+echo Ikinci yedek kopyasi icin klasor (harici disk onerilir; bosluk kullanmadan).
+set /p "BACKUP_COPY_INPUT=Ikinci kopya klasoru [%TOYOTA_BACKUP_COPY_DIR%]: "
+if defined BACKUP_COPY_INPUT set "TOYOTA_BACKUP_COPY_DIR=%BACKUP_COPY_INPUT%"
+if not exist "%TOYOTA_BACKUP_COPY_DIR%" mkdir "%TOYOTA_BACKUP_COPY_DIR%" >nul 2>&1
+set "BACKUP_COPY_ENV_DIR=%TOYOTA_BACKUP_COPY_DIR:\=/%"
+
 if not exist "%ENVFILE%" (
     for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "DBPASS=%%P"
+    for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "SETUP_TOKEN=%%P"
     if not defined DBPASS (
         echo HATA: Veritabani parolasi olusturulamadi.
+        goto fail
+    )
+    if not defined SETUP_TOKEN (
+        echo HATA: Kurulum tokeni olusturulamadi.
         goto fail
     )
     > "%ENVFILE%" echo POSTGRES_DB=servisdefteri
@@ -85,6 +103,10 @@ if not exist "%ENVFILE%" (
     >> "%ENVFILE%" echo APP_PORT=%APP_PORT%
     >> "%ENVFILE%" echo BACKUP_RETENTION_DAYS=14
     >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
+    >> "%ENVFILE%" echo BACKUP_COPY_HOST_DIR=%BACKUP_COPY_ENV_DIR%
+    >> "%ENVFILE%" echo BACKUP_COPY_DIR=/app/backup-copy
+    >> "%ENVFILE%" echo SETUP_TOKEN=!SETUP_TOKEN!
+    >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
     echo .env olusturuldu.
 ) else (
     echo Mevcut .env kullaniliyor.
@@ -92,6 +114,22 @@ if not exist "%ENVFILE%" (
     if not defined APP_PORT set "APP_PORT=18080"
     findstr /B /C:"BACKUP_HOST_DIR=" "%ENVFILE%" >nul 2>&1
     if errorlevel 1 >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
+    findstr /B /C:"BACKUP_COPY_HOST_DIR=" "%ENVFILE%" >nul 2>&1
+    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_COPY_HOST_DIR=%BACKUP_COPY_ENV_DIR%
+    findstr /B /C:"BACKUP_COPY_DIR=" "%ENVFILE%" >nul 2>&1
+    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_COPY_DIR=/app/backup-copy
+    findstr /B /C:"APP_UPDATE_ENABLED=" "%ENVFILE%" >nul 2>&1
+    if errorlevel 1 >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
+    for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"SETUP_TOKEN=" "%ENVFILE%" 2^>nul') do set "SETUP_TOKEN=%%B"
+    if not defined SETUP_TOKEN (
+        for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "SETUP_TOKEN=%%P"
+        >> "%ENVFILE%" echo SETUP_TOKEN=!SETUP_TOKEN!
+    )
+)
+
+if exist "%INSTALL_DIR%\scripts\harden-env.ps1" (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%INSTALL_DIR%\scripts\harden-env.ps1" >> "%LOG%" 2>&1
+    if errorlevel 1 echo UYARI: .env izinleri sikilastirilamadi.
 )
 
 if defined TOYOTA_SKIP_START (
@@ -137,10 +175,11 @@ echo  Ilk kurulum : http://localhost:%APP_PORT%/setup
 echo  Giris       : http://localhost:%APP_PORT%/login
 echo.
 echo  Ilk kurulumda /setup ekranindan PATRON hesabini olusturun.
+echo  Kurulum tokeni: %INSTALL_DIR%\.env icindeki SETUP_TOKEN
 echo  Veritabani parolasi: %INSTALL_DIR%\.env
 echo  Baslat/Durdur: %INSTALL_DIR%\ToyotaServis-Baslat.cmd
 echo.
-start "" "http://localhost:%APP_PORT%/setup"
+start "" "http://localhost:%APP_PORT%/setup?token=%SETUP_TOKEN%"
 pause
 exit /b 0
 
