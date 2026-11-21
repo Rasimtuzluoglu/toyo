@@ -2,6 +2,7 @@ package tr.com.servisdefteri.settings;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import tr.com.servisdefteri.audit.AuditAction;
 import tr.com.servisdefteri.audit.AuditService;
 import tr.com.servisdefteri.common.BusinessRuleException;
@@ -24,6 +25,9 @@ public class BusinessSettingsService {
     private final AuditService auditService;
     private final CurrentUserService currentUserService;
     private final Clock clock;
+
+    @Value("${app.backup.directory:./backups}")
+    private String backupRootDirectory;
 
     public BusinessSettingsService(BusinessSettingsRepository repository, AuditService auditService,
                                    CurrentUserService currentUserService, Clock clock) {
@@ -107,7 +111,52 @@ public class BusinessSettingsService {
             }
             normalized = path.toString();
         }
+        saveBackupDirectory(normalized);
+    }
 
+    /**
+     * PATRON'un uygulama içinden yedek kökü altında alt klasör seçmesini sağlar.
+     * Kök dışına çıkan yollar (../, mutlak yol) reddedilir.
+     */
+    @Transactional
+    public void updateBackupSubdirectory(String subdirectory) {
+        if (subdirectory == null || subdirectory.isBlank()) {
+            saveBackupDirectory(null);
+            return;
+        }
+        Path base = Paths.get(backupRootDirectory).toAbsolutePath().normalize();
+        Path target = base;
+        String relative = subdirectory.trim().replace('\\', '/');
+        if (relative.startsWith("/") || relative.contains("..") || relative.contains(":")) {
+            throw new BusinessRuleException("Yedek alt klasörü geçersiz.");
+        }
+        String[] segments = relative.split("/");
+        if (segments.length > 3) {
+            throw new BusinessRuleException("Yedek alt klasörü en fazla 3 seviye olabilir.");
+        }
+        for (String segment : segments) {
+            if (!segment.matches("[A-Za-z0-9._-]{1,50}")) {
+                throw new BusinessRuleException(
+                        "Klasör adı yalnızca harf, rakam, nokta, tire ve alt çizgi içerebilir.");
+            }
+            target = target.resolve(segment);
+        }
+        target = target.normalize();
+        if (!target.startsWith(base)) {
+            throw new BusinessRuleException("Yedek alt klasörü kök klasörün dışına çıkamaz.");
+        }
+        try {
+            Files.createDirectories(target);
+            if (!Files.isDirectory(target) || !Files.isWritable(target)) {
+                throw new IOException("dizin yazılabilir değil");
+            }
+        } catch (IOException ex) {
+            throw new BusinessRuleException("Yedek klasörü kullanılamıyor: " + ex.getMessage());
+        }
+        saveBackupDirectory(target.toString());
+    }
+
+    private void saveBackupDirectory(String normalized) {
         BusinessSettings settings = repository.findById(SETTINGS_ID).orElseGet(() -> {
             BusinessSettings created = new BusinessSettings();
             created.setId(SETTINGS_ID);

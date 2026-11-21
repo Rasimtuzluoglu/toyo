@@ -196,11 +196,28 @@
                                     <span class="input-group-text">salt okunur</span>
                                 </div>
                                 <div class="form-text">
-                                    Otomatik yedekler bu klasöre yazılır. Değiştirmek için <code>.env</code>
-                                    içindeki <code>BACKUP_HOST_DIR</code> değerini güncelleyip servisleri yeniden başlatın.
-                                    Container içi yol: <span class="money" th:text="${backupDirectory}">/app/backups</span>
+                                    Kök klasör kurulumda belirlenir. Container içi kök:
+                                    <span class="money" th:text="${backupDirectory}">/app/backups</span>
                                 </div>
                             </div>
+
+                            <form class="mt-3" th:action="@{/settings/backup-subdirectory}" method="post"
+                                  data-submit-once>
+                                <input type="hidden" name="formToken" th:value="${formToken}">
+                                <label class="form-label" for="backupSubdirectory">Yedek alt klasörü</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="backupSubdirectory" name="subdirectory"
+                                           type="text" maxlength="160"
+                                           th:value="${backupSubdirectory}" placeholder="ör. 2026 veya sube-1">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="bi bi-folder-check me-1"></i> Kaydet
+                                    </button>
+                                </div>
+                                <div class="form-text">
+                                    Boş bırakılırsa kök klasör kullanılır. Yalnızca harf, rakam, nokta, tire ve
+                                    alt çizgi; en fazla 3 seviye. Yedekler bu klasörün altına yazılır.
+                                </div>
+                            </form>
 
                             <div class="alert alert-warning mt-3 mb-0" role="note">
                                 <i class="bi bi-exclamation-triangle-fill me-1"></i>

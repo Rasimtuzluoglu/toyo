@@ -32,6 +32,8 @@ import tr.com.servisdefteri.common.FormTokenService;
 import tr.com.servisdefteri.security.AppUserPrincipal;
 import tr.com.servisdefteri.update.UpdateService;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 @Controller
@@ -129,6 +131,21 @@ public class SettingsController {
         return "redirect:/settings?tab=backup";
     }
 
+    @PostMapping("/backup-subdirectory")
+    public String updateBackupSubdirectory(@RequestParam(name = "subdirectory", required = false) String subdirectory,
+                                           @RequestParam(name = "formToken", required = false) String formToken,
+                                           HttpSession session,
+                                           RedirectAttributes redirectAttributes) {
+        try {
+            formTokenService.consume(session, formToken);
+            businessSettingsService.updateBackupSubdirectory(subdirectory);
+            redirectAttributes.addFlashAttribute("successMessage", "Yedek alt klasörü güncellendi.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/settings?tab=backup";
+    }
+
     @PostMapping("/update/check")
     public String checkUpdate(@RequestParam(name = "formToken", required = false) String formToken,
                               HttpSession session,
@@ -198,6 +215,11 @@ public class SettingsController {
         model.addAttribute("backupEnabled", backupService.isEnabled());
         model.addAttribute("backupDirectory", backupService.currentDirectory());
         model.addAttribute("backupHostDirectory", backupHostDirectory);
+        Path backupRoot = Paths.get(backupService.getProperties().getDirectory()).toAbsolutePath().normalize();
+        Path currentBackup = Paths.get(backupService.currentDirectory()).toAbsolutePath().normalize();
+        String backupSubdirectory = currentBackup.startsWith(backupRoot)
+                ? backupRoot.relativize(currentBackup).toString().replace('\\', '/') : "";
+        model.addAttribute("backupSubdirectory", backupSubdirectory);
         model.addAttribute("retentionDays", backupService.getProperties().getRetentionDays());
         model.addAttribute("backupCron", backupService.getProperties().getCron());
         model.addAttribute("recentAudit", auditLogRepository.findAllByOrderByCreatedAtDesc(

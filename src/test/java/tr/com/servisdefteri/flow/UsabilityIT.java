@@ -818,6 +818,18 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
+    void backupSubdirectoryIsRestrictedToBackupRoot() {
+        businessSettingsService.updateBackupSubdirectory("test-sub");
+        assertThat(businessSettingsService.get().getBackupDirectory()).endsWith("test-sub");
+
+        assertThatThrownBy(() -> businessSettingsService.updateBackupSubdirectory("../kacis"))
+                .isInstanceOf(BusinessRuleException.class);
+
+        businessSettingsService.updateBackupSubdirectory("");
+        assertThat(businessSettingsService.get().getBackupDirectory()).isNull();
+    }
+
+    @Test
     void maintenanceReminderUsesCompletionDate() {
         Customer customer = createCustomer("Bakım Müşteri", "0555 999 88 77");
         Vehicle vehicle = createVehicle(customer, "34 BKM 001");

@@ -26,6 +26,18 @@ Yetkiler sunucuda kontrol edilir. Menüde görünmeyen bir adrese doğrudan gidi
 
 > Kurtarma kodu 24 saat geçerlidir ve yalnızca bir kez kullanılabilir. Kodu PATRON, **Kullanıcılar → Düzenle → Kurtarma Kodu Oluştur** ile üretir ve kullanıcıya iletir.
 
+### PATRON şifresini unuttuysa
+
+PATRON tek yönetici hesabıysa ve kurtarma kodu yoksa, sunucuya yerel erişimi olan kişi host üzerinden sıfırlar:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\reset-user-password.ps1 -Username patron
+```
+
+- Parola verilmezse güçlü bir geçici parola üretilir ve ekranda gösterilir.
+- İşlem uygulamayı yeniden başlatır; açık oturumlar kapanır.
+- Bu araç yalnızca host/Docker erişimi olan kişi tarafından çalıştırılabilir; web üzerinden erişilemez.
+
 ### Kendi parolanızı değiştirme
 
 Sağ üstteki kullanıcı menüsü → **Parola Değiştir**. Mevcut parola, yeni parola ve tekrarı girilir. Yeni parola en az 10 karakter olmalı; büyük harf, küçük harf ve rakam içermelidir.
@@ -398,6 +410,7 @@ Sağ üstteki **oynat** simgesi 6 adımlık sunum turunu başlatır: kokpit → 
 - **Logo:** PNG/JPEG/WebP, en fazla 2 MB. Yüklenen logo giriş ekranı, menü, belgeler ve PDF’lerde kullanılır; kaldırılabilir.
 - Yedek klasörü, saklama süresi ve cron bilgisi
 - Bilgisayar 02:00'de kapalıysa sonraki açılışta **telafi yedeği** alınır
+- **Yedek alt klasörü:** PATRON, **Ayarlar → Yedekleme → Yedek alt klasörü** ile kök yedek klasörü altında bir alt klasör seçebilir (ör. `2026`, `sube-1`). Boş bırakılırsa kök klasör kullanılır. Kök klasör kurulumda belirlenir.
 - **Sunucuda Yedekle** ve **Yedek Al ve İndir** (tarayıcıda istediğiniz klasörü seçerek kaydetme)
 - Geçmiş yedekleri **İndir** ile bilgisayara alma
 - Son denetim kayıtları
