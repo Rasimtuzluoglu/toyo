@@ -43,6 +43,17 @@ if errorlevel 1 (
     goto fail
 )
 
+powershell -NoProfile -Command "try { Get-NetTCPConnection -LocalPort %APP_PORT% -State Listen -ErrorAction Stop | Out-Null; exit 0 } catch { exit 1 }"
+if not errorlevel 1 (
+    echo.
+    echo HATA: %APP_PORT% portu zaten kullaniliyor.
+    echo Mevcut bir Toyota Servis kurulumu veya baska bir uygulama calisiyor olabilir.
+    echo Yeni kurulum icin farkli port secin, ornek:
+    echo    set TOYOTA_APP_PORT=18082
+    echo    ToyotaServis-Kurulum.cmd
+    goto fail
+)
+
 echo [2/6] Kurulum dosyalari hazirlaniyor...
 if /I not "%ROOT%"=="%INSTALL_DIR%\" (
     copy /Y "%ROOT%docker-compose.dist.yml" "%COMPOSE%" >nul
@@ -70,42 +81,53 @@ if not exist "%ROOT%ToyotaServis-1.0.0.tar" (
     goto fail
 )
 
-if not defined TOYOTA_BACKUP_DIR set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
-echo.
-echo Yedeklerin tutulacagi klasoru secin (bosluk kullanmadan).
-set /p "BACKUP_INPUT=Yedek klasoru [%TOYOTA_BACKUP_DIR%]: "
-if defined BACKUP_INPUT set "TOYOTA_BACKUP_DIR=%BACKUP_INPUT%"
+if not defined TOYOTA_BACKUP_DIR (
+    set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
+    echo.
+    echo Yedeklerin tutulacagi klasoru secin - bosluk kullanmayin.
+    set /p "BACKUP_INPUT=Yedek klasoru [%TOYOTA_BACKUP_DIR%]: "
+    if defined BACKUP_INPUT set "TOYOTA_BACKUP_DIR=%BACKUP_INPUT%"
+) else (
+    echo Yedek klasoru: %TOYOTA_BACKUP_DIR%
+)
 if not exist "%TOYOTA_BACKUP_DIR%" mkdir "%TOYOTA_BACKUP_DIR%" >nul 2>&1
 set "BACKUP_ENV_DIR=%TOYOTA_BACKUP_DIR:\=/%"
 
-if not defined TOYOTA_BACKUP_COPY_DIR set "TOYOTA_BACKUP_COPY_DIR=%USERPROFILE%\ToyotaServis-Yedekler-2"
-echo.
-echo Ikinci yedek kopyasi icin klasor (harici disk onerilir; bosluk kullanmadan).
-set /p "BACKUP_COPY_INPUT=Ikinci kopya klasoru [%TOYOTA_BACKUP_COPY_DIR%]: "
-if defined BACKUP_COPY_INPUT set "TOYOTA_BACKUP_COPY_DIR=%BACKUP_COPY_INPUT%"
+if not defined TOYOTA_BACKUP_COPY_DIR (
+    set "TOYOTA_BACKUP_COPY_DIR=%USERPROFILE%\ToyotaServis-Yedekler-2"
+    echo.
+    echo Ikinci yedek kopyasi icin klasor - harici disk onerilir; bosluk kullanmayin.
+    set /p "BACKUP_COPY_INPUT=Ikinci kopya klasoru [%TOYOTA_BACKUP_COPY_DIR%]: "
+    if defined BACKUP_COPY_INPUT set "TOYOTA_BACKUP_COPY_DIR=%BACKUP_COPY_INPUT%"
+) else (
+    echo Ikinci kopya klasoru: %TOYOTA_BACKUP_COPY_DIR%
+)
 if not exist "%TOYOTA_BACKUP_COPY_DIR%" mkdir "%TOYOTA_BACKUP_COPY_DIR%" >nul 2>&1
 set "BACKUP_COPY_ENV_DIR=%TOYOTA_BACKUP_COPY_DIR:\=/%"
 
+rem Batch parser: parenli PowerShell komutlarini dis if blogunun icine koymayin.
+rem Aksi halde "Substring(0,24)" icindeki ')' blogu erken kapatir.
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "NEW_DBPASS=%%P"
+for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "NEW_SETUP_TOKEN=%%P"
+
 if not exist "%ENVFILE%" (
-    for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "DBPASS=%%P"
-    for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "SETUP_TOKEN=%%P"
-    if not defined DBPASS (
+    if not defined NEW_DBPASS (
         echo HATA: Veritabani parolasi olusturulamadi.
         goto fail
     )
-    if not defined SETUP_TOKEN (
+    if not defined NEW_SETUP_TOKEN (
         echo HATA: Kurulum tokeni olusturulamadi.
         goto fail
     )
     > "%ENVFILE%" echo POSTGRES_DB=servisdefteri
     >> "%ENVFILE%" echo POSTGRES_USER=servisdefteri
-    >> "%ENVFILE%" echo POSTGRES_PASSWORD=!DBPASS!
+    >> "%ENVFILE%" echo POSTGRES_PASSWORD=!NEW_DBPASS!
     >> "%ENVFILE%" echo APP_PORT=%APP_PORT%
     >> "%ENVFILE%" echo BACKUP_RETENTION_DAYS=14
     >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
     >> "%ENVFILE%" echo BACKUP_COPY_HOST_DIR=%BACKUP_COPY_ENV_DIR%
     >> "%ENVFILE%" echo BACKUP_COPY_DIR=/app/backup-copy
-    >> "%ENVFILE%" echo SETUP_TOKEN=!SETUP_TOKEN!
+    >> "%ENVFILE%" echo SETUP_TOKEN=!NEW_SETUP_TOKEN!
     >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
     echo .env olusturuldu.
 ) else (
@@ -122,9 +144,14 @@ if not exist "%ENVFILE%" (
     if errorlevel 1 >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
     for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"SETUP_TOKEN=" "%ENVFILE%" 2^>nul') do set "SETUP_TOKEN=%%B"
     if not defined SETUP_TOKEN (
-        for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "SETUP_TOKEN=%%P"
+        set "SETUP_TOKEN=!NEW_SETUP_TOKEN!"
         >> "%ENVFILE%" echo SETUP_TOKEN=!SETUP_TOKEN!
     )
+)
+
+if not exist "%ENVFILE%" (
+    echo HATA: .env dosyasi olusturulamadi.
+    goto fail
 )
 
 if exist "%INSTALL_DIR%\scripts\harden-env.ps1" (
@@ -155,17 +182,22 @@ if errorlevel 1 (
 echo [5/6] Uygulama saglik kontrolu...
 for /l %%i in (1,1,60) do (
     powershell -NoProfile -Command "try { $r=Invoke-WebRequest -UseBasicParsing http://localhost:%APP_PORT%/actuator/health -TimeoutSec 3; if ($r.StatusCode -eq 200) { exit 0 } } catch {}; exit 1" >nul 2>&1 && goto healthy
-    timeout /t 5 >nul
+    ping -n 6 127.0.0.1 >nul
 )
 echo HATA: Uygulama zamaninda hazir olmadi.
 docker compose --project-directory "%INSTALL_DIR%" --env-file "%ENVFILE%" -f "%COMPOSE%" logs --tail 100
 goto fail
 
 :healthy
+if defined TOYOTA_SKIP_SHORTCUTS (
+    echo [6/6] Kisayollar atlandi - TOYOTA_SKIP_SHORTCUTS=1.
+    goto installed
+)
 echo [6/6] Kisayollar hazirlaniyor...
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws=New-Object -ComObject WScript.Shell; $desktop=[Environment]::GetFolderPath('Desktop'); $s=$ws.CreateShortcut((Join-Path $desktop 'Toyota Servis.url')); $s.TargetPath='http://localhost:%APP_PORT%'; $s.Save(); $startup=[Environment]::GetFolderPath('Startup'); $l=$ws.CreateShortcut((Join-Path $startup 'Toyota Servis.lnk')); $l.TargetPath='%INSTALL_DIR%\ToyotaServis-Baslat.cmd'; $l.WorkingDirectory='%INSTALL_DIR%'; $l.WindowStyle=7; $l.Save()"
 
+:installed
 echo.
 echo ============================================
 echo  KURULUM TAMAMLANDI
@@ -179,14 +211,18 @@ echo  Kurulum tokeni: %INSTALL_DIR%\.env icindeki SETUP_TOKEN
 echo  Veritabani parolasi: %INSTALL_DIR%\.env
 echo  Baslat/Durdur: %INSTALL_DIR%\ToyotaServis-Baslat.cmd
 echo.
-start "" "http://localhost:%APP_PORT%/setup?token=%SETUP_TOKEN%"
-pause
+if defined TOYOTA_NO_BROWSER (
+    echo Tarayici otomatik acilmadi - TOYOTA_NO_BROWSER=1.
+) else (
+    start "" "http://localhost:%APP_PORT%/setup?token=%SETUP_TOKEN%"
+)
+if not defined TOYOTA_NONINTERACTIVE pause
 exit /b 0
 
 :finish_no_start
 echo Kurulum dosyalari hazirlandi.
 echo Baslatmak icin: %INSTALL_DIR%\ToyotaServis-Baslat.cmd
-pause
+if not defined TOYOTA_NONINTERACTIVE pause
 exit /b 0
 
 :fail
@@ -195,7 +231,7 @@ echo.
 echo Kurulum tamamlanamadi.
 echo Docker Desktop ve WSL2/sanallastirmayi kontrol edin.
 echo Ayrintilar icin: %INSTALL_DIR%\kurulum.log
-pause
+if not defined TOYOTA_NONINTERACTIVE pause
 exit /b 1
 
 :ensure_docker
@@ -257,7 +293,7 @@ exit /b 0
 :wait_docker
 for /l %%i in (1,1,60) do (
     docker info >nul 2>&1 && exit /b 0
-    timeout /t 5 >nul
+    ping -n 6 127.0.0.1 >nul
 )
 echo Docker Desktop zamaninda hazir olmadi.
 echo WSL2 ve sanallastirma acik olmalidir. Gerekirse "wsl --install" calistirin ve yeniden baslatin.
