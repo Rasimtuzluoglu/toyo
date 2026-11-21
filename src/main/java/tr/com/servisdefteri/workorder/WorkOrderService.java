@@ -438,6 +438,12 @@ public class WorkOrderService {
         return workOrderRepository.countByStatusIn(OPEN_STATUSES);
     }
 
+    @Transactional(readOnly = true)
+    public long staleOpenCount(int days) {
+        return workOrderRepository.countByStatusAndOpenedAtBefore(
+                WorkOrderStatus.ISLEMDE, LocalDateTime.now(clock).minusDays(days));
+    }
+
     private WorkOrder lockEditable(Long orderId) {
         WorkOrder order = workOrderRepository.findByIdForUpdate(orderId)
                 .orElseThrow(() -> NotFoundException.of("İş emri", orderId));

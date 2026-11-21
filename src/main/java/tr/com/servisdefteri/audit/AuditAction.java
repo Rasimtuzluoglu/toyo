@@ -43,7 +43,8 @@ public enum AuditAction {
     APP_UPDATE_COMPLETED("Yazılım güncelleme tamamlandı"),
     BACKUP_TRIGGERED("Yedekleme başlatma"),
     BACKUP_COMPLETED("Yedekleme tamamlandı"),
-    BACKUP_FAILED("Yedekleme hatası");
+    BACKUP_FAILED("Yedekleme hatası"),
+    BACKUP_RESTORE_REQUESTED("Yedek geri yükleme isteği");
 
     private final String label;
 

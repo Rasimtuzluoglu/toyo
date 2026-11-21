@@ -1,7 +1,8 @@
 $ErrorActionPreference = "Stop"
 
-# Host tarafı güncelleme ajanı.
+# Host tarafı güncelleme ve geri yükleme ajanı.
 # - updates/update.request dosyasını izler ve update-toyota.ps1 betiğini çalıştırır.
+# - updates/restore.request dosyasını izler ve restore-toyota.ps1 betiğini çalıştırır.
 # - Her 10 saniyede heartbeat yazar; Ayarlar ekranı ajanın çalıştığını buradan görür.
 # - UPDATE_AUTO=true ise 5 dakikada bir GitHub'ı kontrol edip yeni commit'i otomatik uygular.
 #
@@ -10,9 +11,11 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $updatesDir = Join-Path $projectRoot "updates"
 New-Item -ItemType Directory -Force -Path $updatesDir | Out-Null
 $requestFile = Join-Path $updatesDir "update.request"
+$restoreRequestFile = Join-Path $updatesDir "restore.request"
 $agentFile = Join-Path $updatesDir "agent.status"
 $logFile = Join-Path $updatesDir "agent.log"
 $updateScript = Join-Path $PSScriptRoot "update-toyota.ps1"
+$restoreScript = Join-Path $PSScriptRoot "restore-toyota.ps1"
 
 $mutex = New-Object System.Threading.Mutex($false, "Global\ToyotaServisUpdateAgent")
 if (-not $mutex.WaitOne(0)) {
@@ -45,6 +48,44 @@ Write-Log "Güncelleme ajanı başladı. Otomatik: $auto"
 try {
     while ($true) {
         Write-Heartbeat
+
+        if (Test-Path $restoreRequestFile) {
+            try {
+                $request = Get-Content $restoreRequestFile -Raw | ConvertFrom-Json
+                Remove-Item $restoreRequestFile -Force
+                if (-not $request.backupFile) {
+                    throw "Geri yükleme isteğinde yedek dosya adı yok."
+                }
+                if ($request.requestedAt) {
+                    $rawRequestedAt = ([string]$request.requestedAt) -replace '\.\d+$', ''
+                    $requestedAt = [datetime]::Parse($rawRequestedAt,
+                        [System.Globalization.CultureInfo]::InvariantCulture)
+                    if ($requestedAt -lt (Get-Date).AddMinutes(-10)) {
+                        throw "Geri yükleme isteği zaman aşımına uğradı; yeniden deneyin."
+                    }
+                }
+                Write-Log "Geri yükleme isteği alındı: $($request.backupFile)"
+                $restoreArgs = @{
+                    BackupFile        = [string]$request.backupFile
+                    RelativeDirectory = [string]$request.relativeDirectory
+                    RequestedBy       = [string]$request.requestedBy
+                }
+                & $restoreScript @restoreArgs
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Log "Geri yükleme betiği hata koduyla bitti: $LASTEXITCODE"
+                }
+            } catch {
+                Write-Log "Geri yükleme isteği işlenemedi: $($_.Exception.Message)"
+                $status = [ordered]@{
+                    state      = "error"
+                    message    = "Geri yükleme isteği işlenemedi: $($_.Exception.Message)"
+                    startedAt  = (Get-Date).ToString("o")
+                    finishedAt = (Get-Date).ToString("o")
+                }
+                Write-Utf8 (Join-Path $updatesDir "restore.status") ($status | ConvertTo-Json -Compress)
+            }
+            continue
+        }
 
         if (Test-Path $requestFile) {
             try {

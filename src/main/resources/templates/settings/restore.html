@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Yedekten Geri Yükle')}"></head>
+<body>
+<div class="sd-shell">
+    <aside th:replace="~{fragments/layout :: sidebar('settings')}"></aside>
+    <div class="sd-main">
+        <header th:replace="~{fragments/layout :: topbar}"></header>
+        <main class="sd-content">
+            <div th:replace="~{fragments/layout :: alerts}"></div>
+
+            <div class="page-head">
+                <div>
+                    <div class="page-eyebrow">Ayarlar · Yedekleme</div>
+                    <h1 class="page-title">Yedekten Geri Yükle</h1>
+                    <p class="page-subtitle">
+                        Yalnızca PATRON. Seçilen yedek, mevcut veritabanının üzerine yazılır.
+                    </p>
+                </div>
+                <div class="page-actions">
+                    <a class="btn btn-outline-secondary" th:href="@{/settings(tab='backup')}">
+                        <i class="bi bi-arrow-left me-1"></i> Yedekleme
+                    </a>
+                </div>
+            </div>
+
+            <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                Geri yükleme sırasında uygulama kısa süre erişilemez olur. İşlem öncesi
+                <strong>mevcut veritabanının güvenlik yedeği otomatik alınır</strong>; yine de önce
+                güncel bir yedek indirmeniz önerilir.
+            </div>
+
+            <div class="alert alert-danger" th:if="${!agentOnline}" role="alert">
+                <i class="bi bi-plug-fill me-1"></i>
+                Geri yükleme ajanı çevrimiçi değil. Sunucuda güncelleme ajanını başlatmadan geri yükleme yapılamaz.
+            </div>
+
+            <div class="alert"
+                 th:if="${restoreStatus != null and !restoreStatus.isEmpty()}"
+                 th:classappend="${restoreStatus['state'] == 'success' ? ' alert-success'
+                     : (restoreStatus['state'] == 'running' ? ' alert-info' : ' alert-danger')}"
+                 role="alert">
+                <strong th:text="${restoreStatus['state'] == 'success' ? 'Geri yükleme tamamlandı'
+                        : (restoreStatus['state'] == 'running' ? 'Geri yükleme sürüyor'
+                        : 'Geri yükleme başarısız')}">
+                    Geri yükleme durumu
+                </strong>
+                <div th:text="${restoreStatus['message']}">Mesaj</div>
+                <div class="record-meta" th:if="${restoreStatus['backupFile'] != null}">
+                    Dosya: <span th:text="${restoreStatus['backupFile']}">—</span>
+                </div>
+            </div>
+
+            <div class="sd-card" th:if="${runs.isEmpty()}">
+                <div class="empty-state">
+                    <i class="bi bi-archive"></i>
+                    <strong>Geri yüklenebilir yedek yok</strong>
+                    Başarılı bir yedek alındıktan sonra burada listelenir.
+                </div>
+            </div>
+
+            <form th:if="${!runs.isEmpty() and agentOnline}" th:action="@{/settings/restore}" method="post"
+                  data-submit-once>
+                <input type="hidden" name="formToken" th:value="${formToken}">
+                <div class="sd-card">
+                    <div class="sd-card-header">
+                        <h2>Yedek seçin</h2>
+                        <span class="record-meta" th:text="${runs.size()} + ' yedek'">0 yedek</span>
+                    </div>
+                    <div class="sd-card-body">
+                        <div class="form-check mb-2" th:each="run : ${runs}">
+                            <input class="form-check-input" type="radio" name="runId"
+                                   th:id="'run-' + ${run.id}" th:value="${run.id}" required>
+                            <label class="form-check-label" th:for="'run-' + ${run.id}">
+                                <strong th:text="${run.fileName}">servisdefteri.dump</strong>
+                                <span class="record-meta ms-2"
+                                      th:text="${fmt.dateTime(run.finishedAt != null ? run.finishedAt : run.startedAt)}">01.01.2026</span>
+                                <span class="record-meta ms-2"
+                                      th:text="${run.fileSizeBytes == null ? '' : fmt.number(run.fileSizeBytes) + ' bayt'}"></span>
+                            </label>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="form-label" for="confirmation">
+                                Onaylamak için <code>GERI YUKLE</code> yazın <span class="required">*</span>
+                            </label>
+                            <input class="form-control" id="confirmation" name="confirmation" type="text"
+                                   autocomplete="off" required>
+                        </div>
+                    </div>
+                    <div class="sd-card-footer d-flex justify-content-end gap-2">
+                        <a class="btn btn-outline-secondary" th:href="@{/settings(tab='backup')}">Vazgeç</a>
+                        <button class="btn btn-danger" type="submit"
+                                data-confirm="Seçilen yedek mevcut veritabanının üzerine yazılacak. Devam edilsin mi?">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Geri Yükle
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </main>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+    </div>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

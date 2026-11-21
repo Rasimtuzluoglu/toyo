@@ -86,6 +86,7 @@ açılmaz; bu nedenle telefon/tablet ile uzaktan kullanım desteklenmez.
 - Uygulama her gün saat 02:00'de otomatik yedek alır.
 - Bilgisayar 02:00'de kapalıysa sonraki açılışta 36 saatten eski yedek telafi edilir.
 - Ayarlar → Yedekleme ekranından manuel yedek alabilir ve yedeği indirebilirsiniz.
+- Güncelleme ajanı kuruluysa PATRON, **Ayarlar → Yedekleme → Geri Yükle** ile başarılı bir yedeği uygulama içinden geri yükleyebilir; işlem öncesi güvenlik yedeği otomatik alınır.
 - Kurulum sırasında seçtiğiniz klasöre otomatik yedek yazılır (varsayılan: `%USERPROFILE%\ToyotaServis-Yedekler`).
 - İkinci kopya da yazılır (varsayılan: `%USERPROFILE%\ToyotaServis-Yedekler-2`); harici disk/NAS için kurulumda o yolu seçin.
 - Harici diski sonradan bağlarsanız:

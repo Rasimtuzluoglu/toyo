@@ -81,6 +81,65 @@
                 </div>
             </div>
 
+            <div class="sd-card mb-3" th:if="${order.status.name() != 'IPTAL'}">
+                <div class="sd-card-body d-flex flex-wrap align-items-center gap-3">
+                    <div class="flex-grow-1">
+                        <div class="page-eyebrow mb-1">Sıradaki adım</div>
+                        <strong th:if="${order.status.name() == 'ISLEMDE'}">
+                            İşi tamamlayın; iş emri tutarı cari hesaba borç olarak işlenir.
+                        </strong>
+                        <strong th:if="${order.status.name() == 'TAMAMLANDI'
+                                and workOrderDebt != null and workOrderDebt.remaining.signum() > 0}">
+                            Tahsilatı alın, ardından aracı teslim edin.
+                        </strong>
+                        <strong th:if="${order.status.name() == 'TAMAMLANDI'
+                                and (workOrderDebt == null or workOrderDebt.remaining.signum() <= 0)}">
+                            Ödeme tamam; aracı teslim edin.
+                        </strong>
+                        <strong th:if="${order.status.name() == 'TESLIM_EDILDI'}">
+                            Araç teslim edildi; belgeyi yazdırabilir veya yeni iş emri açabilirsiniz.
+                        </strong>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <form sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                              th:if="${order.status.name() == 'ISLEMDE'}"
+                              th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
+                              data-submit-once>
+                            <input type="hidden" name="status" value="TAMAMLANDI">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-check2-circle me-1"></i> Tamamla
+                            </button>
+                        </form>
+                        <a class="btn btn-success"
+                           sec:authorize="hasAnyRole('PATRON','MUHASEBE','SERVIS')"
+                           th:if="${order.status.name() == 'TAMAMLANDI'
+                                   and workOrderDebt != null and workOrderDebt.remaining.signum() > 0}"
+                           th:href="@{/work-orders/{id}/payment(id=${order.id})}">
+                            <i class="bi bi-cash-coin me-1"></i> Tahsilat Al
+                        </a>
+                        <a class="btn btn-outline-secondary"
+                           th:if="${order.status.name() == 'TAMAMLANDI'}"
+                           th:href="@{/work-orders/{id}/delivery(id=${order.id})}">
+                            <i class="bi bi-clipboard-check me-1"></i> Teslim Tutanağı
+                        </a>
+                        <form sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                              th:if="${order.status.name() == 'TAMAMLANDI'}"
+                              th:action="@{/work-orders/{id}/status(id=${order.id})}" method="post"
+                              data-submit-once>
+                            <input type="hidden" name="status" value="TESLIM_EDILDI">
+                            <button class="btn btn-outline-success" type="submit">
+                                <i class="bi bi-box-seam me-1"></i> Teslim Et
+                            </button>
+                        </form>
+                        <a class="btn btn-outline-secondary"
+                           th:if="${order.status.name() == 'TESLIM_EDILDI'}"
+                           th:href="@{/work-orders/{id}/print(id=${order.id})}">
+                            <i class="bi bi-printer me-1"></i> Belgeyi Yazdır
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <div class="quick-success" th:if="${quickCreated}">
                 <span class="quick-success-icon"><i class="bi bi-check2-circle"></i></span>
                 <div class="quick-success-text">

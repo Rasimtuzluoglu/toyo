@@ -68,7 +68,9 @@
                         </ul>
                     </div>
                     <a class="btn btn-primary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
-                       th:href="@{/work-orders/new(customerId=${customer.id})}">
+                       th:href="${vehicles.isEmpty()}
+                           ? @{/work-orders/new(customerId=${customer.id})}
+                           : @{/work-orders/new(customerId=${customer.id},vehicleId=${vehicles[0].id})}">
                         <i class="bi bi-clipboard-plus me-1"></i> İş Emri Aç
                     </a>
                 </div>

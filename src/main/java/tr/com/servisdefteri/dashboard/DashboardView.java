@@ -14,6 +14,8 @@ import java.util.List;
 public record DashboardView(long activeCustomers,
                             long activeVehicles,
                             long openWorkOrders,
+                            long staleOpenOrders,
+                            boolean backupWarning,
                             boolean financialVisible,
                             BigDecimal netReceivable,
                             long debtorCount,

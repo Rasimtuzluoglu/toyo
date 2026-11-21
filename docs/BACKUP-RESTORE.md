@@ -67,7 +67,7 @@ $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 docker compose exec -T db pg_dump -U servisdefteri -d servisdefteri -Fc > "servisdefteri-manual-$stamp.dump"
 ```
 
-> Yedek dosyaları kişisel ve finansal veri içerir. Erişim izinlerini kısıtlayın, şifreli bir diskte saklayın, e-posta/WhatsApp ile paylaşmayın.
+> Yedek dosyaları kişisel ve finansal veri içerir. Erişim izinlerini kısıtlayın, e-posta/WhatsApp ile paylaşmayın.
 
 ## Yedek Dosyasını Dışarı Kopyalama
 
@@ -86,6 +86,25 @@ BACKUP_HOST_DIR=C:/ToyotaServis-Yedekler
 ```
 
 Ardından `docker compose up -d` çalıştırın. Otomatik yedekler doğrudan bu klasöre yazılır.
+
+## Arayüzden Geri Yükleme (PATRON)
+
+PATRON, **Ayarlar → Yedekleme → Geri Yükle** ekranından başarılı bir yedeği uygulama içinden geri yükleyebilir.
+
+Gereksinimler:
+
+- Sunucuda `update-agent.ps1` çalışıyor olmalı (Ayarlar ekranı ajanın çevrimiçi olduğunu gösterir).
+- Ajan betiği `restore.request` dosyasını tanıyacak sürümde olmalı; eski ajan sürümünde geri yükleme isteği işlenmez.
+- Aynı anda bekleyen güncelleme veya geri yükleme isteği olmamalı.
+
+Akış:
+
+1. PATRON yedeği seçer ve onay alanına `GERI YUKLE` yazar.
+2. İstek `updates/restore.request` dosyasına yazılır; ajan `scripts/restore-toyota.ps1` betiğini çalıştırır.
+3. Betik uygulamayı durdurur, **mevcut veritabanının güvenlik yedeğini** alır ve seçilen yedeği geri yükler.
+4. Geri yükleme başarısız olursa güvenlik yedeğine otomatik dönülür; sonuç `restore.status` üzerinden ekranda gösterilir.
+
+> Geri yükleme sırasında uygulama kısa süre erişilemez olur. İşlem öncesi güncel bir yedeği bilgisayarınıza indirmeniz önerilir.
 
 ## Geri Yükleme Testi (Önerilen Yöntem)
 

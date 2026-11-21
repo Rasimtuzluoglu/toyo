@@ -10,6 +10,9 @@ import tr.com.servisdefteri.account.CustomerBalance;
 import tr.com.servisdefteri.account.TransactionType;
 import tr.com.servisdefteri.appointment.Appointment;
 import tr.com.servisdefteri.appointment.AppointmentService;
+import tr.com.servisdefteri.backup.BackupRun;
+import tr.com.servisdefteri.backup.BackupService;
+import tr.com.servisdefteri.backup.BackupStatus;
 import tr.com.servisdefteri.customer.CustomerService;
 import tr.com.servisdefteri.payment.CollectionSummary;
 import tr.com.servisdefteri.payment.PaymentService;
@@ -21,6 +24,7 @@ import tr.com.servisdefteri.workorder.WorkOrderStatusSummary;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +41,14 @@ public class DashboardService {
     private final AccountTransactionRepository transactionRepository;
     private final AppointmentService appointmentService;
     private final ReportService reportService;
+    private final BackupService backupService;
     private final Clock clock;
 
     public DashboardService(CustomerService customerService, VehicleService vehicleService,
                             WorkOrderService workOrderService, PaymentService paymentService,
                             AccountService accountService, AccountTransactionRepository transactionRepository,
-                            AppointmentService appointmentService, ReportService reportService, Clock clock) {
+                            AppointmentService appointmentService, ReportService reportService,
+                            BackupService backupService, Clock clock) {
         this.customerService = customerService;
         this.vehicleService = vehicleService;
         this.workOrderService = workOrderService;
@@ -51,6 +57,7 @@ public class DashboardService {
         this.transactionRepository = transactionRepository;
         this.appointmentService = appointmentService;
         this.reportService = reportService;
+        this.backupService = backupService;
         this.clock = clock;
     }
 
@@ -94,10 +101,23 @@ public class DashboardService {
         List<WorkOrderStatusSummary> statuses = workOrderService.statusSummary();
         long totalWorkOrders = statuses.stream().mapToLong(WorkOrderStatusSummary::count).sum();
 
+        List<BackupRun> recentBackups = backupService.recentRuns();
+        BackupRun lastSuccessfulBackup = recentBackups.stream()
+                .filter(run -> run.getStatus() == BackupStatus.BASARILI)
+                .findFirst()
+                .orElse(null);
+        boolean lastRunFailed = !recentBackups.isEmpty()
+                && recentBackups.get(0).getStatus() == BackupStatus.BASARISIZ;
+        boolean backupWarning = backupService.isEnabled()
+                && (lastRunFailed || lastSuccessfulBackup == null
+                || lastSuccessfulBackup.getStartedAt().isBefore(LocalDateTime.now(clock).minusHours(36)));
+
         return new DashboardView(
                 customerService.activeCount(),
                 vehicleService.activeCount(),
                 workOrderService.openCount(),
+                workOrderService.staleOpenCount(2),
+                backupWarning,
                 financialVisible,
                 financialVisible ? netReceivable : BigDecimal.ZERO,
                 financialVisible ? debtorCount : 0,

@@ -129,6 +129,8 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
 
     long countByStatusIn(Collection<WorkOrderStatus> statuses);
 
+    long countByStatusAndOpenedAtBefore(WorkOrderStatus status, LocalDateTime before);
+
     boolean existsByOrderNoIgnoreCase(String orderNo);
 
     boolean existsByOrderNoIgnoreCaseAndIdNot(String orderNo, Long id);

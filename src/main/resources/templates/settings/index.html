@@ -221,9 +221,9 @@
 
                             <div class="alert alert-warning mt-3 mb-0" role="note">
                                 <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                Otomatik yedek, geri yükleme testi değildir. Geri yükleme adımları
-                                <code>docs/BACKUP-RESTORE.md</code> içindedir. Bilgisayar 02:00'de kapalıysa
-                                36 saatten eski yedek açılışta telafi edilir.
+                                Otomatik yedek, geri yükleme testi değildir. PATRON,
+                                <a th:href="@{/settings/restore}">Geri Yükle</a> ekranından başarılı bir yedeği
+                                geri yükleyebilir. Bilgisayar 02:00'de kapalıysa 36 saatten eski yedek açılışta telafi edilir.
                             </div>
                         </div>
                         <div class="sd-card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -231,6 +231,9 @@
                                 Manuel yedek, otomatik yedekleme kapalı olsa da kullanılabilir.
                             </span>
                             <div class="d-flex gap-2 flex-wrap">
+                                <a class="btn btn-outline-danger" th:href="@{/settings/restore}">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Geri Yükle
+                                </a>
                                 <form th:action="@{/settings/backup}" method="post" data-submit-once>
                                     <input type="hidden" name="formToken" th:value="${formToken}">
                                     <button class="btn btn-outline-secondary" type="submit">

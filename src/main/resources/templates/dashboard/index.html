@@ -34,6 +34,24 @@
                 </div>
             </div>
 
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a class="btn btn-primary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                   th:href="@{/work-orders/new}">
+                    <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
+                </a>
+                <a class="btn btn-success" sec:authorize="hasAnyRole('PATRON','MUHASEBE')"
+                   th:href="@{/payments/new}">
+                    <i class="bi bi-cash-coin me-1"></i> Tahsilat Al
+                </a>
+                <a class="btn btn-outline-secondary" sec:authorize="hasAnyRole('PATRON','SERVIS')"
+                   th:href="@{/appointments/new}">
+                    <i class="bi bi-calendar-plus me-1"></i> Randevu Ver
+                </a>
+                <a class="btn btn-outline-secondary" th:href="@{/search}">
+                    <i class="bi bi-search me-1"></i> Plaka / Telefon Ara
+                </a>
+            </div>
+
             <div class="stat-grid dashboard-kpis">
                 <div class="stat-card kpi-primary">
                     <span class="stat-icon red"><i class="bi bi-clipboard-check"></i></span>
@@ -65,6 +83,48 @@
                     <div class="stat-value" th:text="${view.todayAppointments.size()}">0</div>
                     <div class="stat-label">Bugünkü randevu</div>
                     <div class="stat-hint"><a th:href="@{/appointments}">Günlük planı gör</a></div>
+                </div>
+            </div>
+
+            <div class="sd-card mb-3"
+                 th:with="alertCount=${(view.staleOpenOrders > 0 ? 1 : 0)
+                     + (!view.todayAppointments.isEmpty() ? 1 : 0)
+                     + (!view.readyForDelivery.isEmpty() ? 1 : 0)
+                     + (!view.maintenanceReminders.isEmpty() ? 1 : 0)
+                     + (view.backupWarning ? 1 : 0)}">
+                <div class="sd-card-header">
+                    <h2><i class="bi bi-bell me-2 text-danger"></i>Bugünün uyarıları</h2>
+                    <span class="record-meta" th:text="${alertCount} + ' uyarı'">0 uyarı</span>
+                </div>
+                <div class="sd-card-body d-flex flex-column gap-2">
+                    <a class="alert alert-warning mb-0 d-flex justify-content-between align-items-center"
+                       th:if="${view.staleOpenOrders > 0}" th:href="@{/work-orders/board}">
+                        <span><strong th:text="${view.staleOpenOrders}">0</strong> iş emri 2+ gündür açık.</span>
+                        <span class="small">Panoya git <i class="bi bi-arrow-right"></i></span>
+                    </a>
+                    <a class="alert alert-info mb-0 d-flex justify-content-between align-items-center"
+                       th:if="${!view.todayAppointments.isEmpty()}" th:href="@{/appointments}">
+                        <span>Bugün <strong th:text="${view.todayAppointments.size()}">0</strong> randevu var.</span>
+                        <span class="small">Planı gör <i class="bi bi-arrow-right"></i></span>
+                    </a>
+                    <a class="alert alert-success mb-0 d-flex justify-content-between align-items-center"
+                       th:if="${!view.readyForDelivery.isEmpty()}" th:href="@{/work-orders/board}">
+                        <span><strong th:text="${view.readyForDelivery.size()}">0</strong> araç teslime hazır.</span>
+                        <span class="small">Panoya git <i class="bi bi-arrow-right"></i></span>
+                    </a>
+                    <a class="alert alert-secondary mb-0 d-flex justify-content-between align-items-center"
+                       th:if="${!view.maintenanceReminders.isEmpty()}" th:href="@{/reports/maintenance}">
+                        <span>Bakım zamanı gelen araçlar var.</span>
+                        <span class="small">Listeyi gör <i class="bi bi-arrow-right"></i></span>
+                    </a>
+                    <a class="alert alert-danger mb-0 d-flex justify-content-between align-items-center"
+                       th:if="${view.backupWarning}" th:href="@{/settings(tab='backup')}">
+                        <span>Son yedek başarısız veya 36 saatten eski.</span>
+                        <span class="small">Yedeklemeye git <i class="bi bi-arrow-right"></i></span>
+                    </a>
+                    <div class="text-muted-soft" th:if="${alertCount == 0}">
+                        <i class="bi bi-check2-circle me-1"></i> Bugün acil bir uyarı yok.
+                    </div>
                 </div>
             </div>
 

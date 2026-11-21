@@ -298,7 +298,8 @@ public class BackupService {
                     .filter(Files::isRegularFile)
                     .filter(path -> {
                         String name = path.getFileName().toString();
-                        return (name.startsWith("servisdefteri-") || name.startsWith("pre-update-"))
+                        return (name.startsWith("servisdefteri-") || name.startsWith("pre-update-")
+                                || name.startsWith("pre-restore-"))
                                 && name.endsWith(".dump");
                     })
                     .sorted(Comparator.comparing(this::lastModified).reversed())

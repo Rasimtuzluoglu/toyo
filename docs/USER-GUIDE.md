@@ -64,6 +64,15 @@ Telefonda alt sabit menü vardır; en sık kullanılan ekranlara tek dokunuşla 
 
 > **Ağ güvenliği:** Varsayılan olarak uygulama yalnızca bu bilgisayardan (`127.0.0.1`) erişilebilir. Tablet/telefon erişimi istiyorsanız `APP_BIND_ADDRESS=0.0.0.0` yapın; yalnızca güvenilir bir Wi‑Fi/ağda kullanın. Bu durumda TLS sonlandıran bir reverse proxy ve `SESSION_COOKIE_SECURE=true` önerilir.
 
+## Ana Panel
+
+PATRON ve MUHASEBE girişinde açılan kokpit ekranıdır.
+
+- **Hızlı işlem çubuğu:** Tek dokunuşla **Yeni İş Emri**, **Tahsilat Al**, **Randevu Ver** ve **Plaka / Telefon Ara**.
+- **Bugünün uyarıları:** 2+ gündür açık iş emirleri, bugünkü randevular, teslime hazır araçlar, bakım zamanı gelen araçlar ve son yedeğin başarısız/eski olması. Uyarıya tıklayınca ilgili listeye gidilir.
+- **KPI kartları:** Açık iş emri, bugünkü tahsilat, net cari bakiye ve bugünkü randevu sayısı.
+- MUHASEBE ekranında ayrıca cari hesap ve tahsilat kısayolları bulunur.
+
 ## Günlük İşler / Bugün
 
 **Günlük İşler** ekranı, servisin her sabah bakacağı tek listedir. SERVIS rolünde ekranın adı **Bugün** olur.
@@ -119,6 +128,7 @@ Telefon numarası normalize edilir (boşluk/tire/`+90`/`0` farkları giderilir).
 
 - İletişim ve vergi bilgileri
 - Müşteriye bağlı araçlar
+- **İş Emri Aç:** Müşterinin ilk aracı, plaka ve müşteri bilgileri ön dolu olarak açılır; yalnızca şikâyet ve yapılan işi yazmanız yeterlidir.
 - Son iş emirleri
 - PATRON/MUHASEBE için cari bakiye, açık borç, cari ekstre, tahsilat ve manuel borç bağlantıları
 
@@ -225,6 +235,8 @@ Yeni iş emrinde **Fiş numarası** zorunludur ve **otomatik üretilmez**; numar
 ### Hızlı durum işlemleri
 
 İş emri detayında ve günlük panoda mevcut duruma uygun **Tamamla**, **Teslim Et** ve **İptal Et** düğmeleri gösterilir. Rutin geçişler tek tıkla yapılır; ayrı onay penceresi yoktur. “Tamamla” işlemi tutar varsa cari borcu otomatik oluşturur.
+
+Detay ekranının üstündeki **Sıradaki adım** paneli, iş emrinin durumuna göre tek belirgin eylemi gösterir: **Tamamla → Tahsilat Al → Teslim Tutanağı / Teslim Et → Belgeyi Yazdır**.
 
 - Tamamlamadan sonra ekranın sağ altında **Geri Al** bildirimi çıkar. Son **10 dakika** içinde tamamlama geri alınabilir; borç varsa ters kayıt oluşturulur, kayıt silinmez.
 - **PATRON/MUHASEBE** “Tamamla” yanındaki seçenekten **Cari / Nakit / Kart** seçebilir. Nakit veya kart seçilirse tahsilat aynı işlemde kaydedilir.
@@ -413,6 +425,7 @@ Sağ üstteki **oynat** simgesi 6 adımlık sunum turunu başlatır: kokpit → 
 - **Yedek alt klasörü:** PATRON, **Ayarlar → Yedekleme → Yedek alt klasörü** ile kök yedek klasörü altında bir alt klasör seçebilir (ör. `2026`, `sube-1`). Boş bırakılırsa kök klasör kullanılır. Kök klasör kurulumda belirlenir.
 - **Sunucuda Yedekle** ve **Yedek Al ve İndir** (tarayıcıda istediğiniz klasörü seçerek kaydetme)
 - Geçmiş yedekleri **İndir** ile bilgisayara alma
+- **Geri Yükle:** PATRON, başarılı bir yedeği **Ayarlar → Yedekleme → Geri Yükle** ekranından uygulama içinden geri yükleyebilir. Onay alanına `GERI YUKLE` yazılır; işlem öncesi mevcut veritabanının güvenlik yedeği otomatik alınır. Ayrıntılar: `docs/BACKUP-RESTORE.md`.
 - Son denetim kayıtları
 - Tüm denetim kayıtları: işlem türüne göre filtreleme
 - **Yazılım Güncellemesi:** GitHub’daki son commit’i kontrol eder; host ajanı çalışıyorsa **Güncelle ve Yeniden Başlat** ile Docker imajı yeniden oluşturulur. Güncelleme sırasında uygulama kısa süre erişilemez ve oturumlar kapanır.
@@ -430,7 +443,7 @@ Güncelleme ajanı kurulumu için `docs/INSTALLATION.md` → *Yazılım güncell
 - İş emri oluşturma, güncelleme, kalem ve durum değişiklikleri
 - Borç oluşturma, iş emri borçlandırma/ters kayıt
 - Tahsilat oluşturma/iptal
-- Yedekleme başlatma/sonuçları
+- Yedekleme başlatma/sonuçları ve yedekten geri yükleme istekleri
 
 Parola, oturum belirteci ve gereksiz kişisel veri loglanmaz.
 

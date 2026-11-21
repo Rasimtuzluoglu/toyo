@@ -141,7 +141,7 @@ Bu betik ajanı **Windows Görev Zamanlayıcı**'ya ekler ve hemen başlatır. G
   powershell -ExecutionPolicy Bypass -File .\scripts\rotate-db-password.ps1
   ```
   Betik yeni parolayı üretir, `ALTER ROLE` ile veritabanında değiştirir, `.env` dosyasını günceller ve uygulamayı yeniden başlatıp sağlık kontrolü yapar. Eski `.env` yedeğini güvenli şekilde silin.
-- `.env` dosyasını e-posta/sohbet ile paylaşmayın; yedeklerini şifreli harici diskte tutun.
+- `.env` dosyasını e-posta/sohbet ile paylaşmayın; yedeklerini erişimi kısıtlı ayrı bir diskte tutun.
 
 ### Temel komutlar
 

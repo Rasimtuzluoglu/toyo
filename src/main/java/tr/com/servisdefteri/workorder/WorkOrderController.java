@@ -25,6 +25,7 @@ import tr.com.servisdefteri.common.CsvUtil;
 import tr.com.servisdefteri.common.DownloadUtil;
 import tr.com.servisdefteri.common.FormTokenService;
 import tr.com.servisdefteri.common.SearchNormalizer;
+import tr.com.servisdefteri.customer.Customer;
 import tr.com.servisdefteri.customer.CustomerService;
 import tr.com.servisdefteri.account.AccountService;
 import tr.com.servisdefteri.export.ExportService;
@@ -34,6 +35,7 @@ import tr.com.servisdefteri.pdf.PdfService;
 import tr.com.servisdefteri.security.AppUserPrincipal;
 import tr.com.servisdefteri.security.Role;
 import tr.com.servisdefteri.settings.BusinessSettingsService;
+import tr.com.servisdefteri.vehicle.Vehicle;
 import tr.com.servisdefteri.vehicle.VehicleService;
 
 import java.io.IOException;
@@ -187,7 +189,8 @@ public class WorkOrderController {
 
     @GetMapping("/new")
     @PreAuthorize("hasAnyRole('PATRON','SERVIS')")
-    public String createForm(@RequestParam(required = false) Long vehicleId,
+    public String createForm(@RequestParam(required = false) Long customerId,
+                             @RequestParam(required = false) Long vehicleId,
                              @RequestParam(required = false) String plate,
                              @AuthenticationPrincipal AppUserPrincipal principal,
                              HttpSession session, Model model) {
@@ -195,7 +198,18 @@ public class WorkOrderController {
         if (plate != null && !plate.isBlank()) {
             quickForm.setPlate(plate.trim());
         } else if (vehicleId != null) {
-            quickForm.setPlate(vehicleService.findById(vehicleId).getPlate());
+            Vehicle vehicle = vehicleService.findById(vehicleId);
+            quickForm.setPlate(vehicle.getPlate());
+            quickForm.setCustomerName(vehicle.getCustomer().getName());
+            quickForm.setPhone(vehicle.getCustomer().getPhone());
+        } else if (customerId != null) {
+            Customer customer = customerService.findById(customerId);
+            quickForm.setCustomerName(customer.getName());
+            quickForm.setPhone(customer.getPhone());
+            List<Vehicle> customerVehicles = vehicleService.byCustomer(customerId);
+            if (!customerVehicles.isEmpty()) {
+                quickForm.setPlate(customerVehicles.get(0).getPlate());
+            }
         }
         return newOrderView(quickForm, session, model);
     }

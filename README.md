@@ -15,11 +15,11 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
-  <img alt="160 test" src="https://img.shields.io/badge/tests-160%20passing-brightgreen">
+  <img alt="173 test" src="https://img.shields.io/badge/tests-173%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ve demo ortamı çalışıyor · **160 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ortamı çalışıyor · **173 otomatik test** · yerel CI + Docker imaj doğrulaması
 
 ## Bir bakışta
 
@@ -43,6 +43,10 @@
 ## Öne çıkanlar
 
 **⚡ Hızlı operasyon**
+- **Ana panel hızlı işlem çubuğu**: Yeni iş emri, tahsilat, randevu ve plaka/telefon araması tek dokunuşla.
+- **Bugünün uyarıları**: 2+ gündür açık işler, randevular, teslime hazır araçlar, bakım zamanı ve eski yedek uyarısı.
+- Müşteri detayından **İş Emri Aç**: müşteri, araç ve plaka ön dolu gelir.
+- İş emri detayında **Sıradaki adım** paneli: Tamamla → Tahsilat → Teslim → Belge.
 - Plaka, müşteri veya telefonla arama; kayıtlı plakada müşteri/araç otomatik gelir.
 - Yeni plakada müşteri + araç + iş emri tek adımda oluşur.
 - Kanban üzerinde sürükle-bırak veya tek tıkla **İşleme Al / Tamamla / Teslim Et**.
@@ -82,6 +86,7 @@
 - CSV formül enjeksiyonuna karşı hücre temizliği; müşteri/araç toplu dışa aktarımı PATRON/MUHASEBE ile sınırlı.
 - İşlem denetim kaydı: kullanıcı, zaman, IP ve detay.
 - Günlük otomatik yedek; kaçırılan yedek açılışta telafi edilir.
+- **PATRON uygulama içinden geri yükleme**: yedek seçimi, `GERI YUKLE` onayı, otomatik güvenlik yedeği ve hata durumunda geri dönüş.
 - Güncelleme öncesi yedek, GitHub son commit kontrolü ve host ajanıyla Docker güncellemesi.
 
 > **Ağ notu:** Uygulama yalnızca **bu bilgisayara** (`127.0.0.1`) bağlanır ve yerel ağa/internete açılmaz. Uygulamayı `0.0.0.0` adresine bağlayarak yerel ağa açmayın; HTTP üzerinde oturum bilgileri açık gider. Uzaktan erişim gerekiyorsa TLS sonlandıran bir reverse proxy ve `SESSION_COOKIE_SECURE=true` ayrıca yapılandırılmalıdır.
@@ -194,7 +199,7 @@ docker compose -f docker-compose.demo.yml up -d
 mvn clean package
 ```
 
-- **160 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
+- **173 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
 - Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
 - Pre-push hook: `scripts/install-ci-hook.ps1`.

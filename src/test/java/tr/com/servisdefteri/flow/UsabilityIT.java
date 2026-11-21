@@ -1014,6 +1014,120 @@ class UsabilityIT extends BusinessTestSupport {
         }
     }
 
+    @Test
+    void dashboardOffersQuickActionsAndDailyAlerts() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Hızlı Eylem Müşteri", "0555 202 02 02");
+        Vehicle vehicle = createVehicle(customer, "34 HZL 002");
+        createOpenOrder(customer, vehicle);
+
+        mockMvc.perform(get("/").with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Yeni İş Emri")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tahsilat Al")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Randevu Ver")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Plaka / Telefon Ara")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Bugünün uyarıları")));
+    }
+
+    @Test
+    void customerDetailPrefillsWorkOrderWithCustomerAndVehicle() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Ön Dolum Müşteri", "0555 212 12 12");
+        Vehicle vehicle = createVehicle(customer, "34 OND 001");
+
+        mockMvc.perform(get("/customers/" + customer.getId()).with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers
+                        .containsString("/work-orders/new?customerId=" + customer.getId())))
+                .andExpect(content().string(org.hamcrest.Matchers
+                        .containsString("vehicleId=" + vehicle.getId())));
+
+        mockMvc.perform(get("/work-orders/new?customerId=" + customer.getId()
+                        + "&vehicleId=" + vehicle.getId())
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("34OND001")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Dolum")));
+    }
+
+    @Test
+    void customerWithoutVehicleCanStillOpenPrefilledWorkOrder() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Araçsız Müşteri", "0555 242 42 42");
+
+        mockMvc.perform(get("/customers/" + customer.getId()).with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers
+                        .containsString("/work-orders/new?customerId=" + customer.getId())));
+
+        mockMvc.perform(get("/work-orders/new?customerId=" + customer.getId())
+                        .with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("242")));
+    }
+
+    @Test
+    void workOrderDetailGuidesNextStepFromCompletionToDelivery() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        Customer customer = createCustomer("Sıradaki Adım Müşteri", "0555 222 22 22");
+        Vehicle vehicle = createVehicle(customer, "34 SRA 001");
+        WorkOrder order = createWorkOrderWithItem(customer, vehicle, "900.00");
+
+        mockMvc.perform(get("/work-orders/" + order.getId()).with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Sıradaki adım")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tamamla")));
+
+        runAsSystemPatron(() ->
+                workOrderService.changeStatus(order.getId(), tr.com.servisdefteri.workorder.WorkOrderStatus.TAMAMLANDI));
+
+        mockMvc.perform(get("/work-orders/" + order.getId()).with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Tahsilat Al")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Teslim Et")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Teslim Tutanağı")));
+    }
+
+    @Test
+    void staleOpenOrderCountDetectsOrdersOlderThanTwoDays() {
+        Customer customer = createCustomer("Eski İş Müşteri", "0555 232 32 32");
+        Vehicle vehicle = createVehicle(customer, "34 ESK 001");
+        WorkOrder order = createOpenOrder(customer, vehicle);
+        long before = workOrderService.staleOpenCount(2);
+
+        jdbcTemplate.update("update work_orders set opened_at = now() - interval '3 days' where id = ?",
+                order.getId());
+
+        assertThat(workOrderService.staleOpenCount(2)).isEqualTo(before + 1);
+    }
+
+    @Test
+    void restorePageIsPatronOnlyAndRequiresExplicitConfirmation() throws Exception {
+        User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
+        User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
+
+        mockMvc.perform(get("/settings/restore").with(user(principal(patron))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Yedekten Geri Yükle")));
+
+        mockMvc.perform(get("/settings/restore").with(user(principal(servis))))
+                .andExpect(status().isForbidden());
+
+        MockHttpSession session = new MockHttpSession();
+        String token = formTokenService.issue(session);
+        mockMvc.perform(post("/settings/restore")
+                        .session(session)
+                        .with(user(principal(patron)))
+                        .with(csrf())
+                        .param("formToken", token)
+                        .param("confirmation", "yanlis"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/settings/restore"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash()
+                        .attributeExists("errorMessage"));
+    }
+
     private void assertPdf(MvcResult result) {
         byte[] content = result.getResponse().getContentAsByteArray();
         assertThat(content).hasSizeGreaterThan(2000);

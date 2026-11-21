@@ -10,6 +10,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,6 +28,7 @@ import tr.com.servisdefteri.audit.AuditLogRepository;
 import tr.com.servisdefteri.backup.BackupRun;
 import tr.com.servisdefteri.backup.BackupService;
 import tr.com.servisdefteri.backup.BackupStatus;
+import tr.com.servisdefteri.backup.RestoreService;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.FormTokenService;
 import tr.com.servisdefteri.security.AppUserPrincipal;
@@ -41,6 +43,7 @@ import java.util.Locale;
 public class SettingsController {
 
     private final BackupService backupService;
+    private final RestoreService restoreService;
     private final AuditLogRepository auditLogRepository;
     private final FormTokenService formTokenService;
     private final BusinessSettingsService businessSettingsService;
@@ -49,11 +52,13 @@ public class SettingsController {
     @Value("${app.backup.host-directory:}")
     private String backupHostDirectory;
 
-    public SettingsController(BackupService backupService, AuditLogRepository auditLogRepository,
+    public SettingsController(BackupService backupService, RestoreService restoreService,
+                              AuditLogRepository auditLogRepository,
                               FormTokenService formTokenService,
                               BusinessSettingsService businessSettingsService,
                               UpdateService updateService) {
         this.backupService = backupService;
+        this.restoreService = restoreService;
         this.auditLogRepository = auditLogRepository;
         this.formTokenService = formTokenService;
         this.businessSettingsService = businessSettingsService;
@@ -184,6 +189,37 @@ public class SettingsController {
                         ContentDisposition.attachment().filename(resource.getFilename()).build().toString())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+
+    @GetMapping("/restore")
+    @PreAuthorize("hasRole('PATRON')")
+    public String restorePage(HttpSession session, Model model) {
+        model.addAttribute("runs", restoreService.restorableRuns());
+        model.addAttribute("agentOnline", restoreService.isAgentOnline());
+        model.addAttribute("restoreStatus", restoreService.status());
+        model.addAttribute("formToken", formTokenService.issue(session));
+        model.addAttribute("activeMenu", "settings");
+        return "settings/restore";
+    }
+
+    @PostMapping("/restore")
+    @PreAuthorize("hasRole('PATRON')")
+    public String restore(@RequestParam(name = "runId", required = false) Long runId,
+                          @RequestParam(name = "confirmation", required = false) String confirmation,
+                          @RequestParam(name = "formToken", required = false) String formToken,
+                          @AuthenticationPrincipal AppUserPrincipal principal,
+                          HttpSession session,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            formTokenService.consume(session, formToken);
+            restoreService.requestRestore(runId, confirmation,
+                    principal == null ? "patron" : principal.getUsername());
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Geri yükleme isteği alındı. Ajan birkaç dakika içinde uygulamayı durdurup yedeği geri yükleyecek.");
+        } catch (BusinessRuleException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/settings/restore";
     }
 
     @GetMapping("/audit")
