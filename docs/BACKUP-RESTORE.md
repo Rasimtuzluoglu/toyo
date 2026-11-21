@@ -7,7 +7,7 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 - Otomatik: varsayılan her gün 02:00 (`BACKUP_CRON=0 0 2 * * *`)
 - Manuel: **Ayarlar → Sunucuda Yedekle** veya **Yedek Al ve İndir** (yalnızca PATRON)
 - Dosya adı: `servisdefteri-YYYYMMdd-HHmmss.dump`
-- Konum: Kurulumda seçilen **bilgisayardaki yedek klasörü** (`BACKUP_HOST_DIR`); Docker içinde `/app/backups` yoluna bağlanır
+- Konum: `.env` içindeki **bilgisayardaki yedek klasörü** (`BACKUP_HOST_DIR`); Docker içinde `/app/backups` yoluna bağlanır
 - İkinci kopya: `BACKUP_COPY_HOST_DIR` ile seçilen host klasörü (harici disk/NAS) container içinde `/app/backup-copy` yoluna bağlanır; her başarılı yedek buraya da yazılır
 - Saklama: varsayılan 14 gün (`BACKUP_RETENTION_DAYS`); süresi dolan `.dump` dosyaları silinir, ancak en yeni 5 yedek (`BACKUP_MIN_COPIES`) her zaman korunur, veritabanındaki `backup_runs` kayıtları kalır
 - Her yedek, başarılı sayılmadan önce `pg_restore --list` ile okunabilirlik açısından doğrulanır; yarım kalan dosyalar silinir
@@ -37,8 +37,8 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 
 ### Yedek klasörünü değiştirme
 
-Kurulum betiği yedek klasörünü sorar ve `.env` içine `BACKUP_HOST_DIR` olarak yazar.
-Sonradan değiştirmek için:
+Yedek klasörü `.env` içindeki `BACKUP_HOST_DIR` değeriyle belirlenir.
+Değiştirmek için:
 
 ```powershell
 notepad .env

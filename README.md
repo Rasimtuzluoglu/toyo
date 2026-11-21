@@ -15,12 +15,11 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
-  <img alt="Tek tik kurulum" src="https://img.shields.io/badge/kurulum-tek%20tik-brightgreen">
   <img alt="173 test" src="https://img.shields.io/badge/tests-173%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
 
-> **Durum:** Üretim ortamı çalışıyor · **173 otomatik test** · yerel CI + Docker imaj doğrulaması
+> **Durum:** Üretim ortamı çalışıyor · **173 otomatik test**
 
 ## Bir bakışta
 
@@ -30,16 +29,6 @@
 | **Nerede çalışır?** | Yerel bilgisayarda Docker ile; port yönlendirme veya bulut hesabı gerekmez |
 | **Roller** | PATRON · MUHASEBE · SERVIS |
 | **Günlük odak** | Az tıklama, hızlı iş emri, net tahsilat, güvenli geçmiş |
-
-## Hızlı kurulum (Windows)
-
-- **Tek tık:** `KURULUM.cmd` veya paketlenmiş tek dosya EXE.
-- Docker Desktop yoksa otomatik kurulur; ilk kurulumda internet gerekir.
-- **Yedek klasörü sorulmaz:** `%USERPROFILE%\ToyotaServis-Yedekler` otomatik oluşturulur.
-- Kurulum sonunda `/setup` ekranından PATRON hesabı oluşturulur.
-- Pakette uygulama kaynak kodu bulunmaz; yalnızca derlenmiş Docker imajı gelir.
-
-Ayrıntılar: [Dağıtım notları](distribution/OKUBENI.md)
 
 ## Rol bazlı sade deneyim
 
@@ -167,44 +156,7 @@ Modüler monolit: tek Spring Boot uygulaması, tek PostgreSQL veritabanı, sunuc
 
 > `docker compose down -v` volume'ları siler ve veritabanı kayıtlarını geri döndürülemez biçimde kaybettirir. Normal kullanımda `-v` kullanmayın.
 
-PostgreSQL portu ana compose dosyasında bilerek yayınlanmaz. Yerel geliştirmede veritabanına host üzerinden erişmek için:
-
-```bash
-docker compose -f docker-compose.yml -f compose.dev.yml up -d db
-```
-
-Bu komut portu yalnızca `127.0.0.1:5432` üzerinde açar.
-
-## Demo ortamı
-
-Gerçek veriyi kirletmeden göstermek için ayrı veritabanı ve port kullanılır:
-
-```bash
-docker compose up -d --build
-docker compose -f docker-compose.demo.yml up -d
-```
-
-- Adres: `http://localhost:18081`
-- Veri: 12 müşteri, 12 Toyota araç, 12 iş emri, 5 tahsilat, 4 randevu
-- Rol girişleri: SERVIS doğrudan **Bugün** panosuna, MUHASEBE **Finans** özetine düşer.
-
-| Kullanıcı | Parola | Rol |
-|---|---|---|
-| `demo` | `DemoPass1234` | PATRON |
-| `servis` | `ServisPass1234` | SERVIS |
-| `muhasebe` | `MuhasebePass1234` | MUHASEBE |
-
-Demo verisi yalnızca `demo` profilinde ve boş veritabanında oluşur; üretim verisine dokunmaz.
-
-Güvenli sıfırlama:
-
-```bash
-docker rm -f servisdefteri-demo-app servisdefteri-demo-db
-docker volume rm servisdefteri-demo-pgdata
-docker compose -f docker-compose.demo.yml up -d
-```
-
-## Test ve yerel CI
+## Testler
 
 ```bash
 mvn clean package
@@ -212,24 +164,17 @@ mvn clean package
 
 - **173 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
 - Docker imajı `servisdefteri:1.0.0` olarak üretilir.
-- Yerel CI: `scripts/ci-local.ps1` (test + Docker imaj doğrulaması).
-- Pre-push hook: `scripts/install-ci-hook.ps1`.
-- GitHub Actions ile `mvn clean verify` + Docker imaj derleme kapısı çalışır (`.github/workflows/ci.yml`); yerel `ci-local.ps1` ve pre-push hook da kullanılabilir.
 
 ## Belgeler
 
 | Belge | İçerik |
 |---|---|
-| [Kurulum](docs/INSTALLATION.md) | Docker, yerel geliştirme, autostart, güncelleme ajanı |
+| [Kurulum](docs/INSTALLATION.md) | Docker ile kurulum, autostart, güncelleme ajanı |
 | [Kullanıcı Rehberi](docs/USER-GUIDE.md) | Roller, günlük akış, tahsilat, belgeler, SSS |
 | [Mimari](docs/ARCHITECTURE.md) | Modüller, katmanlar, güvenlik ve yedekleme yaklaşımı |
 | [Veritabanı](docs/DATABASE.md) | Tablolar, ilişkiler, indeksler ve migration'lar |
 | [Yedekleme ve Geri Yükleme](docs/BACKUP-RESTORE.md) | Yedek alma, geri yükleme tatbikatı, felaket senaryosu |
 | [Case Study](docs/CASE-STUDY.md) | Problem, çözüm, teknik yapı ve pilot metrikleri |
-
-## Dağıtım
-
-Kaynak kod içermeyen Docker imajı ve Windows kurulum paketi için [dağıtım notları](distribution/OKUBENI.md).
 
 ## Kapsam dışı
 

@@ -7,7 +7,6 @@ backups/
 updates/
 demo-backups/
 logs/
-distribution/
 scripts/
 *.log
 *.tar

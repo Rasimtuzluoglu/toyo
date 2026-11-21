@@ -25,7 +25,7 @@ tahsilat, randevu ve belge süreçlerini tek bir yerel ağ uygulamasında toplar
 | Belgeler | İş emri, makbuz, araç kabul ve teslim tutanağı; PDF ve ıslak/dijital imza |
 | Müşteri ilişkisi | Bakım hatırlatmaları (180 gün / 10.000 km), WhatsApp metin paylaşımı |
 | Güvenlik | Rol bazlı yetki, CSRF, audit log, yedekleme ve geri yükleme |
-| Kurulum | Docker Compose, yerel ağ, isteğe bağlı demo ortamı |
+| Kurulum | Docker Compose, yerel ağ |
 
 ## Teknik Yapı
 

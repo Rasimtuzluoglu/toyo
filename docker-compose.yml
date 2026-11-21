@@ -28,7 +28,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    # Veritabani portu bilerek yayinlanmaz. Yerel gelistirme icin compose.dev.yml kullanin.
+    # Veritabani portu bilerek yayinlanmaz.
 
   app:
     build:

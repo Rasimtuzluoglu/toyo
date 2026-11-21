@@ -18,7 +18,6 @@ Modüller paket sınırlarıyla ayrılmıştır:
 | `report` | Rapor sorguları, CSV ve Excel çıktıları |
 | `export` | Müşteri, araç, iş emri ve tahsilat listelerinin CSV/Excel çıktıları |
 | `pdf` | İş emri ve tahsilat makbuzu PDF üretimi |
-| `demo` | Yalnızca `demo` profilinde çalışan örnek veri yükleyici |
 | `audit` | Denetim kaydı |
 | `backup` | pg_dump ve yedek geçmişi |
 | `security` | Kullanıcı, rol, oturum, ilk kurulum |

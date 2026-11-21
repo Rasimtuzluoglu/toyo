@@ -86,11 +86,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-toyota.ps1
 
 ### Yedek klasörü
 
-Dağıtım paketindeki `KURULUM.cmd` yedek klasörü için **hiçbir soru sormaz**; tek yedek klasörü
-`%USERPROFILE%\ToyotaServis-Yedekler` otomatik oluşturulur. Kaynak koddan kurulumda bu konum
-`.env` içindeki `BACKUP_HOST_DIR` değeriyle belirlenir ve Docker bu klasörü container içindeki
-`/app/backups` yoluna bağlar. Böylece hem manuel hem zamanlanmış yedekler doğrudan
-bilgisayardaki klasöre düşer.
+Kaynak koddan kurulumda yedek konumu `.env` içindeki `BACKUP_HOST_DIR` değeriyle belirlenir ve Docker bu klasörü container içindeki `/app/backups` yoluna bağlar. Böylece hem manuel hem zamanlanmış yedekler doğrudan bilgisayardaki klasöre düşer.
 
 Klasörü sonradan değiştirmek için:
 
@@ -156,17 +152,6 @@ docker compose down
 
 > **Uyarı:** `docker compose down -v` komutu `servisdefteri-pgdata` volume'ını siler; veritabanı kayıtları geri döndürülemez biçimde kaybolur. Yedekler `BACKUP_HOST_DIR` ile belirtilen host klasöründe tutulduğu için `down -v` bu dosyaları silmez. Normal kapatma için `docker compose down` kullanın.
 
-### Demo / sunum ortamı
-
-Gerçek veriyi kirletmeden örnek verilerle göstermek için:
-
-```bash
-docker compose up -d --build
-docker compose -f docker-compose.demo.yml up -d
-```
-
-Adres `http://localhost:18081`, kullanıcı `demo`, parola `DemoPass1234`. Demo veritabanı ayrı volume kullanır; `down -v` ile sıfırlanabilir.
-
 ### Port değiştirme
 
 `.env` içinde:
@@ -177,48 +162,7 @@ APP_PORT=8090
 
 Uygulama container içinde 18080 dinlemeye devam eder; hostta 8090 açılır.
 
-### Veritabanı portu
-
-Ana `docker-compose.yml` dosyasında PostgreSQL portu **yayınlanmaz**. Yerel geliştirmede host üzerinden erişmek için:
-
-```bash
-docker compose -f docker-compose.yml -f compose.dev.yml up -d db
-```
-
-Bu komut `127.0.0.1:5432` bağlar; tüm ağa açmaz.
-
-## 4. Yerel Geliştirme (Maven)
-
-```bash
-# PostgreSQL
-docker compose -f docker-compose.yml -f compose.dev.yml up -d db
-
-# Ortam değişkenleri (PowerShell)
-$env:DB_URL="jdbc:postgresql://localhost:5432/servisdefteri"
-$env:DB_USERNAME="servisdefteri"
-$env:DB_PASSWORD="<POSTGRES_PASSWORD>"
-
-# Uygulama
-mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
-```
-
-Linux/macOS:
-
-```bash
-export DB_URL=jdbc:postgresql://localhost:5432/servisdefteri
-export DB_USERNAME=servisdefteri
-export DB_PASSWORD="<POSTGRES_PASSWORD>"
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-Varsayılan `dev` profili:
-
-- Thymeleaf cache kapalı
-- Uygulama logları DEBUG
-- `ddl-auto=validate` (şema yine Flyway ile)
-- PostgreSQL `localhost:5432`
-
-## 5. İlk Giriş
+## 4. İlk Giriş
 
 1. `http://localhost:18080` adresini açın.
 2. İlk kurulumda `/setup` ekranına yönlendirilirsiniz. Bu ekran yalnızca bir kez açılır.
@@ -229,7 +173,7 @@ Parola politikası: en az 10 karakter, en az bir büyük harf, bir küçük harf
 
 İlk girişten sonra **Ayarlar → İşletme bilgileri** bölümünde işletme adı, telefon, adres ve vergi bilgilerini girin; iş emri, makbuz ve ekstre çıktılarında bu bilgiler kullanılır.
 
-## 6. Testler
+## 5. Testler
 
 ```bash
 mvn test
@@ -243,23 +187,7 @@ mvn test
 
 Testler üretim veritabanınıza dokunmaz; ayrı container kullanır.
 
-### Yerel CI
-
-Test + Docker build (yerel CI):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\ci-local.ps1
-```
-
-İsteğe bağlı pre-push hook:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-ci-hook.ps1
-```
-
-Hook, testler veya Docker build başarısızsa push'u durdurur. Log: `logs/ci-local.log`.
-
-## 7. Sağlık Kontrolü
+## 6. Sağlık Kontrolü
 
 ```bash
 curl http://localhost:18080/actuator/health
@@ -273,7 +201,7 @@ Beklenen:
 
 Ayrıntılar güvenlik nedeniyle gizlenir. Uygulama container'ı, veritabanı `healthy` olmadan başlamaz (`depends_on: condition: service_healthy`).
 
-## 8. Üretim Benzeri Kullanım Notları
+## 7. Üretim Benzeri Kullanım Notları
 
 - Uygulama yerel ağ için HTTP üzerinde çalışır. İnternete açmayın.
 - Dış erişim gerekiyorsa HTTPS sonlandıran bir ters proxy arkasında ve güvenlik duvarı kurallarıyla kullanın.
@@ -283,7 +211,7 @@ Ayrıntılar güvenlik nedeniyle gizlenir. Uygulama container'ı, veritabanı `h
 - `.env` dosya izinlerini kısıtlayın.
 - Düzenli yedek alın ve geri yükleme testi yapın: `docs/BACKUP-RESTORE.md`.
 
-## 9. Sorun Giderme
+## 8. Sorun Giderme
 
 ### Uygulama başlamıyor: "Port 18080 was already in use"
 
