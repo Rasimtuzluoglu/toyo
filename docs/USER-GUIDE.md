@@ -14,12 +14,25 @@ Yetkiler sunucuda kontrol edilir. Menüde görünmeyen bir adrese doğrudan gidi
 
 - Kullanıcı adı ve parola ile giriş yapılır.
 - 2 saat işlem yapılmazsa oturum kapanır (`SESSION_TIMEOUT` ile değiştirilebilir).
-- Sağ üstteki kullanıcı menüsünden **Parola Değiştir** veya **Çıkış Yap** seçilir.
+- Sağ üstteki kullanıcı menüsünden **Kullanıcı Adı Değiştir**, **Parola Değiştir** veya **Çıkış Yap** seçilir.
 - Hatalı girişler denetim kaydına yazılır; mesaj kullanıcı adının var olup olmadığını ele vermez.
+
+### Parolamı unuttum
+
+1. Giriş ekranında **Şifremi unuttum** bağlantısına tıklayın.
+2. PATRON’dan aldığınız **tek kullanımlık kurtarma kodunu** girin.
+3. Yeni parolanızı iki kez girin.
+4. Sıfırlama sonrası tüm açık oturumlar kapanır; yeni parolayla giriş yapın.
+
+> Kurtarma kodu 24 saat geçerlidir ve yalnızca bir kez kullanılabilir. Kodu PATRON, **Kullanıcılar → Düzenle → Kurtarma Kodu Oluştur** ile üretir ve kullanıcıya iletir.
 
 ### Kendi parolanızı değiştirme
 
 Sağ üstteki kullanıcı menüsü → **Parola Değiştir**. Mevcut parola, yeni parola ve tekrarı girilir. Yeni parola en az 10 karakter olmalı; büyük harf, küçük harf ve rakam içermelidir.
+
+### Kendi kullanıcı adınızı değiştirme
+
+Sağ üstteki kullanıcı menüsü → **Kullanıcı Adı Değiştir**. Mevcut parolanızı girerek yeni kullanıcı adınızı belirleyin. Kullanıcı adı 3-50 karakter olmalı; harf, rakam, nokta, tire ve alt çizgi içerebilir. Değişiklik sonrası tüm oturumlar kapanır ve yeni adla giriş yapmanız gerekir.
 
 ## Rol Bazlı Giriş
 
@@ -371,9 +384,11 @@ Sağ üstteki **oynat** simgesi 6 adımlık sunum turunu başlatır: kokpit → 
 ## Kullanıcılar (PATRON)
 
 - Yeni kullanıcı oluşturma (PATRON/MUHASEBE/SERVIS)
-- Ad soyad, rol ve aktiflik güncelleme
+- Ad soyad, **kullanıcı adı**, rol ve aktiflik güncelleme
 - Parola sıfırlama
+- **Kurtarma kodu oluşturma:** kullanıcı parolasını unuttuysa 24 saat geçerli, tek kullanımlık kod üretilir. Kod yalnızca oluşturulduğu ekranda bir kez gösterilir.
 - Kullanıcı silinmez; pasife alınır
+- Kullanıcı adı değişince o kullanıcının tüm oturumları kapanır
 - Kendi hesabınızı pasife alamaz veya kendi PATRON rolünüzü kaldıramazsınız
 - Sistemde en az bir aktif PATRON kalmalıdır
 

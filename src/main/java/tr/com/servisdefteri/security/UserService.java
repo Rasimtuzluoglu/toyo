@@ -8,13 +8,21 @@ import tr.com.servisdefteri.audit.AuditService;
 import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.common.NotFoundException;
 
+import java.security.SecureRandom;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
 @Service
 public class UserService {
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+    private static final char[] RECOVERY_ALPHABET =
+            "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".toCharArray();
+    private static final int RECOVERY_CODE_LENGTH = 10;
+    private static final Duration RECOVERY_CODE_TTL = Duration.ofHours(24);
 
     private final UserRepository userRepository;
     private final InstallationStateRepository installationStateRepository;
@@ -117,19 +125,112 @@ public class UserService {
             throw new BusinessRuleException("Sistemde en az bir aktif işletme sahibi (patron) kalmalıdır.");
         }
 
+        String oldUsername = user.getUsername();
+        boolean usernameChanged = false;
+        String requestedUsername = normalizeUsername(form.getUsername());
+        if (!requestedUsername.isBlank() && !requestedUsername.equals(user.getUsername())) {
+            if (!currentUserService.isPatron()) {
+                throw new BusinessRuleException("Kullanıcı adı değiştirme yetkiniz yok.");
+            }
+            validateUsername(requestedUsername);
+            if (userRepository.existsByUsernameIgnoreCaseAndIdNot(requestedUsername, id)) {
+                throw new BusinessRuleException("Bu kullanıcı adı zaten kullanılıyor.");
+            }
+            user.setUsername(requestedUsername);
+            usernameChanged = true;
+        }
+
         boolean roleChanged = user.getRole() != form.getRole();
         boolean enabledChanged = user.isEnabled() != form.isEnabled();
         user.setFullName(form.getFullName().trim());
         user.setRole(form.getRole());
         user.setEnabled(form.isEnabled());
         User saved = userRepository.save(user);
-        if (roleChanged || enabledChanged) {
+        if (usernameChanged) {
+            sessionRevocationService.revokeAllSessions(oldUsername);
+        } else if (roleChanged || enabledChanged) {
             sessionRevocationService.revokeAllSessions(saved.getUsername());
         }
         auditService.record(AuditAction.USER_UPDATED, "Kullanıcı", saved.getId(),
-                "Kullanıcı güncellendi: " + saved.getUsername() + ", rol=" + saved.getRole()
+                "Kullanıcı güncellendi: " + (usernameChanged ? oldUsername + " -> " + saved.getUsername()
+                        : saved.getUsername()) + ", rol=" + saved.getRole()
                         + ", aktif=" + saved.isEnabled());
         return saved;
+    }
+
+    /**
+     * PATRON tarafından kullanıcıya tek kullanımlık, 24 saat geçerli kurtarma kodu üretir.
+     * Kod yalnızca bir kez gösterilir; veritabanında BCrypt ile saklanır.
+     */
+    @Transactional
+    public String generateRecoveryCode(Long userId) {
+        if (!currentUserService.isPatron()) {
+            throw new BusinessRuleException("Kurtarma kodu oluşturma yetkiniz yok.");
+        }
+        User user = findById(userId);
+        String code = randomRecoveryCode();
+        LocalDateTime now = LocalDateTime.now(clock);
+        user.setRecoveryCodeHash(passwordEncoder.encode(code));
+        user.setRecoveryCodeCreatedAt(now);
+        user.setRecoveryCodeExpiresAt(now.plus(RECOVERY_CODE_TTL));
+        userRepository.save(user);
+        auditService.record(AuditAction.USER_UPDATED, "Kullanıcı", user.getId(),
+                "Kurtarma kodu oluşturuldu: " + user.getUsername());
+        return code;
+    }
+
+    /**
+     * Giriş ekranındaki "şifremi unuttum" akışı. Kod tek kullanımlıktır ve süresi dolunca geçersizdir.
+     */
+    @Transactional
+    public void resetPasswordWithRecoveryCode(String username, String code, String newPassword) {
+        PasswordPolicy.requireStrong(newPassword);
+        User user = userRepository.findByUsernameIgnoreCase(normalizeUsername(username)).orElse(null);
+        String normalizedCode = code == null ? "" : code.trim().toUpperCase(Locale.ROOT);
+        boolean valid = user != null && user.isEnabled()
+                && user.getRecoveryCodeHash() != null
+                && user.getRecoveryCodeExpiresAt() != null
+                && user.getRecoveryCodeExpiresAt().isAfter(LocalDateTime.now(clock))
+                && !normalizedCode.isBlank()
+                && passwordEncoder.matches(normalizedCode, user.getRecoveryCodeHash());
+        if (!valid) {
+            throw new BusinessRuleException(
+                    "Kullanıcı adı veya kurtarma kodu hatalı ya da kodun süresi dolmuş.");
+        }
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        user.setRecoveryCodeHash(null);
+        user.setRecoveryCodeExpiresAt(null);
+        user.setRecoveryCodeCreatedAt(null);
+        userRepository.save(user);
+        sessionRevocationService.revokeAllSessions(user.getUsername());
+        auditService.recordAs(user.getId(), user.getUsername(), AuditAction.USER_PASSWORD_RESET,
+                "Kullanıcı", user.getId(), "Kurtarma koduyla parola sıfırlandı");
+    }
+
+    /**
+     * Kullanıcının kendi kullanıcı adını değiştirmesi. Mevcut parola doğrulanır ve
+     * tüm oturumlar sonlandırılır.
+     */
+    @Transactional
+    public void changeOwnUsername(Long id, String newUsername, String currentPassword) {
+        User user = findById(id);
+        if (currentPassword == null || !passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new BusinessRuleException("Mevcut parola hatalı.");
+        }
+        String normalized = normalizeUsername(newUsername);
+        if (normalized.equals(user.getUsername())) {
+            throw new BusinessRuleException("Yeni kullanıcı adı mevcut kullanıcı adıyla aynı.");
+        }
+        validateUsername(normalized);
+        if (userRepository.existsByUsernameIgnoreCaseAndIdNot(normalized, id)) {
+            throw new BusinessRuleException("Bu kullanıcı adı zaten kullanılıyor.");
+        }
+        String oldUsername = user.getUsername();
+        user.setUsername(normalized);
+        userRepository.save(user);
+        sessionRevocationService.revokeAllSessions(oldUsername);
+        auditService.record(AuditAction.USER_UPDATED, "Kullanıcı", user.getId(),
+                "Kullanıcı adı değiştirildi: " + oldUsername + " -> " + normalized);
     }
 
     @Transactional
@@ -158,5 +259,20 @@ public class UserService {
 
     private String normalizeUsername(String username) {
         return username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private void validateUsername(String username) {
+        if (username == null || !username.matches("^[a-z0-9._-]{3,50}$")) {
+            throw new BusinessRuleException(
+                    "Kullanıcı adı 3-50 karakter olmalı; harf, rakam, nokta, tire ve alt çizgi içerebilir.");
+        }
+    }
+
+    private String randomRecoveryCode() {
+        StringBuilder code = new StringBuilder(RECOVERY_CODE_LENGTH);
+        for (int i = 0; i < RECOVERY_CODE_LENGTH; i++) {
+            code.append(RECOVERY_ALPHABET[SECURE_RANDOM.nextInt(RECOVERY_ALPHABET.length)]);
+        }
+        return code.toString();
     }
 }

@@ -9,6 +9,13 @@
         <main class="sd-content">
             <div th:replace="~{fragments/layout :: alerts}"></div>
 
+            <div class="alert alert-warning" th:if="${recoveryCode}" role="alert">
+                <strong><i class="bi bi-key me-1"></i>Kurtarma kodu:</strong>
+                <code class="fs-6" th:text="${recoveryCode}">ABC123</code><br>
+                <span th:text="${recoveryCodeUsername}">kullanici</span> için 24 saat geçerli,
+                tek kullanımlık koddur. Kullanıcıya iletin; bu ekran kapandıktan sonra tekrar gösterilmez.
+            </div>
+
             <div class="page-head">
                 <div>
                     <div class="page-eyebrow">Yönetim</div>
@@ -41,9 +48,12 @@
                                 <div class="invalid-feedback" th:errors="*{fullName}"></div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label" for="username">Kullanıcı adı</label>
-                                <input class="form-control" id="username" type="text" th:value="${user.username}" disabled>
-                                <div class="form-text">Kullanıcı adı değiştirilemez.</div>
+                                <label class="form-label" for="username">Kullanıcı adı <span class="required">*</span></label>
+                                <input class="form-control" id="username" type="text" th:field="*{username}"
+                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                                       maxlength="50" required>
+                                <div class="invalid-feedback" th:errors="*{username}"></div>
+                                <div class="form-text">3-50 karakter; harf, rakam, nokta, tire ve alt çizgi.</div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label" for="role">Rol <span class="required">*</span></label>
@@ -72,6 +82,24 @@
                     </div>
                 </div>
             </form>
+
+            <div class="sd-card mt-3">
+                <div class="sd-card-header">
+                    <h2><i class="bi bi-key me-2"></i>Parola kurtarma kodu</h2>
+                </div>
+                <div class="sd-card-body">
+                    <p class="mb-2">
+                        Kullanıcı parolasını unuttuysa tek kullanımlık bir kurtarma kodu üretin.
+                        Kod 24 saat geçerlidir ve yalnızca bir kez kullanılabilir.
+                    </p>
+                    <form th:action="@{/users/{id}/recovery-code(id=${user.id})}" method="post"
+                          data-confirm="Yeni kurtarma kodu oluşturulsun mu? Önceki kod geçersiz olacak.">
+                        <button class="btn btn-outline-warning" type="submit">
+                            <i class="bi bi-key me-1"></i> Kurtarma Kodu Oluştur
+                        </button>
+                    </form>
+                </div>
+            </div>
         </main>
         <footer th:replace="~{fragments/layout :: footer}"></footer>
     </div>

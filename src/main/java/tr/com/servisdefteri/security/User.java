@@ -46,4 +46,13 @@ public class User {
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
+
+    @Column(name = "recovery_code_hash", length = 100)
+    private String recoveryCodeHash;
+
+    @Column(name = "recovery_code_expires_at")
+    private LocalDateTime recoveryCodeExpiresAt;
+
+    @Column(name = "recovery_code_created_at")
+    private LocalDateTime recoveryCodeCreatedAt;
 }

@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/webjars/**", "/images/**", "/favicon.ico",
                                 "/manifest.json", "/branding/**").permitAll()
                         .requestMatchers("/login", "/setup", "/setup/**", "/403", "/error", "/error/**").permitAll()
+                        .requestMatchers("/forgot-password").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/users/**", "/settings/**", "/audit/**").hasRole("PATRON")
                         .requestMatchers("/reports/**", "/payments/**", "/accounts/**")

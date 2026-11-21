@@ -54,6 +54,12 @@
             <div class="alert alert-success" th:if="${param.logout}" role="status">
                 Güvenli biçimde çıkış yaptınız.
             </div>
+            <div class="alert alert-success" th:if="${param.reset}" role="status">
+                Parolanız sıfırlandı. Yeni parolanızla giriş yapabilirsiniz.
+            </div>
+            <div class="alert alert-warning" th:if="${param.usernameChanged}" role="alert">
+                Kullanıcı adınız değiştirildi. Yeni kullanıcı adınızla giriş yapın.
+            </div>
             <div class="alert alert-warning" th:if="${param.expired}" role="alert">
                 <i class="bi bi-clock-history me-1" aria-hidden="true"></i>
                 Oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.
@@ -77,6 +83,9 @@
                             <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
                     </div>
+                </div>
+                <div class="d-flex justify-content-end mb-3">
+                    <a class="small" th:href="@{/forgot-password}">Şifremi unuttum</a>
                 </div>
                 <button type="submit" class="btn btn-primary w-100 py-2">
                     <span class="spinner-border spinner-border-sm me-2 d-none" aria-hidden="true"></span>

@@ -1,6 +1,7 @@
 package tr.com.servisdefteri.security;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,6 +31,40 @@ public class ProfileController {
         model.addAttribute("passwordForm", new PasswordChangeForm());
         model.addAttribute("activeMenu", "");
         return "profile/password";
+    }
+
+    @GetMapping("/username")
+    public String usernameForm(Model model) {
+        model.addAttribute("usernameForm", new UsernameChangeForm());
+        model.addAttribute("currentUsername", currentUserService.username());
+        model.addAttribute("activeMenu", "");
+        return "profile/username";
+    }
+
+    @PostMapping("/username")
+    public String changeUsername(@Valid @ModelAttribute("usernameForm") UsernameChangeForm form,
+                                 BindingResult bindingResult,
+                                 Model model,
+                                 HttpServletRequest request,
+                                 RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("currentUsername", currentUserService.username());
+            model.addAttribute("activeMenu", "");
+            return "profile/username";
+        }
+        try {
+            userService.changeOwnUsername(currentUserService.id(),
+                    form.getNewUsername(), form.getCurrentPassword());
+        } catch (BusinessRuleException ex) {
+            bindingResult.reject("username.failed", ex.getMessage());
+            model.addAttribute("currentUsername", currentUserService.username());
+            model.addAttribute("activeMenu", "");
+            return "profile/username";
+        }
+        if (request.getSession(false) != null) {
+            request.getSession(false).invalidate();
+        }
+        return "redirect:/login?usernameChanged";
     }
 
     @PostMapping("/password")

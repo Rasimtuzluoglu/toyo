@@ -15,8 +15,8 @@ class FlywayMigrationIT extends IntegrationTestSupport {
     @Test
     void allMigrationsAreAppliedAndExpectedTablesExist() {
         assertThat(flyway.info().current()).isNotNull();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("19");
-        assertThat(flyway.info().applied()).hasSize(19);
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("20");
+        assertThat(flyway.info().applied()).hasSize(20);
 
         Long tables = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.tables
@@ -67,6 +67,14 @@ class FlywayMigrationIT extends IntegrationTestSupport {
                     Long.class, index);
             assertThat(count).as(index).isEqualTo(1L);
         }
+
+        Long recoveryColumns = jdbcTemplate.queryForObject("""
+                select count(*) from information_schema.columns
+                where table_schema = 'public' and table_name = 'users'
+                  and column_name in ('recovery_code_hash', 'recovery_code_expires_at',
+                                      'recovery_code_created_at')
+                """, Long.class);
+        assertThat(recoveryColumns).isEqualTo(3L);
 
         Long checkConstraints = jdbcTemplate.queryForObject("""
                 select count(*) from information_schema.table_constraints

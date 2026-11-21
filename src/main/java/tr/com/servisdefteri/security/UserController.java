@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import tr.com.servisdefteri.common.BusinessRuleException;
 
@@ -17,9 +19,11 @@ import tr.com.servisdefteri.common.BusinessRuleException;
 public class UserController {
 
     private final UserService userService;
+    private final CurrentUserService currentUserService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, CurrentUserService currentUserService) {
         this.userService = userService;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping
@@ -62,6 +66,7 @@ public class UserController {
     public String editForm(@PathVariable Long id, Model model) {
         User user = userService.findById(id);
         UserEditForm form = new UserEditForm();
+        form.setUsername(user.getUsername());
         form.setFullName(user.getFullName());
         form.setRole(user.getRole());
         form.setEnabled(user.isEnabled());
@@ -76,14 +81,23 @@ public class UserController {
                          @Valid @ModelAttribute("userForm") UserEditForm form,
                          BindingResult bindingResult,
                          Model model,
+                         HttpServletRequest request,
                          RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("user", userService.findById(id));
             model.addAttribute("roles", Role.values());
             return "users/edit";
         }
+        boolean self = currentUserService.id().equals(id);
+        String oldUsername = userService.findById(id).getUsername();
         try {
-            userService.update(id, form);
+            User saved = userService.update(id, form);
+            if (self && !oldUsername.equalsIgnoreCase(saved.getUsername())) {
+                if (request.getSession(false) != null) {
+                    request.getSession(false).invalidate();
+                }
+                return "redirect:/login?usernameChanged";
+            }
         } catch (BusinessRuleException ex) {
             bindingResult.reject("user.failed", ex.getMessage());
             model.addAttribute("user", userService.findById(id));
@@ -94,9 +108,18 @@ public class UserController {
         return "redirect:/users";
     }
 
+    @PostMapping("/{id}/recovery-code")
+    @PreAuthorize("hasRole('PATRON')")
+    public String generateRecoveryCode(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        String code = userService.generateRecoveryCode(id);
+        User user = userService.findById(id);
+        redirectAttributes.addFlashAttribute("recoveryCode", code);
+        redirectAttributes.addFlashAttribute("recoveryCodeUsername", user.getUsername());
+        return "redirect:/users/" + id + "/edit";
+    }
+
     @GetMapping("/{id}/password")
-    public String passwordForm(@PathVariable Long id, Model model) {
-        model.addAttribute("user", userService.findById(id));
+    public String passwordForm(@PathVariable Long id, Model model) {        model.addAttribute("user", userService.findById(id));
         model.addAttribute("passwordForm", new PasswordForm());
         return "users/password";
     }

@@ -10,9 +10,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.test.web.servlet.MvcResult;
+import tr.com.servisdefteri.common.BusinessRuleException;
 import tr.com.servisdefteri.support.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -316,6 +318,59 @@ class SecurityIT extends IntegrationTestSupport {
         assertThat(sessionRegistry.getAllSessions(servisPrincipal, true))
                 .isNotEmpty()
                 .allMatch(SessionInformation::isExpired);
+    }
+
+    @Test
+    void recoveryCodeResetsPasswordAndCannotBeReused() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                principal(patron), null, principal(patron).getAuthorities()));
+
+        String code = userService.generateRecoveryCode(servis.getId());
+        assertThat(code).hasSize(10);
+
+        userService.resetPasswordWithRecoveryCode("servis", code, "NewPass1234");
+
+        User refreshed = userRepository.findByUsernameIgnoreCase("servis").orElseThrow();
+        assertThat(passwordEncoder.matches("NewPass1234", refreshed.getPasswordHash())).isTrue();
+        assertThat(refreshed.getRecoveryCodeHash()).isNull();
+        assertThat(refreshed.getRecoveryCodeExpiresAt()).isNull();
+
+        assertThatThrownBy(() -> userService.resetPasswordWithRecoveryCode(
+                "servis", code, "AnotherPass1234"))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("kurtarma kodu");
+    }
+
+    @Test
+    void patronCanChangeUsername() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                principal(patron), null, principal(patron).getAuthorities()));
+
+        UserEditForm form = new UserEditForm();
+        form.setUsername("servis-yeni");
+        form.setFullName(servis.getFullName());
+        form.setRole(Role.SERVIS);
+        form.setEnabled(true);
+        userService.update(servis.getId(), form);
+
+        assertThat(userRepository.findByUsernameIgnoreCase("servis")).isEmpty();
+        assertThat(userRepository.findByUsernameIgnoreCase("servis-yeni")).isPresent();
+    }
+
+    @Test
+    void userCanChangeOwnUsernameOnlyWithCorrectPassword() {
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                principal(servis), null, principal(servis).getAuthorities()));
+
+        assertThatThrownBy(() -> userService.changeOwnUsername(
+                servis.getId(), "servis-yeni", "wrong-password"))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("Mevcut parola");
+
+        userService.changeOwnUsername(servis.getId(), "servis-yeni", "TestPass1234");
+
+        assertThat(userRepository.findByUsernameIgnoreCase("servis")).isEmpty();
+        assertThat(userRepository.findByUsernameIgnoreCase("servis-yeni")).isPresent();
     }
 
     @Test

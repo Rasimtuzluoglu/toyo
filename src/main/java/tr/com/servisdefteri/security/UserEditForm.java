@@ -10,6 +10,9 @@ import lombok.Setter;
 @Setter
 public class UserEditForm {
 
+    @Size(max = 50, message = "Kullanıcı adı en fazla 50 karakter olabilir.")
+    private String username;
+
     @NotBlank(message = "Ad soyad zorunludur.")
     @Size(max = 100, message = "Ad soyad en fazla 100 karakter olabilir.")
     private String fullName;
