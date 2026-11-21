@@ -130,8 +130,36 @@ if not exist "%ROOT%ToyotaServis-1.0.0.tar" (
     goto fail
 )
 
-if not defined TOYOTA_BACKUP_DIR set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
-if not exist "%TOYOTA_BACKUP_DIR%" mkdir "%TOYOTA_BACKUP_DIR%" >nul 2>&1
+if defined TOYOTA_BACKUP_DIR (
+    call :ensure_backup_dir "%TOYOTA_BACKUP_DIR%"
+    if errorlevel 1 (
+        echo UYARI: Belirtilen yedek klasoru kullanilamiyor: %TOYOTA_BACKUP_DIR%
+        set "TOYOTA_BACKUP_DIR="
+    ) else (
+        goto backup_dir_ready
+    )
+)
+
+set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
+call :ensure_backup_dir "%TOYOTA_BACKUP_DIR%"
+if not errorlevel 1 goto backup_dir_ready
+
+echo UYARI: Kullanici profilindeki yedek klasoru kullanilamiyor.
+set "TOYOTA_BACKUP_DIR=%PUBLIC%\ToyotaServis-Yedekler"
+call :ensure_backup_dir "%TOYOTA_BACKUP_DIR%"
+if not errorlevel 1 goto backup_dir_ready
+
+echo UYARI: Public yedek klasoru kullanilamiyor; kurulum klasoru kullanilacak.
+set "TOYOTA_BACKUP_DIR=%INSTALL_DIR%\yedekler"
+call :ensure_backup_dir "%TOYOTA_BACKUP_DIR%"
+if not errorlevel 1 goto backup_dir_ready
+
+echo HATA: Yedek klasoru olusturulamadi veya yazilamiyor.
+echo Antivirus / Controlled Folder Access ayarlarini kontrol edin.
+if not defined TOYOTA_NONINTERACTIVE pause
+exit /b 1
+
+:backup_dir_ready
 set "BACKUP_ENV_DIR=%TOYOTA_BACKUP_DIR:\=/%"
 echo Yedek klasoru otomatik secildi: %TOYOTA_BACKUP_DIR%
 
@@ -162,8 +190,9 @@ if not exist "%ENVFILE%" (
     echo Mevcut .env kullaniliyor.
     for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"APP_PORT=" "%ENVFILE%" 2^>nul') do set "APP_PORT=%%B"
     if not defined APP_PORT set "APP_PORT=18080"
-    findstr /B /C:"BACKUP_HOST_DIR=" "%ENVFILE%" >nul 2>&1
-    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_HOST_DIR="%BACKUP_ENV_DIR%"
+    findstr /V /B /C:"BACKUP_HOST_DIR=" "%ENVFILE%" > "%ENVFILE%.tmp"
+    >> "%ENVFILE%.tmp" echo BACKUP_HOST_DIR="%BACKUP_ENV_DIR%"
+    move /Y "%ENVFILE%.tmp" "%ENVFILE%" >nul
     findstr /B /C:"BACKUP_COPY_DIR=" "%ENVFILE%" >nul 2>&1
     if not errorlevel 1 (
         powershell -NoProfile -Command "$p='%ENVFILE%'; (Get-Content -LiteralPath $p) -replace '^BACKUP_COPY_DIR=.*','BACKUP_COPY_DIR=' | Set-Content -LiteralPath $p -Encoding ASCII"
@@ -273,6 +302,15 @@ set "WRITE_TEST=%INSTALL_DIR%\.yazma-testi-%RANDOM%%RANDOM%"
 > "%WRITE_TEST%" echo test 2>nul
 if not exist "%WRITE_TEST%" exit /b 1
 del "%WRITE_TEST%" >nul 2>&1
+exit /b 0
+
+:ensure_backup_dir
+if not exist "%~1" mkdir "%~1" >nul 2>&1
+if errorlevel 1 exit /b 1
+set "BACKUP_TEST=%~1\.yazma-testi-%RANDOM%%RANDOM%"
+> "%BACKUP_TEST%" echo test 2>nul
+if not exist "%BACKUP_TEST%" exit /b 1
+del "%BACKUP_TEST%" >nul 2>&1
 exit /b 0
 
 :ensure_docker

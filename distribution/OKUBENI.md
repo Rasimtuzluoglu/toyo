@@ -137,6 +137,7 @@ Ardından `C:\ToyotaServis` klasörünü kaldırabilirsiniz.
 | Docker Desktop açılmıyor | Bilgisayarı yeniden başlatın; WSL2 ve sanallaştırmanın açık olduğunu kontrol edin |
 | `docker` komutu bulunamadı | Docker Desktop'ı açın veya bilgisayarı yeniden başlatın |
 | C:\ToyotaServis yazılamıyor | Kurulum otomatik olarak `C:\ProgramData\ToyotaServis` veya `C:\Users\Public\ToyotaServis` dener. EXE'yi yönetici olarak çalıştırın, antivirüsü kontrol edin. Log: `%TEMP%\ToyotaServis-Kurulum.log` |
+| Yedek klasörü oluşturulamıyor | Kurulum sırasıyla `%USERPROFILE%`, `%PUBLIC%` ve kurulum klasörünü dener; hiçbiri olmazsa hata verir. |
 | 18080 portu kullanımda | Başka bir uygulamayı kapatın veya `C:\ToyotaServis\.env` içinde `APP_PORT` değiştirip yeniden başlatın |
 | Uygulama açılmıyor | `docker compose -f C:\ToyotaServis\docker-compose.dist.yml --env-file C:\ToyotaServis\.env logs app` |
 | Kurulum ekranı açılmıyor | Adresin sonundaki `?token=...` bölümünün `.env` içindeki `SETUP_TOKEN` ile aynı olduğunu kontrol edin |
