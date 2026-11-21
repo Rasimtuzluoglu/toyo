@@ -15,6 +15,7 @@
   <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
+  <img alt="Tek tik kurulum" src="https://img.shields.io/badge/kurulum-tek%20tik-brightgreen">
   <img alt="173 test" src="https://img.shields.io/badge/tests-173%20passing-brightgreen">
   <img alt="Yerel ağ" src="https://img.shields.io/badge/yerel%20ağ-internete%20kapalı-blue">
 </p>
@@ -26,9 +27,19 @@
 | Konu | Özet |
 |---|---|
 | **Kimin için?** | Toyota Plaza Öztoprak'ın günlük servis ve muhasebe operasyonu |
-| **Nerede çalışır?** | Yerel ağda Docker ile; port yönlendirme veya bulut hesabı gerekmez |
+| **Nerede çalışır?** | Yerel bilgisayarda Docker ile; port yönlendirme veya bulut hesabı gerekmez |
 | **Roller** | PATRON · MUHASEBE · SERVIS |
 | **Günlük odak** | Az tıklama, hızlı iş emri, net tahsilat, güvenli geçmiş |
+
+## Hızlı kurulum (Windows)
+
+- **Tek tık:** `KURULUM.cmd` veya paketlenmiş tek dosya EXE.
+- Docker Desktop yoksa otomatik kurulur; ilk kurulumda internet gerekir.
+- **Yedek klasörü sorulmaz:** `%USERPROFILE%\ToyotaServis-Yedekler` otomatik oluşturulur.
+- Kurulum sonunda `/setup` ekranından PATRON hesabı oluşturulur.
+- Pakette uygulama kaynak kodu bulunmaz; yalnızca derlenmiş Docker imajı gelir.
+
+Ayrıntılar: [Dağıtım notları](distribution/OKUBENI.md)
 
 ## Rol bazlı sade deneyim
 
