@@ -107,7 +107,7 @@ if not exist "%ENVFILE%" (
     >> "%ENVFILE%" echo POSTGRES_PASSWORD=!NEW_DBPASS!
     >> "%ENVFILE%" echo APP_PORT=%APP_PORT%
     >> "%ENVFILE%" echo BACKUP_RETENTION_DAYS=14
-    >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
+    >> "%ENVFILE%" echo BACKUP_HOST_DIR="%BACKUP_ENV_DIR%"
     >> "%ENVFILE%" echo SETUP_TOKEN=!NEW_SETUP_TOKEN!
     >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
     echo .env olusturuldu.
@@ -116,7 +116,7 @@ if not exist "%ENVFILE%" (
     for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"APP_PORT=" "%ENVFILE%" 2^>nul') do set "APP_PORT=%%B"
     if not defined APP_PORT set "APP_PORT=18080"
     findstr /B /C:"BACKUP_HOST_DIR=" "%ENVFILE%" >nul 2>&1
-    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
+    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_HOST_DIR="%BACKUP_ENV_DIR%"
     findstr /B /C:"BACKUP_COPY_DIR=" "%ENVFILE%" >nul 2>&1
     if not errorlevel 1 (
         powershell -NoProfile -Command "$p='%ENVFILE%'; (Get-Content -LiteralPath $p) -replace '^BACKUP_COPY_DIR=.*','BACKUP_COPY_DIR=' | Set-Content -LiteralPath $p -Encoding ASCII"
