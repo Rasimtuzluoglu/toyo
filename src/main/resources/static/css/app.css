@@ -3148,3 +3148,9 @@ body.command-open {
     }
 }
 
+
+/* Edge/IE yerlesik parola goster ikonu, ozel goz ikonuyla cakismasin. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
