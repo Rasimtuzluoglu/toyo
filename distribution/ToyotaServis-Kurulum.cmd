@@ -5,19 +5,63 @@ title Toyota Servis Kurulum
 if not defined TOYOTA_SKIP_ADMIN (
     net session >nul 2>&1
     if errorlevel 1 (
-        echo Yonetici izni isteniyor...
-        powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+        echo Yonetici izni gerekli. UAC penceresini onaylayin...
+        powershell -NoProfile -ExecutionPolicy Bypass -Command "try { Start-Process -FilePath '%~f0' -Verb RunAs -Wait -ErrorAction Stop } catch { Write-Host 'Yonetici izni verilmedi veya UAC iptal edildi.'; Read-Host 'Kapatmak icin Enter tusuna basin'; exit 1 }"
         exit /b
     )
 )
 
 set "PATH=%ProgramFiles%\Docker\Docker\resources\bin;%PATH%"
 set "ROOT=%~dp0"
-if defined TOYOTA_INSTALL_DIR (
-    set "INSTALL_DIR=%TOYOTA_INSTALL_DIR%"
-) else (
-    set "INSTALL_DIR=C:\ToyotaServis"
+
+if defined TOYOTA_INSTALL_DIR goto use_custom_install_dir
+set "INSTALL_DIR=C:\ToyotaServis"
+call :ensure_install_dir
+if not errorlevel 1 goto install_dir_ready
+
+echo.
+echo UYARI: C:\ToyotaServis olusturulamadi veya yazilamiyor.
+echo Alternatif kurulum klasoru deneniyor: %ProgramData%\ToyotaServis
+set "INSTALL_DIR=%ProgramData%\ToyotaServis"
+call :ensure_install_dir
+if not errorlevel 1 goto install_dir_ready
+
+echo.
+echo UYARI: ProgramData klasoru de kullanilamiyor.
+echo Alternatif kurulum klasoru deneniyor: %PUBLIC%\ToyotaServis
+set "INSTALL_DIR=%PUBLIC%\ToyotaServis"
+call :ensure_install_dir
+if not errorlevel 1 goto install_dir_ready
+
+echo.
+echo UYARI: Public klasoru de kullanilamiyor.
+echo Alternatif kurulum klasoru deneniyor: %USERPROFILE%\ToyotaServis
+set "INSTALL_DIR=%USERPROFILE%\ToyotaServis"
+call :ensure_install_dir
+if not errorlevel 1 goto install_dir_ready
+
+echo.
+echo HATA: Kurulum klasoru olusturulamadi.
+echo C:\, ProgramData ve Public klasorlerine yazma izni yok.
+echo Yonetici olarak calistirdiginizdan ve antivirusun engellemediginden emin olun.
+echo Log: %TEMP%\ToyotaServis-Kurulum.log
+if not defined TOYOTA_NONINTERACTIVE pause
+exit /b 1
+
+:use_custom_install_dir
+set "INSTALL_DIR=%TOYOTA_INSTALL_DIR%"
+call :ensure_install_dir
+if errorlevel 1 (
+    echo.
+    echo HATA: Belirtilen kurulum klasoru olusturulamadi veya yazilamiyor:
+    echo %INSTALL_DIR%
+    echo Yonetici izni ve antivirus ayarlarini kontrol edin.
+    if not defined TOYOTA_NONINTERACTIVE pause
+    exit /b 1
 )
+goto install_dir_ready
+
+:install_dir_ready
 if "%INSTALL_DIR:~-1%"=="\" set "INSTALL_DIR=%INSTALL_DIR:~0,-1%"
 if defined TOYOTA_APP_PORT (
     set "APP_PORT=%TOYOTA_APP_PORT%"
@@ -27,14 +71,17 @@ if defined TOYOTA_APP_PORT (
 set "ENVFILE=%INSTALL_DIR%\.env"
 set "COMPOSE=%INSTALL_DIR%\docker-compose.dist.yml"
 set "LOG=%INSTALL_DIR%\kurulum.log"
+set "EARLY_LOG=%TEMP%\ToyotaServis-Kurulum.log"
 
 echo ============================================
 echo  Toyota Plaza Oztoprak - Servis Kurulumu
 echo ============================================
+echo  Kurulum klasoru: %INSTALL_DIR%
 echo.
 
-if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 echo [%date% %time%] Kurulum basladi >> "%LOG%"
+echo [%date% %time%] INSTALL_DIR=%INSTALL_DIR% >> "%LOG%"
+echo [%date% %time%] Kurulum basladi (INSTALL_DIR=%INSTALL_DIR%) >> "%EARLY_LOG%"
 
 echo [1/6] Docker Desktop kontrol ediliyor...
 call :ensure_docker
@@ -215,8 +262,18 @@ echo.
 echo Kurulum tamamlanamadi.
 echo Docker Desktop ve WSL2/sanallastirmayi kontrol edin.
 echo Ayrintilar icin: %INSTALL_DIR%\kurulum.log
+if exist "%EARLY_LOG%" echo Erken kurulum gunlugu: %EARLY_LOG%
 if not defined TOYOTA_NONINTERACTIVE pause
 exit /b 1
+
+:ensure_install_dir
+if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%" >nul 2>&1
+if errorlevel 1 exit /b 1
+set "WRITE_TEST=%INSTALL_DIR%\.yazma-testi-%RANDOM%%RANDOM%"
+> "%WRITE_TEST%" echo test 2>nul
+if not exist "%WRITE_TEST%" exit /b 1
+del "%WRITE_TEST%" >nul 2>&1
+exit /b 0
 
 :ensure_docker
 set "PATH=%ProgramFiles%\Docker\Docker\resources\bin;%PATH%"
