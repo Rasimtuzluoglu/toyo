@@ -63,8 +63,9 @@ Bu kurulum yalnızca üzerinde çalıştığı bilgisayar için tasarlanmıştı
 - **İlk kurulum:** `.env` içinde `SETUP_TOKEN` tanımlarsanız `/setup` ekranı yalnızca `http://localhost:18080/setup?token=...` ile açılır. Boş bırakılırsa kurulum yalnızca loopback portundan erişilebilir.
 - Windows Güvenlik Duvarı'nda 18080 portu için gelen kural açmayın; gerekmiyor.
 - Modem/router üzerinde bu port için **port yönlendirme yapmayın**.
-- Yedekleri aynı bilgisayarda tutmayın; harici disk/NAS için `scripts/setup-backup-copy.ps1` çalıştırın veya **Yedek Al ve İndir** ile dışa alın.
-- Harici disk sonradan takıldıysa kaçırılan yedekleri `scripts/offline-backup.ps1` ile kopyalayın.
+- Yedekleri aynı bilgisayarda tutmayın; harici disk/NAS için kaynak kurulumda `scripts/setup-backup-copy.ps1` çalıştırın veya **Yedek Al ve İndir** ile dışa alın.
+- Dağıtım paketinde tek yedek klasörü kullanılır; harici kopya için **Yedek Al ve İndir** ile yedeği dışa alın.
+- Harici disk sonradan takıldıysa kaynak kurulumda kaçırılan yedekleri `scripts/offline-backup.ps1` ile kopyalayabilirsiniz.
 
 ### Windows'ta otomatik başlatma
 
@@ -85,9 +86,9 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-toyota.ps1
 
 ### Yedek klasörü
 
-Kurulum betiği yedeklerin tutulacağı klasörü sorar. Varsayılan konum
-`%USERPROFILE%\ToyotaServis-Yedekler` klasörüdür. Seçilen klasör `.env` içindeki
-`BACKUP_HOST_DIR` değerine yazılır ve Docker bu klasörü container içindeki
+Dağıtım paketindeki `KURULUM.cmd` yedek klasörü için **hiçbir soru sormaz**; tek yedek klasörü
+`%USERPROFILE%\ToyotaServis-Yedekler` otomatik oluşturulur. Kaynak koddan kurulumda bu konum
+`.env` içindeki `BACKUP_HOST_DIR` değeriyle belirlenir ve Docker bu klasörü container içindeki
 `/app/backups` yoluna bağlar. Böylece hem manuel hem zamanlanmış yedekler doğrudan
 bilgisayardaki klasöre düşer.
 

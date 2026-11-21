@@ -59,4 +59,4 @@ if (Test-Path $envPath) {
 }
 
 Write-Host "Tamamlandı. .env yalnızca $currentUser, SYSTEM ve Administrators tarafından okunabilir."
-Write-Host "Not: Dosyayı paylaşmayın; yedeklerini şifreli bir harici diskte tutun."
+Write-Host "Not: Dosyayı paylaşmayın; yedeklerini erişimi kısıtlı ayrı bir diskte tutun."

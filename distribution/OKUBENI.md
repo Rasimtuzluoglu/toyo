@@ -1,19 +1,25 @@
 # Toyota Plaza Öztoprak · Kurulum Paketi
 
 Bu klasör, uygulamayı müşteri bilgisayarına **kaynak kod olmadan** kurmak için hazırlanmıştır.
-Uygulama Docker imajı olarak gelir; Java/Maven/PostgreSQL kurmanız gerekmez.
+Uygulama yalnızca **derlenmiş Docker imajı** olarak gelir; `.java`, `pom.xml`, testler veya
+proje kaynakları pakette bulunmaz. Java/Maven/PostgreSQL kurmanız gerekmez.
+
+> Docker imajı teknik olarak incelenebilir; bu nedenle "kaynak kod pakette yoktur" denir,
+> ancak derlenmiş uygulama dosyaları Docker erişimi olan biri tarafından görülebilir.
 
 ## Paket içeriği
 
 | Dosya | Görev |
 |---|---|
-| `ToyotaServis-Kurulum.cmd` | Yönetici olarak çalıştırılan otomatik kurulum |
+| `KURULUM.cmd` | **Tek tıkla kurulum** (yönetici olarak çalıştırın) |
+| `BENIOKU.txt` | 3 adımlık hızlı başlangıç |
+| `ToyotaServis-Kurulum.cmd` | Kurulumun ana betiği |
 | `ToyotaServis-1.0.0.tar` | Uygulama + PostgreSQL Docker imajları |
 | `docker-compose.dist.yml` | Çalışma zamanı compose dosyası |
 | `ToyotaServis-Baslat.cmd` | Docker ve uygulamayı başlatır |
 | `ToyotaServis-Durdur.cmd` | Uygulamayı durdurur (veriler korunur) |
 | `ToyotaServis-Guncelle.cmd` | Yeni imaj paketiyle güncelleme |
-| `scripts/` | Yedek kopyası, parola rotasyonu ve `.env` izin araçları |
+| `scripts/` | Parola rotasyonu, acil parola sıfırlama ve `.env` izin araçları |
 | `OKUBENI.md` | Bu dosya |
 
 ## Gereksinimler
@@ -30,23 +36,22 @@ Uygulama Docker imajı olarak gelir; Java/Maven/PostgreSQL kurmanız gerekmez.
 ## Kurulum
 
 1. Bu klasörün **tamamını** müşteri bilgisayarına kopyalayın (USB/klasör).
-2. `ToyotaServis-Kurulum.cmd` dosyasına sağ tıklayıp **Yönetici olarak çalıştır** seçin.
-3. UAC izin ekranını onaylayın.
-4. Kurulum şunları otomatik yapar:
+2. `KURULUM.cmd` dosyasına çift tıklayın; UAC izin ekranını onaylayın.
+3. Kurulum şunları otomatik yapar:
    - Docker Desktop yoksa kurmayı dener (winget veya resmi installer).
    - Docker Desktop'ı başlatır ve hazır olmasını bekler.
    - Uygulama imajını Docker'a yükler.
    - `C:\ToyotaServis` altında çalışma dosyalarını, rastgele veritabanı parolasını ve tek kullanımlık kurulum tokenını oluşturur.
-   - Birincil ve ikinci yedek klasörlerini sorar (ikinci kopya için harici disk önerilir).
+   - **Hiçbir klasör yolu sormaz.** Yedekler otomatik olarak `%USERPROFILE%\ToyotaServis-Yedekler` klasörüne yazılır.
    - Veritabanını ve uygulamayı başlatır.
    - Windows güvenlik duvarında ek bir port açmaz; uygulama yalnızca bu bilgisayardan kullanılır.
    - `.env` dosyasının erişim izinlerini sıkılaştırır.
    - Masaüstüne **Toyota Servis** kısayolunu ve oturum açılışında başlatan görevi ekler.
-5. Kurulum sonunda tarayıcıda **token içeren `/setup` adresi** açılır.
-6. İlk PATRON (işletme sahibi) hesabını oluşturun. Bu ekran yalnızca bir kez açılır. Token `C:\ToyotaServis\.env` içindeki `SETUP_TOKEN` değeridir.
+4. Kurulum sonunda tarayıcıda **token içeren `/setup` adresi** açılır.
+5. İlk PATRON (işletme sahibi) hesabını oluşturun. Bu ekran yalnızca bir kez açılır. Token `C:\ToyotaServis\.env` içindeki `SETUP_TOKEN` değeridir.
 
 Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlatın ve
-`ToyotaServis-Kurulum.cmd` dosyasını tekrar çalıştırın. Kurulu adımlar atlanır.
+`KURULUM.cmd` dosyasını tekrar çalıştırın. Kurulu adımlar atlanır.
 
 ## Giriş adresleri
 
@@ -87,18 +92,12 @@ açılmaz; bu nedenle telefon/tablet ile uzaktan kullanım desteklenmez.
 - Bilgisayar 02:00'de kapalıysa sonraki açılışta 36 saatten eski yedek telafi edilir.
 - Ayarlar → Yedekleme ekranından manuel yedek alabilir ve yedeği indirebilirsiniz.
 - Güncelleme ajanı kuruluysa PATRON, **Ayarlar → Yedekleme → Geri Yükle** ile başarılı bir yedeği uygulama içinden geri yükleyebilir; işlem öncesi güvenlik yedeği otomatik alınır.
-- Kurulum sırasında seçtiğiniz klasöre otomatik yedek yazılır (varsayılan: `%USERPROFILE%\ToyotaServis-Yedekler`).
-- İkinci kopya da yazılır (varsayılan: `%USERPROFILE%\ToyotaServis-Yedekler-2`); harici disk/NAS için kurulumda o yolu seçin.
-- Harici diski sonradan bağlarsanız:
-  ```powershell
-  powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\setup-backup-copy.ps1 -DriveLetter E
-  ```
-- Diskte kaçırılan yedekleri tamamlamak için:
-  ```powershell
-  powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\offline-backup.ps1
-  ```
-- Yedek klasörünü değiştirmek için `.env` içindeki `BACKUP_HOST_DIR` / `BACKUP_COPY_HOST_DIR` değerlerini güncelleyip servisleri yeniden başlatın.
-- Veritabanı verisi `toyota-servis-pgdata` volume'undadır.
+- **Tek yedek klasörü:** `%USERPROFILE%\ToyotaServis-Yedekler`. Kurulum hiçbir yol sormaz; klasör yoksa otomatik oluşturulur.
+- Veritabanı verisi `toyota-servis-pgdata` Docker volume'ündedir.
+
+> Yedek klasörünü ileri düzeyde değiştirmek isterseniz `C:\ToyotaServis\.env` içindeki
+> `BACKUP_HOST_DIR` değerini düzenleyip `C:\ToyotaServis\ToyotaServis-Baslat.cmd` ile
+> yeniden başlatın. Normal kullanımda buna gerek yoktur.
 
 > `C:\ToyotaServis\.env` dosyasını kaybetmeyin. Veritabanı parolası ve kurulum tokenı burada tutulur.
 > Bu dosyayı yedekleyin; üçüncü kişilerle paylaşmayın. İzinleri sıkılaştırmak için:

@@ -2,11 +2,13 @@
 setlocal EnableExtensions EnableDelayedExpansion
 title Toyota Servis Kurulum
 
-net session >nul 2>&1
-if errorlevel 1 (
-    echo Yonetici izni isteniyor...
-    powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
-    exit /b
+if not defined TOYOTA_SKIP_ADMIN (
+    net session >nul 2>&1
+    if errorlevel 1 (
+        echo Yonetici izni isteniyor...
+        powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+        exit /b
+    )
 )
 
 set "PATH=%ProgramFiles%\Docker\Docker\resources\bin;%PATH%"
@@ -81,29 +83,10 @@ if not exist "%ROOT%ToyotaServis-1.0.0.tar" (
     goto fail
 )
 
-if not defined TOYOTA_BACKUP_DIR (
-    set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
-    echo.
-    echo Yedeklerin tutulacagi klasoru secin - bosluk kullanmayin.
-    set /p "BACKUP_INPUT=Yedek klasoru [%TOYOTA_BACKUP_DIR%]: "
-    if defined BACKUP_INPUT set "TOYOTA_BACKUP_DIR=%BACKUP_INPUT%"
-) else (
-    echo Yedek klasoru: %TOYOTA_BACKUP_DIR%
-)
+if not defined TOYOTA_BACKUP_DIR set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
 if not exist "%TOYOTA_BACKUP_DIR%" mkdir "%TOYOTA_BACKUP_DIR%" >nul 2>&1
 set "BACKUP_ENV_DIR=%TOYOTA_BACKUP_DIR:\=/%"
-
-if not defined TOYOTA_BACKUP_COPY_DIR (
-    set "TOYOTA_BACKUP_COPY_DIR=%USERPROFILE%\ToyotaServis-Yedekler-2"
-    echo.
-    echo Ikinci yedek kopyasi icin klasor - harici disk onerilir; bosluk kullanmayin.
-    set /p "BACKUP_COPY_INPUT=Ikinci kopya klasoru [%TOYOTA_BACKUP_COPY_DIR%]: "
-    if defined BACKUP_COPY_INPUT set "TOYOTA_BACKUP_COPY_DIR=%BACKUP_COPY_INPUT%"
-) else (
-    echo Ikinci kopya klasoru: %TOYOTA_BACKUP_COPY_DIR%
-)
-if not exist "%TOYOTA_BACKUP_COPY_DIR%" mkdir "%TOYOTA_BACKUP_COPY_DIR%" >nul 2>&1
-set "BACKUP_COPY_ENV_DIR=%TOYOTA_BACKUP_COPY_DIR:\=/%"
+echo Yedek klasoru otomatik secildi: %TOYOTA_BACKUP_DIR%
 
 rem Batch parser: parenli PowerShell komutlarini dis if blogunun icine koymayin.
 rem Aksi halde "Substring(0,24)" icindeki ')' blogu erken kapatir.
@@ -125,8 +108,6 @@ if not exist "%ENVFILE%" (
     >> "%ENVFILE%" echo APP_PORT=%APP_PORT%
     >> "%ENVFILE%" echo BACKUP_RETENTION_DAYS=14
     >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
-    >> "%ENVFILE%" echo BACKUP_COPY_HOST_DIR=%BACKUP_COPY_ENV_DIR%
-    >> "%ENVFILE%" echo BACKUP_COPY_DIR=/app/backup-copy
     >> "%ENVFILE%" echo SETUP_TOKEN=!NEW_SETUP_TOKEN!
     >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
     echo .env olusturuldu.
@@ -136,10 +117,10 @@ if not exist "%ENVFILE%" (
     if not defined APP_PORT set "APP_PORT=18080"
     findstr /B /C:"BACKUP_HOST_DIR=" "%ENVFILE%" >nul 2>&1
     if errorlevel 1 >> "%ENVFILE%" echo BACKUP_HOST_DIR=%BACKUP_ENV_DIR%
-    findstr /B /C:"BACKUP_COPY_HOST_DIR=" "%ENVFILE%" >nul 2>&1
-    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_COPY_HOST_DIR=%BACKUP_COPY_ENV_DIR%
     findstr /B /C:"BACKUP_COPY_DIR=" "%ENVFILE%" >nul 2>&1
-    if errorlevel 1 >> "%ENVFILE%" echo BACKUP_COPY_DIR=/app/backup-copy
+    if not errorlevel 1 (
+        powershell -NoProfile -Command "$p='%ENVFILE%'; (Get-Content -LiteralPath $p) -replace '^BACKUP_COPY_DIR=.*','BACKUP_COPY_DIR=' | Set-Content -LiteralPath $p -Encoding ASCII"
+    )
     findstr /B /C:"APP_UPDATE_ENABLED=" "%ENVFILE%" >nul 2>&1
     if errorlevel 1 >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
     for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"SETUP_TOKEN=" "%ENVFILE%" 2^>nul') do set "SETUP_TOKEN=%%B"
@@ -208,8 +189,11 @@ echo  Giris       : http://localhost:%APP_PORT%/login
 echo.
 echo  Ilk kurulumda /setup ekranindan PATRON hesabini olusturun.
 echo  Kurulum tokeni: %INSTALL_DIR%\.env icindeki SETUP_TOKEN
+echo  Yedekler    : %TOYOTA_BACKUP_DIR%
 echo  Veritabani parolasi: %INSTALL_DIR%\.env
 echo  Baslat/Durdur: %INSTALL_DIR%\ToyotaServis-Baslat.cmd
+echo.
+echo  Bu paket kaynak kod icermez; uygulama derlenmis Docker imaji olarak calisir.
 echo.
 if defined TOYOTA_NO_BROWSER (
     echo Tarayici otomatik acilmadi - TOYOTA_NO_BROWSER=1.
