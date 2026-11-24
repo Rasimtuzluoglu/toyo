@@ -57,6 +57,20 @@ proje kaynakları pakette bulunmaz. Java/Maven/PostgreSQL kurmanız gerekmez.
 > Farklı bir klasöre kurmak isterseniz kurulumdan önce `TOYOTA_INSTALL_DIR` ortam değişkenini
 > kullanabilirsiniz. Örnek: `set TOYOTA_INSTALL_DIR=D:\ToyotaServis`
 
+### C: diski kısıtlıysa
+
+Kurulum zaten paketi çıkardığınız klasöre yapılır. Yedekleri de D: diskine almak için
+kurulumdan önce komut penceresinde:
+
+```bat
+set TOYOTA_BACKUP_DIR=D:\ToyotaServis-Yedekler
+KURULUM.cmd
+```
+
+Docker Desktop'ın kendi WSL disk görüntüsü varsayılan olarak C: altında kalır. C: diskinde
+yer yoksa Docker Desktop → **Settings → Resources → Advanced → Disk image location**
+üzerinden Docker verisini de D: diskine taşıyın.
+
 Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlatın ve
 `KURULUM.cmd` dosyasını tekrar çalıştırın. Kurulu adımlar atlanır.
 
