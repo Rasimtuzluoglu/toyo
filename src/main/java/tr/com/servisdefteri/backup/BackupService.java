@@ -92,6 +92,9 @@ public class BackupService {
     }
 
     public synchronized BackupRun runBackup(String triggeredBy) {
+        if (!properties.isEnabled()) {
+            throw new BusinessRuleException("Yedekleme bu kurulumda kapalı.");
+        }
         BackupRun run = new BackupRun();
         run.setStartedAt(LocalDateTime.now(clock));
         run.setStatus(BackupStatus.DEVAM_EDIYOR);

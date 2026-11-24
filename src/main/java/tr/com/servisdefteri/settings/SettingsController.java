@@ -100,6 +100,10 @@ public class SettingsController {
                             @RequestParam(name = "download", defaultValue = "false") boolean download,
                             HttpSession session,
                             RedirectAttributes redirectAttributes) {
+        if (!backupService.isEnabled()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Yedekleme bu kurulumda kapalı.");
+            return "redirect:/settings";
+        }
         try {
             if (!download) {
                 formTokenService.consume(session, formToken);
@@ -126,6 +130,10 @@ public class SettingsController {
                                         @RequestParam(name = "formToken", required = false) String formToken,
                                         HttpSession session,
                                         RedirectAttributes redirectAttributes) {
+        if (!backupService.isEnabled()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Yedekleme bu kurulumda kapalı.");
+            return "redirect:/settings";
+        }
         try {
             formTokenService.consume(session, formToken);
             businessSettingsService.updateBackupDirectory(directory);
@@ -141,6 +149,10 @@ public class SettingsController {
                                            @RequestParam(name = "formToken", required = false) String formToken,
                                            HttpSession session,
                                            RedirectAttributes redirectAttributes) {
+        if (!backupService.isEnabled()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Yedekleme bu kurulumda kapalı.");
+            return "redirect:/settings";
+        }
         try {
             formTokenService.consume(session, formToken);
             businessSettingsService.updateBackupSubdirectory(subdirectory);
@@ -183,6 +195,9 @@ public class SettingsController {
 
     @GetMapping("/backups/{id}/download")
     public ResponseEntity<Resource> download(@PathVariable Long id) {
+        if (!backupService.isEnabled()) {
+            throw new BusinessRuleException("Yedekleme bu kurulumda kapalı.");
+        }
         Resource resource = backupService.download(id);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
@@ -194,6 +209,9 @@ public class SettingsController {
     @GetMapping("/restore")
     @PreAuthorize("hasRole('PATRON')")
     public String restorePage(HttpSession session, Model model) {
+        if (!backupService.isEnabled()) {
+            return "redirect:/settings";
+        }
         model.addAttribute("runs", restoreService.restorableRuns());
         model.addAttribute("agentOnline", restoreService.isAgentOnline());
         model.addAttribute("restoreStatus", restoreService.status());
@@ -210,6 +228,10 @@ public class SettingsController {
                           @AuthenticationPrincipal AppUserPrincipal principal,
                           HttpSession session,
                           RedirectAttributes redirectAttributes) {
+        if (!backupService.isEnabled()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Yedekleme bu kurulumda kapalı.");
+            return "redirect:/settings";
+        }
         try {
             formTokenService.consume(session, formToken);
             restoreService.requestRestore(runId, confirmation,
@@ -267,6 +289,9 @@ public class SettingsController {
     }
 
     private String normalizeTab(String tab) {
+        if ("backup".equals(tab) && !backupService.isEnabled()) {
+            return "business";
+        }
         if ("backup".equals(tab) || "audit".equals(tab) || "advanced".equals(tab)) {
             return tab;
         }

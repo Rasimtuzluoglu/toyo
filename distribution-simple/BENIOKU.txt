@@ -1,0 +1,33 @@
+TOYOTA SERVIS - BASIT DOCKER KURULUMU
+
+1) ZIP'i hedef bilgisayarda yazilabilir bir klasore cikarin. Ornek: D:\ToyotaServis
+2) KURULUM.cmd dosyasina cift tiklayin.
+3) UAC (yonetici izni) ekranini onaylayin.
+
+Kurulum:
+- Kurulum, paketi cikardiginiz klasore yapilir; C: diski zorunlu degildir.
+- Docker Desktop'in kurulu ve Linux containers modunda olmasi gerekir.
+- Docker Desktop kapaliysa baslatilir ve hazir olmasi beklenir.
+- Yedekleme yoktur (ne otomatik ne manuel).
+- Otomatik guncelleme yoktur.
+- Otomatik saglik gorevi yoktur.
+- Otomatik baslatma kisayolu yoktur.
+- Sadece masaustu kisayolu olusturulur.
+
+Adresler:
+- Uygulama: http://localhost:18080
+- Giris    : http://localhost:18080/login
+
+Veri:
+- Veritabani toyota-servis-pgdata Docker volume'undedir.
+- Bu pakette yedekleme yoktur; disk arizasi veya yanlis silme veri kaybina yol acar.
+- docker compose down -v komutunu kullanmayin; veritabani volume'unu siler.
+
+Sorun devam ederse:
+- Docker Desktop tepsisine sag tik -> "Switch to Linux containers".
+- Log: %TEMP%\ToyotaServis-Basit-Kurulum.log
+- Kurulum logu: kurulum klasorundeki kurulum.log
+
+Bu klasorde uygulamanin kaynak kodu yoktur; yalnizca derlenmis Docker imajlari bulunur.
+
+Ayrintili bilgi: OKUBENI.md

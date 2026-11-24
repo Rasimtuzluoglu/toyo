@@ -13,7 +13,10 @@
                 <div>
                     <div class="page-eyebrow">Yönetim</div>
                     <h1 class="page-title">Ayarlar</h1>
-                    <p class="page-subtitle">İşletme, yedekleme, denetim ve sistem ayarları.</p>
+                    <p class="page-subtitle"
+                       th:text="${backupEnabled} ? 'İşletme, yedekleme, denetim ve sistem ayarları.' : 'İşletme, denetim ve sistem ayarları.'">
+                        İşletme, yedekleme, denetim ve sistem ayarları.
+                    </p>
                 </div>
             </div>
 
@@ -25,7 +28,7 @@
                         <i class="bi bi-shop me-1"></i> İşletme
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
+                <li class="nav-item" role="presentation" th:if="${backupEnabled}">
                     <button class="nav-link" type="button" role="tab"
                             data-bs-toggle="tab" data-bs-target="#tab-backup"
                             th:classappend="${activeTab == 'backup'} ? ' active'">
@@ -145,6 +148,7 @@
                 </div>
 
                 <div class="tab-pane fade" id="tab-backup" role="tabpanel"
+                     th:if="${backupEnabled}"
                      th:classappend="${activeTab == 'backup'} ? ' show active'">
                     <div class="sd-card">
                         <div class="sd-card-header">

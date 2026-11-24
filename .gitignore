@@ -30,3 +30,6 @@ distribution/.env
 
 .DS_Store
 Thumbs.db
+
+distribution-simple/*.tar
+distribution-simple/.env

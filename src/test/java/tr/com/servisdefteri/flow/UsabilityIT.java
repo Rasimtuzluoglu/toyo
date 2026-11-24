@@ -1103,13 +1103,13 @@ class UsabilityIT extends BusinessTestSupport {
     }
 
     @Test
-    void restorePageIsPatronOnlyAndRequiresExplicitConfirmation() throws Exception {
+    void restorePageIsHiddenWhenBackupDisabledAndPatronOnly() throws Exception {
         User patron = createUser("patron", "İşletme Sahibi", Role.PATRON);
         User servis = createUser("servis", "Servis Kullanıcısı", Role.SERVIS);
 
+        // Test profilinde yedekleme kapalıdır; geri yükleme ekranı açılmaz.
         mockMvc.perform(get("/settings/restore").with(user(principal(patron))))
-                .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Yedekten Geri Yükle")));
+                .andExpect(status().is3xxRedirection());
 
         mockMvc.perform(get("/settings/restore").with(user(principal(servis))))
                 .andExpect(status().isForbidden());
@@ -1123,7 +1123,7 @@ class UsabilityIT extends BusinessTestSupport {
                         .param("formToken", token)
                         .param("confirmation", "yanlis"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/settings/restore"))
+                .andExpect(redirectedUrl("/settings"))
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash()
                         .attributeExists("errorMessage"));
     }
