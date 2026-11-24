@@ -1,6 +1,7 @@
 TOYOTA SERVIS - BASIT DOCKER KURULUMU
 
-1) ZIP'i hedef bilgisayarda yazilabilir bir klasore cikarin. Ornek: D:\ToyotaServis
+1) ZIP'i bilgisayarin SABIT diskine cikarin. Ornek: C:\ToyotaServis-Kurulum veya D:\ToyotaServis
+   (USB/ciharilabilir diskten calistirmayin; disk cikarsa kurulum takilir.)
 2) KURULUM.cmd dosyasina cift tiklayin.
 3) UAC (yonetici izni) ekranini onaylayin.
 

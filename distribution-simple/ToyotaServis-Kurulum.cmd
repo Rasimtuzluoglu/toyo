@@ -98,6 +98,7 @@ if exist "%ENVFILE%" (
     )
     echo Mevcut .env kullaniliyor; yedekleme ayarlari kaldirildi.
 ) else (
+    set "NEW_ENV=1"
     for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "NEW_DBPASS=%%P"
     for /f "usebackq delims=" %%P in (`powershell -NoProfile -Command "[guid]::NewGuid().ToString('N').Substring(0,24)"`) do set "NEW_SETUP_TOKEN=%%P"
     if not defined NEW_DBPASS (
@@ -133,6 +134,7 @@ if defined TOYOTA_SKIP_START (
 echo [3/5] Eski konteynerler temizleniyor...
 docker compose --project-directory "%INSTALL_DIR%" --env-file "%ENVFILE%" -f "%COMPOSE%" down --remove-orphans >nul 2>&1
 docker rm -f toyota-servis-app toyota-servis-db >nul 2>&1
+if defined NEW_ENV docker volume rm toyota-servis-pgdata >nul 2>&1
 powershell -NoProfile -Command "try { Get-NetTCPConnection -LocalPort %APP_PORT% -State Listen -ErrorAction Stop | Out-Null; exit 0 } catch { exit 1 }"
 if not errorlevel 1 (
     echo.
@@ -141,7 +143,16 @@ if not errorlevel 1 (
     goto fail
 )
 
+if not exist "%ROOT%ToyotaServis-1.0.0.tar" (
+    echo.
+    echo HATA: Imaj dosyasi bulunamadi: %ROOT%ToyotaServis-1.0.0.tar
+    echo Kurulum dosyalari, cikarildigi diskten silinmis veya disk cikarilmis olabilir.
+    echo Paketi sabit bir diske cikarip tekrar calistirin. Ornek: C:\ToyotaServis-Kurulum
+    goto fail
+)
+
 echo [3/5] Uygulama ve veritabani imajlari yukleniyor...
+echo    Not: 340 MB imaj yukleniyor, 1-2 dakika surebilir. Pencereyi kapatmayin.
 docker load -i "%ROOT%ToyotaServis-1.0.0.tar" > "%TEMP%\ToyotaServis-Basit-docker-load.log" 2>&1
 if errorlevel 1 (
     echo HATA: Docker imajlari yuklenemedi.
@@ -159,12 +170,18 @@ if errorlevel 1 (
 )
 
 echo [5/5] Uygulama saglik kontrolu...
+echo    Not: Ilk baslatma 1-2 dakika surebilir. Pencereyi kapatmayin.
 for /l %%i in (1,1,60) do (
     powershell -NoProfile -Command "try { $r=Invoke-WebRequest -UseBasicParsing http://localhost:%APP_PORT%/actuator/health -TimeoutSec 3; if ($r.StatusCode -eq 200) { exit 0 } } catch {}; exit 1" >nul 2>&1 && goto healthy
     ping -n 6 127.0.0.1 >nul
 )
 echo HATA: Uygulama zamaninda hazir olmadi.
-docker compose --project-directory "%INSTALL_DIR%" --env-file "%ENVFILE%" -f "%COMPOSE%" logs --tail 100
+echo ---- Konteynerler ----
+docker ps -a --format "table {{.Names}}\t{{.Status}}"
+echo ---- Uygulama loglari ----
+docker compose --project-directory "%INSTALL_DIR%" --env-file "%ENVFILE%" -f "%COMPOSE%" logs --tail 100 app
+echo ---- Veritabani loglari ----
+docker compose --project-directory "%INSTALL_DIR%" --env-file "%ENVFILE%" -f "%COMPOSE%" logs --tail 100 db
 goto fail
 
 :healthy

@@ -14,6 +14,7 @@ en az hata kaynağıdır.
 | `docker-compose.dist.yml` | Çalışma zamanı compose dosyası |
 | `ToyotaServis-Baslat.cmd` | Uygulamayı başlatır |
 | `ToyotaServis-Durdur.cmd` | Uygulamayı durdurur (veriler korunur) |
+| `TANILA.cmd` | Sorun olduğunda tanılama raporu oluşturur |
 | `scripts/` | `.env` izinleri ve acil parola sıfırlama |
 
 ## Bu pakette OLMAYAN özellikler
@@ -43,7 +44,8 @@ Docker Desktop kurulu değilse kurulum durur ve uyarı verir; otomatik indirme/k
 
 ## Kurulum
 
-1. ZIP’i yazılabilir bir klasöre çıkarın. Örnek: `D:\ToyotaServis`
+1. ZIP’i bilgisayarın **sabit diskine** çıkarın. Örnek: `C:\ToyotaServis-Kurulum` veya `D:\ToyotaServis`.
+   USB/çıkarılabilir diskten çalıştırmayın; disk çıkarsa kurulum takılır.
 2. `KURULUM.cmd` dosyasına çift tıklayın.
 3. UAC iznini onaylayın.
 4. Kurulum sonunda **token içeren** `/setup?token=...` ekranı açılır; PATRON hesabını oluşturun.
@@ -101,5 +103,6 @@ docker volume rm toyota-servis-pgdata
 | Docker Desktop hazır olmadı | `wsl --update`, `wsl --shutdown`, Docker Desktop’ı yeniden açın |
 | Linux containers modunda değil | Tepsi simgesi → **Switch to Linux containers** |
 | 18080 portu kullanımda | Başka uygulamayı kapatın veya `.env` içinde `APP_PORT` değiştirin |
-| Uygulama açılmıyor | `kurulum.log` ve `%TEMP%\ToyotaServis-Basit-Kurulum.log` dosyalarına bakın |
+| Kurulum takıldı / dondu | Paket çıkarılabilir diskte olabilir; sabit diske çıkarıp tekrar deneyin. `TANILA.cmd` ile rapor alın |
+| Uygulama açılmıyor / kurulum takıldı | `TANILA.cmd` dosyasını çalıştırın; `%TEMP%\ToyotaServis-Tanila.txt` raporunu paylaşın |
 | Ayarlarda yedekleme görünmüyor | Bu pakette yedekleme kapalıdır; beklenen davranış |
