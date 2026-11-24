@@ -9,7 +9,7 @@ Kurulum:
 - Hicbir klasor veya yedek yolu sormaz.
 - Yedekleri de D:'ye almak icin kurulumdan once: set TOYOTA_BACKUP_DIR=D:\ToyotaServis-Yedekler
 - Docker Desktop yoksa kurmayi dener; Linux containers modunu kontrol eder.
-- Yedekler otomatik: %USERPROFILE%\ToyotaServis-Yedekler
+- Yedekler otomatik: kurulum D: ise D:\ToyotaServis-Yedekler, C: ise %USERPROFILE%\ToyotaServis-Yedekler
 - 15 dakikalik saglik gozetmeni kurulur; sorun varsa uygulamayi yeniden baslatir.
 - Kurulum sonunda tarayici acilir; ilk PATRON hesabini olusturun.
 

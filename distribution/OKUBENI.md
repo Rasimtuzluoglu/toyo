@@ -44,7 +44,8 @@ proje kaynakları pakette bulunmaz. Java/Maven/PostgreSQL kurmanız gerekmez.
    - Docker Desktop'ın **Linux containers** modunda olduğunu kontrol eder; değilse uyarır.
    - Uygulama ve veritabanı imajlarını Docker'a yükler.
    - Paketi çıkardığınız klasörde çalışma dosyalarını, rastgele veritabanı parolasını ve tek kullanımlık kurulum tokenını oluşturur.
-   - **Hiçbir klasör yolu sormaz.** Yedekler otomatik olarak `%USERPROFILE%\ToyotaServis-Yedekler` klasörüne yazılır.
+   - **Hiçbir klasör yolu sormaz.** Kurulum D: gibi bir diske yapıldıysa yedekler `D:\ToyotaServis-Yedekler`; C: ise `%USERPROFILE%\ToyotaServis-Yedekler` klasörüne yazılır.
+   - Docker'ın yedek klasörüne gerçekten erişebildiğini kurulumdan önce test eder; erişemezse File Sharing uyarısı verip durur.
    - Veritabanını ve uygulamayı başlatır.
    - Windows güvenlik duvarında ek bir port açmaz; uygulama yalnızca bu bilgisayardan kullanılır.
    - `.env` dosyasının erişim izinlerini sıkılaştırır.

@@ -149,6 +149,21 @@ if defined TOYOTA_BACKUP_DIR (
     )
 )
 
+rem Kurulum C: disinda ise yedekleri de ayni diske al; C:\Users kisitlamasina takilma.
+set "INSTALL_DRIVE="
+for %%D in ("%INSTALL_DIR%") do set "INSTALL_DRIVE=%%~dD"
+if not defined INSTALL_DRIVE goto backup_user_profile
+if /I "%INSTALL_DRIVE%"=="C:" goto backup_user_profile
+
+set "TOYOTA_BACKUP_DIR=%INSTALL_DRIVE%\ToyotaServis-Yedekler"
+call :ensure_backup_dir "%TOYOTA_BACKUP_DIR%"
+if not errorlevel 1 goto backup_dir_ready
+
+set "TOYOTA_BACKUP_DIR=%INSTALL_DIR%\yedekler"
+call :ensure_backup_dir "%TOYOTA_BACKUP_DIR%"
+if not errorlevel 1 goto backup_dir_ready
+
+:backup_user_profile
 set "TOYOTA_BACKUP_DIR=%USERPROFILE%\ToyotaServis-Yedekler"
 call :ensure_backup_dir "%TOYOTA_BACKUP_DIR%"
 if not errorlevel 1 goto backup_dir_ready
@@ -247,6 +262,17 @@ docker load -i "%ROOT%ToyotaServis-1.0.0.tar" > "%TEMP%\ToyotaServis-docker-load
 if errorlevel 1 (
     echo HATA: Docker imajlari yuklenemedi.
     type "%TEMP%\ToyotaServis-docker-load.log"
+    goto fail
+)
+
+echo [4/6] Docker yedek klasoru erisimi kontrol ediliyor...
+docker run --rm --entrypoint /bin/sh -v "%BACKUP_ENV_DIR%:/test" servisdefteri:1.0.0 -c "test -d /test" > "%TEMP%\ToyotaServis-mount-test.log" 2>&1
+if errorlevel 1 (
+    echo HATA: Docker, yedek klasorune erisemiyor.
+    echo Klasor: %TOYOTA_BACKUP_DIR%
+    echo Docker Desktop - Settings - Resources - File Sharing bolumunde bu diski paylasin.
+    echo Ayrintili log: %TEMP%\ToyotaServis-mount-test.log
+    type "%TEMP%\ToyotaServis-mount-test.log"
     goto fail
 )
 
