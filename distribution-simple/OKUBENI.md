@@ -67,6 +67,9 @@ Adres  : http://localhost:18080
 Bilgisayar açılışında uygulama **otomatik başlamaz**. Docker Desktop açıldıktan sonra
 `ToyotaServis-Baslat.cmd` ile başlatabilirsiniz.
 
+Docker Desktop'ın da oturum açılışında başlamasını istemiyorsanız:
+Docker Desktop → **Settings → General → Start Docker Desktop when you sign in** seçeneğini kapatın.
+
 ## Acil parola sıfırlama
 
 ```powershell

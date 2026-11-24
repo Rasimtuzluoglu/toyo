@@ -2,7 +2,6 @@ services:
   db:
     image: servisdefteri-db:16
     container_name: toyota-servis-db
-    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-servisdefteri}
       POSTGRES_USER: ${POSTGRES_USER:-servisdefteri}
@@ -32,7 +31,6 @@ services:
   app:
     image: servisdefteri:1.0.0
     container_name: toyota-servis-app
-    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
