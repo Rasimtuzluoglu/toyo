@@ -15,6 +15,17 @@ set "PATH=%ProgramFiles%\Docker\Docker\resources\bin;%PATH%"
 set "ROOT=%~dp0"
 
 if defined TOYOTA_INSTALL_DIR goto use_custom_install_dir
+
+rem Varsayilan kurulum yeri: paketin cikarildigi klasor.
+rem Boylece paket D:/E: gibi bir diske cikarilirsa C: diski hic kullanilmaz.
+set "INSTALL_DIR=%ROOT:~0,-1%"
+if "%INSTALL_DIR:~1%"==":" set "INSTALL_DIR=%INSTALL_DIR%\ToyotaServis"
+call :ensure_install_dir
+if not errorlevel 1 goto install_dir_ready
+
+echo.
+echo UYARI: Paket klasoru yazilamiyor: %INSTALL_DIR%
+echo Alternatif kurulum klasoru deneniyor: C:\ToyotaServis
 set "INSTALL_DIR=C:\ToyotaServis"
 call :ensure_install_dir
 if not errorlevel 1 goto install_dir_ready
@@ -42,7 +53,7 @@ if not errorlevel 1 goto install_dir_ready
 
 echo.
 echo HATA: Kurulum klasoru olusturulamadi.
-echo C:\, ProgramData ve Public klasorlerine yazma izni yok.
+echo Paket klasoru, C:\, ProgramData ve Public klasorlerine yazma izni yok.
 echo Yonetici olarak calistirdiginizdan ve antivirusun engellemediginden emin olun.
 echo Log: %TEMP%\ToyotaServis-Kurulum.log
 if not defined TOYOTA_NONINTERACTIVE pause

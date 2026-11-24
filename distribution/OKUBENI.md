@@ -35,14 +35,15 @@ proje kaynakları pakette bulunmaz. Java/Maven/PostgreSQL kurmanız gerekmez.
 
 ## Kurulum
 
-1. Bu klasörün **tamamını** müşteri bilgisayarına kopyalayın (USB/klasör).
+1. ZIP'i hedef bilgisayarda **yazılabilir bir klasöre** çıkarın. Örnek: `D:\ToyotaServis`.  
+   Kurulum, paketi çıkardığınız klasöre yapılır; C: diski zorunlu değildir.
 2. `KURULUM.cmd` dosyasına çift tıklayın; UAC izin ekranını onaylayın.
 3. Kurulum şunları otomatik yapar:
    - Docker Desktop yoksa kurmayı dener (winget veya resmi installer).
    - Docker Desktop'ı başlatır ve hazır olmasını bekler.
    - Docker Desktop'ın **Linux containers** modunda olduğunu kontrol eder; değilse uyarır.
    - Uygulama ve veritabanı imajlarını Docker'a yükler.
-   - `C:\ToyotaServis` altında çalışma dosyalarını, rastgele veritabanı parolasını ve tek kullanımlık kurulum tokenını oluşturur.
+   - Paketi çıkardığınız klasörde çalışma dosyalarını, rastgele veritabanı parolasını ve tek kullanımlık kurulum tokenını oluşturur.
    - **Hiçbir klasör yolu sormaz.** Yedekler otomatik olarak `%USERPROFILE%\ToyotaServis-Yedekler` klasörüne yazılır.
    - Veritabanını ve uygulamayı başlatır.
    - Windows güvenlik duvarında ek bir port açmaz; uygulama yalnızca bu bilgisayardan kullanılır.
@@ -50,7 +51,11 @@ proje kaynakları pakette bulunmaz. Java/Maven/PostgreSQL kurmanız gerekmez.
    - Masaüstüne **Toyota Servis** kısayolunu ve oturum açılışında başlatan görevi ekler.
    - **15 dakikalık sağlık gözetmeni** kurar; uygulama yanıt vermezse yeniden başlatır.
 4. Kurulum sonunda tarayıcıda **token içeren `/setup` adresi** açılır.
-5. İlk PATRON (işletme sahibi) hesabını oluşturun. Bu ekran yalnızca bir kez açılır. Token `C:\ToyotaServis\.env` içindeki `SETUP_TOKEN` değeridir.
+5. İlk PATRON (işletme sahibi) hesabını oluşturun. Bu ekran yalnızca bir kez açılır. Token, kurulum klasöründeki `.env` içindeki `SETUP_TOKEN` değeridir.
+
+> Kurulum klasörünü sonradan **silmeyin veya taşımayın**; uygulama o klasörden çalışır.
+> Farklı bir klasöre kurmak isterseniz kurulumdan önce `TOYOTA_INSTALL_DIR` ortam değişkenini
+> kullanabilirsiniz. Örnek: `set TOYOTA_INSTALL_DIR=D:\ToyotaServis`
 
 Docker Desktop kurulumu yeniden başlatma isterse: bilgisayarı yeniden başlatın ve
 `KURULUM.cmd` dosyasını tekrar çalıştırın. Kurulu adımlar atlanır.
@@ -75,12 +80,12 @@ açılmaz; bu nedenle telefon/tablet ile uzaktan kullanım desteklenmez.
 - Masaüstündeki **Toyota Servis** kısayolu uygulamayı açar.
 - Bilgisayar açıldığında `ToyotaServis-Baslat.cmd` otomatik çalışır; Docker Desktop ve
   uygulama arka planda başlar.
-- Uygulamayı durdurmak için `C:\ToyotaServis\ToyotaServis-Durdur.cmd`.
-- Yeniden başlatmak için `C:\ToyotaServis\ToyotaServis-Baslat.cmd`.
+- Uygulamayı durdurmak için `D:\ToyotaServis\ToyotaServis-Durdur.cmd`.
+- Yeniden başlatmak için `D:\ToyotaServis\ToyotaServis-Baslat.cmd`.
 
 ## Güncelleme
 
-1. Yeni sürümün `ToyotaServis-Yeni.tar` dosyasını `C:\ToyotaServis` klasörüne kopyalayın.
+1. Yeni sürümün `ToyotaServis-Yeni.tar` dosyasını `D:\ToyotaServis` klasörüne kopyalayın.
 2. `ToyotaServis-Guncelle.cmd` dosyasını çalıştırın.
 3. Güncelleme öncesi veritabanı yedeği otomatik alınır.
 4. Yeni imaj yüklenir, uygulama yeniden başlatılır ve sağlık kontrolü yapılır.
@@ -102,11 +107,11 @@ açılmaz; bu nedenle telefon/tablet ile uzaktan kullanım desteklenmez.
 Varsayılan yedekler bilgisayarın C: diskindedir. Disk arızasına karşı ikinci bir kopya için:
 
 1. Harici diski/NAS paylaşımını bağlayın.
-2. `C:\ToyotaServis\.env` içine hedef yolu ekleyin (örnek):
+2. `D:\ToyotaServis\.env` içine hedef yolu ekleyin (örnek):
    `BACKUP_OFFSITE_DIR=E:\ToyotaServis-Yedekler`
 3. Sağlık gözetmeni her 15 dakikada yeni `.dump` dosyalarını hedefe kopyalar.
 4. Elle kopyalamak için:
-   `powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\backup-offsite.ps1`
+   `powershell -ExecutionPolicy Bypass -File D:\ToyotaServis\scripts\backup-offsite.ps1`
 
 > Veritabanı yedeği müşteri ve araç bilgileri içerir. Harici diski BitLocker ile şifreleyin,
 > yalnızca yetkili kişilerin erişebildiği bir yerde saklayın. Bulut klasörünü (Google Drive,
@@ -118,18 +123,18 @@ Varsayılan yedekler bilgisayarın C: diskindedir. Disk arızasına karşı ikin
 - Görev adı: `ToyotaServisHealthCheck` (15 dakikada bir).
 - Uygulama sağlığı, son yedek yaşı (36 saat) ve boş disk (5 GB) kontrol edilir.
 - Sorun varsa uygulama yeniden başlatılır, uyarı penceresi açılır ve günlük yazılır.
-- Durum: `C:\ToyotaServis\updates\health.status`
-- Günlük: `C:\ToyotaServis\logs\health-check.log`
+- Durum: `D:\ToyotaServis\updates\health.status`
+- Günlük: `D:\ToyotaServis\logs\health-check.log`
 - Görevi yeniden kurmak için:
-  `powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\install-health-check.ps1`
+  `powershell -ExecutionPolicy Bypass -File D:\ToyotaServis\scripts\install-health-check.ps1`
 
-> Yedek klasörünü ileri düzeyde değiştirmek isterseniz `C:\ToyotaServis\.env` içindeki
-> `BACKUP_HOST_DIR` değerini düzenleyip `C:\ToyotaServis\ToyotaServis-Baslat.cmd` ile
+> Yedek klasörünü ileri düzeyde değiştirmek isterseniz `D:\ToyotaServis\.env` içindeki
+> `BACKUP_HOST_DIR` değerini düzenleyip `D:\ToyotaServis\ToyotaServis-Baslat.cmd` ile
 > yeniden başlatın. Normal kullanımda buna gerek yoktur.
 
-> `C:\ToyotaServis\.env` dosyasını kaybetmeyin. Veritabanı parolası ve kurulum tokenı burada tutulur.
+> `D:\ToyotaServis\.env` dosyasını kaybetmeyin. Veritabanı parolası ve kurulum tokenı burada tutulur.
 > Bu dosyayı yedekleyin; üçüncü kişilerle paylaşmayın. İzinleri sıkılaştırmak için:
-> `powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\harden-env.ps1`
+> `powershell -ExecutionPolicy Bypass -File D:\ToyotaServis\scripts\harden-env.ps1`
 > Parola değiştirmek için: `...\scripts\rotate-db-password.ps1`
 
 ## Acil parola sıfırlama
@@ -138,7 +143,7 @@ PATRON veya başka bir kullanıcının parolası bilinmiyorsa, sunucuya yerel er
 aşağıdaki komutla parolayı sıfırlayabilir:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\reset-user-password.ps1 -Username patron
+powershell -ExecutionPolicy Bypass -File D:\ToyotaServis\scripts\reset-user-password.ps1 -Username patron
 ```
 
 Parola verilmezse güçlü bir geçici parola üretilir ve ekranda gösterilir. İşlem sonunda
@@ -150,7 +155,7 @@ parolayı değiştirin. Bu betiği yalnızca yetkili kişiler çalıştırmalıd
 Uygulamayı durdurmak verileri silmez:
 
 ```bat
-C:\ToyotaServis\ToyotaServis-Durdur.cmd
+D:\ToyotaServis\ToyotaServis-Durdur.cmd
 ```
 
 Tamamen kaldırmak için önce durdurun, sonra Docker Desktop'ta şu volume'u silin:
@@ -159,7 +164,7 @@ Tamamen kaldırmak için önce durdurun, sonra Docker Desktop'ta şu volume'u si
 
 Yedekler Docker volume'unda değil, `.env` içindeki `BACKUP_HOST_DIR` klasöründe tutulur.
 **Volume'u silmek veritabanını kalıcı olarak siler.** Gerekirse önce yedek indirin.
-Ardından `C:\ToyotaServis` klasörünü kaldırabilirsiniz.
+Ardından `D:\ToyotaServis` klasörünü kaldırabilirsiniz.
 
 ## Kaynak kod ve güvenlik
 
@@ -177,13 +182,13 @@ Ardından `C:\ToyotaServis` klasörünü kaldırabilirsiniz.
 |---|---|
 | Docker Desktop açılmıyor | Bilgisayarı yeniden başlatın; WSL2 ve sanallaştırmanın açık olduğunu kontrol edin |
 | `docker` komutu bulunamadı | Docker Desktop'ı açın veya bilgisayarı yeniden başlatın |
-| C:\ToyotaServis yazılamıyor | Kurulum otomatik olarak `C:\ProgramData\ToyotaServis` veya `C:\Users\Public\ToyotaServis` dener. EXE'yi yönetici olarak çalıştırın, antivirüsü kontrol edin. Log: `%TEMP%\ToyotaServis-Kurulum.log` |
+| Paket/kurulum klasörü yazılamıyor | Kurulum sırasıyla `C:\ToyotaServis`, `C:\ProgramData\ToyotaServis`, `C:\Users\Public\ToyotaServis` ve `%USERPROFILE%\ToyotaServis` dener. Kurulumu yönetici olarak çalıştırın, antivirüsü kontrol edin. Log: `%TEMP%\ToyotaServis-Kurulum.log` |
 | Yedek klasörü oluşturulamıyor | Kurulum sırasıyla `%USERPROFILE%`, `%PUBLIC%` ve kurulum klasörünü dener; hiçbiri olmazsa hata verir. |
-| 18080 portu kullanımda | Başka bir uygulamayı kapatın veya `C:\ToyotaServis\.env` içinde `APP_PORT` değiştirip yeniden başlatın |
-| Uygulama açılmıyor | `docker compose -f C:\ToyotaServis\docker-compose.dist.yml --env-file C:\ToyotaServis\.env logs app` |
+| 18080 portu kullanımda | Başka bir uygulamayı kapatın veya `D:\ToyotaServis\.env` içinde `APP_PORT` değiştirip yeniden başlatın |
+| Uygulama açılmıyor | `docker compose -f D:\ToyotaServis\docker-compose.dist.yml --env-file D:\ToyotaServis\.env logs app` |
 | Kurulum ekranı açılmıyor | Adresin sonundaki `?token=...` bölümünün `.env` içindeki `SETUP_TOKEN` ile aynı olduğunu kontrol edin |
-| Sağlık uyarısı alıyorum | `C:\ToyotaServis\updates\health.status` ve `logs\health-check.log` dosyalarına bakın; disk/yedek/uygulama durumunu gösterir |
+| Sağlık uyarısı alıyorum | `D:\ToyotaServis\updates\health.status` ve `logs\health-check.log` dosyalarına bakın; disk/yedek/uygulama durumunu gösterir |
 | Offsite kopya oluşmuyor | `.env` içindeki `BACKUP_OFFSITE_DIR` yolunun bağlı ve yazılabilir olduğunu kontrol edin; `backup-offsite.ps1` çıktısına bakın |
 | PATRON parolası unutuldu | `scripts\reset-user-password.ps1 -Username patron` ile yerel olarak sıfırlayın |
 
-Kurulum günlüğü: `C:\ToyotaServis\kurulum.log`
+Kurulum günlüğü: `D:\ToyotaServis\kurulum.log`

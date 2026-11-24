@@ -31,7 +31,7 @@ Yetkiler sunucuda kontrol edilir. Menüde görünmeyen bir adrese doğrudan gidi
 PATRON tek yönetici hesabıysa ve kurtarma kodu yoksa, sunucuya yerel erişimi olan kişi host üzerinden sıfırlar:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\ToyotaServis\scripts\reset-user-password.ps1 -Username patron
+powershell -ExecutionPolicy Bypass -File D:\ToyotaServis\scripts\reset-user-password.ps1 -Username patron
 ```
 
 - Parola verilmezse güçlü bir geçici parola üretilir ve ekranda gösterilir.

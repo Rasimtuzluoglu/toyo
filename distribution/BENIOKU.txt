@@ -1,10 +1,11 @@
 TOYOTA SERVIS - DOCKER KURULUM
 
-1) Bu klasoru flas bellege kopyalayin.
-2) Hedef bilgisayarda KURULUM.cmd dosyasina cift tiklayin.
+1) Paketi hedef bilgisayarda yazilabilir bir klasore cikarin. Ornek: D:\ToyotaServis
+2) KURULUM.cmd dosyasina cift tiklayin.
 3) UAC (yonetici izni) ekranini onaylayin.
 
 Kurulum:
+- Kurulum, paketi cikardiginiz klasore yapilir; C: diski zorunlu degildir.
 - Hicbir klasor veya yedek yolu sormaz.
 - Docker Desktop yoksa kurmayi dener; Linux containers modunu kontrol eder.
 - Yedekler otomatik: %USERPROFILE%\ToyotaServis-Yedekler
