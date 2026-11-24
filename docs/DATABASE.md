@@ -251,6 +251,9 @@ Tahsilat makbuz sequence değerleri transaction rollback'inde geri alınmaz; bu 
 | V15 | `V15__work_order_debit_reactivation.sql` | Tamamlama geri alınınca yeniden borçlandırma |
 | V16 | `V16__one_time_setup.sql` | Tek seferlik kurulum durumu (`installation_state`) |
 | V17 | `V17__work_order_assigned_name.sql` | İş emrinde serbest metin ilgilenen kişi; eski kullanıcı atamalarını isme kopyalar |
+| V18 | `V18__remove_waiting_status.sql` | Beklemede durumunun kaldırılması |
+| V19 | `V19__integrity_and_report_indexes.sql` | Veri bütünlüğü ve rapor indeksleri |
+| V20 | `V20__password_recovery_and_username_change.sql` | Parola kurtarma ve kullanıcı adı değişikliği |
 
 Uygulama açılışında Flyway doğrular ve eksik migration'ları sırayla uygular. `flyway_schema_history` tablosu şema sürümünü tutar.
 

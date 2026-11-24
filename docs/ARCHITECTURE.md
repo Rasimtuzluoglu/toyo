@@ -114,7 +114,8 @@ Bu yaklaşım, günlük listeyi veritabanında çoğaltmadan ve gece yarısı ç
 - CSRF tüm formlarda açık.
 - Rol kontrolleri URL seviyesinde (`SecurityFilterChain`), controller metotlarında (`@PreAuthorize`) ve kritik işlemlerde service seviyesinde (ör. tahsilat iptali, iş emri durum geçişi) uygulanır.
 - Roller: **PATRON** tüm modüller; **MUHASEBE** tahsilat/cari/rapor ve iş emri iptali; **SERVIS** müşteri/araç/iş emri operasyonu. Finans ekranları SERVIS'e kapalıdır.
-- İlk kullanıcı yoksa `/setup`; varsa `/login`. Varsayılan parola yoktur.
+- İlk kullanıcı yoksa `/setup`; varsa `/login`. Varsayılan parola yoktur. Setup token yoksa `/setup` yalnızca doğrudan loopback bağlantısından açılır.
+- Giriş ve parola kurtarma denemeleri kullanıcı + IP başına sınırlandırılır; kurtarma akışında kullanıcı adı zamanlama sızıntısını azaltan dummy BCrypt kullanılır.
 - Oturum sabitleme: `migrateSession`; varsayılan oturum süresi 2 saat (`SESSION_TIMEOUT`); HttpOnly + SameSite=Lax çerez.
 - Her rol kendi parolasını değiştirebilir; PATRON ayrıca kullanıcı parolası sıfırlayabilir.
 - Yedek indirme yalnızca PATRON; dosya adı desen kontrolü ve dizin dışına çıkma engeli vardır.
@@ -144,6 +145,7 @@ Finansal ve kayıt oluşturan formlarda tek kullanımlık `FormToken` kullanıl�
 - `BackupService` `pg_dump -Fc` çalıştırır; dosya adı zaman damgalıdır.
 - Sonuç `backup_runs` tablosuna yazılır; başarı/başarısızlık denetim kaydına işlenir.
 - Saklama süresi dolan `.dump` dosyaları silinir; veritabanı kayıtları silinmez.
+- İkinci kopya `BACKUP_COPY_HOST_DIR`, harici/NAS kopyası `BACKUP_OFFSITE_DIR` ile desteklenir.
 - Otomatik yedek, geri yüklemenin doğrulandığı anlamına gelmez. Geri yükleme testi ayrı yapılmalıdır.
 
 ## Bilinçli Tasarım Kararları

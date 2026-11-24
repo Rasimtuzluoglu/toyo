@@ -19,8 +19,24 @@ $appUrl = "http://localhost:$appPort"
 Write-Host "Docker kontrol ediliyor..."
 docker info *> $null
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Docker Desktop calismiyor. Lutfen Docker Desktop'i baslatin."
-    exit 1
+    # Oturum acilirken Docker Desktop bazen henuz hazir olmaz; kisa sure bekle.
+    $dockerExe = "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+    if (Test-Path $dockerExe) {
+        Write-Host "Docker Desktop baslatiliyor..."
+        Start-Process -FilePath $dockerExe | Out-Null
+    }
+    $dockerDeadline = (Get-Date).AddMinutes(3)
+    while ((Get-Date) -lt $dockerDeadline) {
+        Start-Sleep -Seconds 5
+        docker info *> $null
+        if ($LASTEXITCODE -eq 0) {
+            break
+        }
+    }
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Docker Desktop zamaninda hazir olmadi. Lutfen Docker Desktop'i baslatin."
+        exit 1
+    }
 }
 
 Write-Host "Toyota Plaza Oztoprak servis yonetimi baslatiliyor..."

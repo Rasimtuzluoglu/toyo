@@ -64,7 +64,7 @@ Bu kurulum yalnızca üzerinde çalıştığı bilgisayar için tasarlanmıştı
 - Windows Güvenlik Duvarı'nda 18080 portu için gelen kural açmayın; gerekmiyor.
 - Modem/router üzerinde bu port için **port yönlendirme yapmayın**.
 - Yedekleri aynı bilgisayarda tutmayın; harici disk/NAS için kaynak kurulumda `scripts/setup-backup-copy.ps1` çalıştırın veya **Yedek Al ve İndir** ile dışa alın.
-- Dağıtım paketinde tek yedek klasörü kullanılır; harici kopya için **Yedek Al ve İndir** ile yedeği dışa alın.
+- Dağıtım paketinde `BACKUP_OFFSITE_DIR` doldurulursa sağlık gözetmeni yedekleri her 15 dakikada harici hedefe kopyalar.
 - Harici disk sonradan takıldıysa kaynak kurulumda kaçırılan yedekleri `scripts/offline-backup.ps1` ile kopyalayabilirsiniz.
 
 ### Windows'ta otomatik başlatma
@@ -118,7 +118,7 @@ Bu betik ajanı **Windows Görev Zamanlayıcı**'ya ekler ve hemen başlatır. G
 
 - **Manuel güncelleme:** Ayarlar → **Kontrol Et** → **Güncelle ve Yeniden Başlat**. Uygulama 1-3 dakika erişilemez olabilir ve oturumlar kapanır. Otomatik güncelleme varsayılan olarak **kapalıdır** (`APP_UPDATE_ENABLED=false`); açmadan önce aşağıdaki imza şartını okuyun.
 - **Otomatik güncelleme:** `APP_UPDATE_ENABLED=true` ve ajan `UPDATE_AUTO=true` ile başlatılırsa 5 dakikada bir kontrol edilir. Yalnızca mesai dışında tercih edin.
-- **Commit imzası zorunlu:** `UPDATE_REQUIRE_SIGNED=true` (varsayılan) iken ajan yalnızca GPG ile imzalanmış commit'leri uygular (`git verify-commit`). İmzasız commit gelirse güncelleme durdurulur. Geliştirme ortamında `.env` içinde `UPDATE_REQUIRE_SIGNED=false` yapılabilir; üretimde yapmayın.
+- **Commit imzası zorunlu:** `UPDATE_REQUIRE_SIGNED=true` (varsayılan) iken ajan yalnızca `security/allowed_signers` içindeki güvenilen SSH anahtarıyla imzalanmış commit'leri uygular (`git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile=... verify-commit`). İmzasız veya farklı anahtarla imzalanmış commit gelirse güncelleme durdurulur. Geliştirme ortamında `.env` içinde `UPDATE_REQUIRE_SIGNED=false` yapılabilir; üretimde yapmayın.
 - Her güncellemeden önce seçilen yedek klasörüne `pre-update-YYYYMMDD-HHmmss.dump` yedeği otomatik alınır. Yedek, app kapalı olsa bile `db` konteynerinden alınır; alınamazsa güncelleme **durdurulur**.
 - Ajan, yalnızca hızlı ileri alma (`git pull --ff-only`) yapar. Kirli çalışma ağacı varsa güncelleme **hata** olarak durur; önce commit/stash yapılmalıdır.
 - Sağlık kontrolü başarısız olursa önceki imaja ve önceki commit'e otomatik dönülür. Veritabanı şeması değiştiyse imaj geri dönüşü tek başına yetmez; güncelleme öncesi yedeği geri yükleyin.
@@ -138,6 +138,11 @@ Bu betik ajanı **Windows Görev Zamanlayıcı**'ya ekler ve hemen başlatır. G
   powershell -ExecutionPolicy Bypass -File .\scripts\rotate-db-password.ps1
   ```
   Betik yeni parolayı üretir, `ALTER ROLE` ile veritabanında değiştirir, `.env` dosyasını günceller ve uygulamayı yeniden başlatıp sağlık kontrolü yapar. Eski `.env` yedeğini güvenli şekilde silin.
+- PATRON veya başka bir kullanıcının parolası unutulursa, sunucuya yerel erişimle:
+  ```powershell
+  powershell -ExecutionPolicy Bypass -File .\scripts\reset-user-password.ps1 -Username patron
+  ```
+  Parola verilmezse güçlü bir geçici parola üretilir. İşlem açık oturumları kapatmak için uygulamayı yeniden başlatır.
 - `.env` dosyasını e-posta/sohbet ile paylaşmayın; yedeklerini erişimi kısıtlı ayrı bir diskte tutun.
 
 ### Temel komutlar
@@ -200,6 +205,14 @@ Beklenen:
 ```
 
 Ayrıntılar güvenlik nedeniyle gizlenir. Uygulama container'ı, veritabanı `healthy` olmadan başlamaz (`depends_on: condition: service_healthy`).
+
+Windows sağlık gözetmeni (15 dakikada bir):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-health-check.ps1
+```
+
+Görev adı `ToyotaServisHealthCheck`; uygulama sağlığını, son başarılı yedeğin yaşını (36 saat) ve boş disk alanını (5 GB) kontrol eder. Sorun varsa uygulamayı yeniden başlatır, `msg.exe` ile yerel uyarı verir ve günlük yazar. Durum dosyası `updates/health.status`, günlük `logs/health-check.log`.
 
 ## 7. Üretim Benzeri Kullanım Notları
 

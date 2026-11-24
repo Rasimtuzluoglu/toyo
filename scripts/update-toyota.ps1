@@ -100,9 +100,15 @@ try {
         }
     }
     if ($requireSigned) {
-        git verify-commit $remoteCommit *>> $logFile
+        # Müşteri kurulumunda güvenilen açık anahtar depoyla birlikte gelir.
+        # Böylece ajan, anahtar kullanıcı profilinde olmasa da imzayı doğrulayabilir.
+        $allowedSigners = Join-Path $projectRoot "security\allowed_signers"
+        if (-not (Test-Path $allowedSigners)) {
+            throw "Güvenlik: security\allowed_signers bulunamadı; imzalı commit doğrulanamıyor."
+        }
+        git -c gpg.format=ssh -c "gpg.ssh.allowedSignersFile=$allowedSigners" verify-commit $remoteCommit *>> $logFile
         if ($LASTEXITCODE -ne 0) {
-            throw "Güvenlik: GitHub'daki commit imzalı değil. Güncelleme yalnızca imzalı commit'lerle yapılabilir. Geliştirme için .env içinde UPDATE_REQUIRE_SIGNED=false ayarlayın."
+            throw "Güvenlik: GitHub'daki commit imzalı değil veya güvenilen anahtarla imzalanmamış. Güncelleme yalnızca imzalı commit'lerle yapılabilir. Geliştirme için .env içinde UPDATE_REQUIRE_SIGNED=false ayarlayın."
         }
         Write-Log "Commit imzası doğrulandı: $remoteCommit"
     }

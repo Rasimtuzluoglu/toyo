@@ -1,8 +1,28 @@
 # PostgreSQL 16 Alpine, Go tabanlı gosu yerine C tabanlı su-exec kullanır.
 # Amaç: gosu içindeki eski Go stdlib CVE'lerini kaldırmak.
-FROM postgres:16-alpine@sha256:f2f98726820d0342055351c6e9d36e705f5bfffb3dd53ff556325114b08afb6d
+#
+# Not: Resmi postgres imajındaki gosu binary'si silinse bile temel katman SBOM'unda
+# görünmeye devam ediyordu. Bu nedenle dosya sistemi, gosu silinmiş haliyle
+# temiz bir scratch katmanına kopyalanır.
+FROM postgres:16-alpine@sha256:f2f98726820d0342055351c6e9d36e705f5bfffb3dd53ff556325114b08afb6d AS source
 
-RUN apk add --no-cache su-exec \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache su-exec \
     && rm -f /usr/local/bin/gosu /usr/local/bin/su-exec \
     && ln -s /sbin/su-exec /usr/local/bin/gosu \
     && ln -s /sbin/su-exec /usr/local/bin/su-exec
+
+FROM scratch
+
+COPY --from=source / /
+
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=en_US.utf8 \
+    PG_MAJOR=16 \
+    PGDATA=/var/lib/postgresql/data
+
+STOPSIGNAL SIGINT
+EXPOSE 5432
+VOLUME /var/lib/postgresql/data
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["postgres"]

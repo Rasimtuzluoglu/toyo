@@ -9,6 +9,7 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 - Dosya adı: `servisdefteri-YYYYMMdd-HHmmss.dump`
 - Konum: `.env` içindeki **bilgisayardaki yedek klasörü** (`BACKUP_HOST_DIR`); Docker içinde `/app/backups` yoluna bağlanır
 - İkinci kopya: `BACKUP_COPY_HOST_DIR` ile seçilen host klasörü (harici disk/NAS) container içinde `/app/backup-copy` yoluna bağlanır; her başarılı yedek buraya da yazılır
+- Offsite kopya: `BACKUP_OFFSITE_DIR` doluysa sağlık gözetmeni her 15 dakikada yeni `.dump` dosyalarını bu hedefe kopyalar
 - Saklama: varsayılan 14 gün (`BACKUP_RETENTION_DAYS`); süresi dolan `.dump` dosyaları silinir, ancak en yeni 5 yedek (`BACKUP_MIN_COPIES`) her zaman korunur, veritabanındaki `backup_runs` kayıtları kalır
 - Her yedek, başarılı sayılmadan önce `pg_restore --list` ile okunabilirlik açısından doğrulanır; yarım kalan dosyalar silinir
 - Sonuçlar `backup_runs` tablosuna ve denetim kaydına yazılır
@@ -19,7 +20,7 @@ Toyota Plaza Öztoprak servis yönetimi, PostgreSQL yedeğini `pg_dump` ile **cu
 
 ## Tatbikat Sonucu
 
-- Tarih: **12.11.2026**
+- Tarih: **24.11.2026** (önceki tatbikat: 12.11.2026)
 - Yöntem: `scripts/restore-drill.ps1` ile üretim veritabanından yedek alındı, `servisdefteri_restore_test` veritabanına `pg_restore` ile geri yüklendi. Betik üretim ve geri yüklenen veritabanının kayıt sayılarını ve cari toplamını otomatik karşılaştırır.
 - Doğrulama: `customers=1/1`, `vehicles=1/1`, `work_orders=1/1`, `payments=1/1`, `account_transactions=1/1`, cari toplam `1555.00/1555.00` (üretim/geri yüklenen). Test veritabanı ve geçici dump `finally` bloğunda temizlendi.
 - Sonuç: **BAŞARILI**
@@ -56,16 +57,22 @@ docker compose up -d
 Uygulamanın kendi yedeğini beklemeden, veritabanı container'ından:
 
 ```bash
-docker compose exec -T db pg_dump -U servisdefteri -d servisdefteri -Fc \
-  > servisdefteri-manual-$(date +%Y%m%d-%H%M%S).dump
+stamp=$(date +%Y%m%d-%H%M%S)
+docker compose exec -T db pg_dump -U servisdefteri -d servisdefteri -Fc -f /tmp/manual.dump
+docker compose cp db:/tmp/manual.dump "./servisdefteri-manual-$stamp.dump"
+docker compose exec -T db rm -f /tmp/manual.dump
 ```
 
-PowerShell'de tarih formatı farklıdır:
+PowerShell'de:
 
 ```powershell
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-docker compose exec -T db pg_dump -U servisdefteri -d servisdefteri -Fc > "servisdefteri-manual-$stamp.dump"
+docker compose exec -T db pg_dump -U servisdefteri -d servisdefteri -Fc -f /tmp/manual.dump
+docker compose cp db:/tmp/manual.dump ".\servisdefteri-manual-$stamp.dump"
+docker compose exec -T db rm -f /tmp/manual.dump
 ```
+
+> `>` ile doğrudan yönlendirme yapmayın; PowerShell metin kodlaması binary dump dosyasını bozabilir.
 
 > Yedek dosyaları kişisel ve finansal veri içerir. Erişim izinlerini kısıtlayın, e-posta/WhatsApp ile paylaşmayın.
 
@@ -86,6 +93,25 @@ BACKUP_HOST_DIR=C:/ToyotaServis-Yedekler
 ```
 
 Ardından `docker compose up -d` çalıştırın. Otomatik yedekler doğrudan bu klasöre yazılır.
+
+### Offsite (harici disk/NAS) kopya
+
+`.env` içine hedef klasörü ekleyin:
+
+```dotenv
+BACKUP_OFFSITE_DIR=E:/ToyotaServis-Yedekler
+```
+
+Sağlık gözetmeni her 15 dakikada yeni `.dump` dosyalarını bu klasöre kopyalar. Elle
+çalıştırmak için:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\backup-offsite.ps1
+```
+
+> Yedekler müşteri ve finansal veri içerir. Harici diski BitLocker ile şifreleyin. Bulut
+> klasörünü hedef göstermeden önce verinin buluta çıkmasının işletme açısından uygun
+> olduğundan emin olun.
 
 ## Arayüzden Geri Yükleme (PATRON)
 

@@ -88,6 +88,9 @@
 - Günlük otomatik yedek; kaçırılan yedek açılışta telafi edilir.
 - **PATRON uygulama içinden geri yükleme**: yedek seçimi, `GERI YUKLE` onayı, otomatik güvenlik yedeği ve hata durumunda geri dönüş.
 - Güncelleme öncesi yedek, GitHub son commit kontrolü ve host ajanıyla Docker güncellemesi.
+- Güncelleme ajanı yalnızca **güvenilen SSH anahtarıyla imzalanmış** commit'leri kabul eder (`security/allowed_signers`).
+- Sağlık, yedek yaşı ve disk alanı için 15 dakikalık Windows gözetmeni (`scripts/install-health-check.ps1`).
+- İkinci kopya `BACKUP_COPY_HOST_DIR`, harici/NAS kopyası `BACKUP_OFFSITE_DIR` ile desteklenir.
 
 > **Ağ notu:** Uygulama yalnızca **bu bilgisayara** (`127.0.0.1`) bağlanır ve yerel ağa/internete açılmaz. Uygulamayı `0.0.0.0` adresine bağlayarak yerel ağa açmayın; HTTP üzerinde oturum bilgileri açık gider. Uzaktan erişim gerekiyorsa TLS sonlandıran bir reverse proxy ve `SESSION_COOKIE_SECURE=true` ayrıca yapılandırılmalıdır.
 
@@ -95,7 +98,7 @@
 
 ```mermaid
 flowchart LR
-    U["Kullanıcı<br/>Telefon · Tablet · Masaüstü"] -->|HTTP| A["Spring Boot 3.5<br/>Thymeleaf"]
+    U["Kullanıcı<br/>Telefon · Tablet · Masaüstü"] -->|HTTP| A["Spring Boot 4.2<br/>Thymeleaf"]
     A -->|JPA / Flyway| DB[("PostgreSQL 16")]
     A -->|pg_dump| B[("Yedekler")]
     GH["GitHub"] -.->|"güncelleme ajanı"| A
@@ -111,7 +114,7 @@ Modüler monolit: tek Spring Boot uygulaması, tek PostgreSQL veritabanı, sunuc
 | Çatı | Spring Boot 4.2.0 |
 | Web | Spring MVC + Thymeleaf |
 | Veri | Spring Data JPA / Hibernate, PostgreSQL 16 |
-| Migration | Flyway (V17) |
+| Migration | Flyway (V20) |
 | Güvenlik | Spring Security, BCrypt (strength 12), CSRF |
 | Dışa aktarma | Apache POI 5.5.1 (Excel .xlsx), UTF-8 BOM CSV |
 | PDF | OpenPDF 2.2.2, gömülü Noto Sans |
@@ -159,7 +162,7 @@ Modüler monolit: tek Spring Boot uygulaması, tek PostgreSQL veritabanı, sunuc
 ## Testler
 
 ```bash
-mvn clean package
+mvn clean verify
 ```
 
 - **173 test**, 0 hata; Testcontainers ile gerçek PostgreSQL 16 üzerinde çalışır.
@@ -170,10 +173,12 @@ mvn clean package
 | Belge | İçerik |
 |---|---|
 | [Kurulum](docs/INSTALLATION.md) | Docker ile kurulum, autostart, güncelleme ajanı |
+| [Müşteri Kurulum Paketi](distribution/OKUBENI.md) | Docker imajlı paket, kurulum/güncelleme/geri yükleme adımları |
 | [Kullanıcı Rehberi](docs/USER-GUIDE.md) | Roller, günlük akış, tahsilat, belgeler, SSS |
 | [Mimari](docs/ARCHITECTURE.md) | Modüller, katmanlar, güvenlik ve yedekleme yaklaşımı |
 | [Veritabanı](docs/DATABASE.md) | Tablolar, ilişkiler, indeksler ve migration'lar |
 | [Yedekleme ve Geri Yükleme](docs/BACKUP-RESTORE.md) | Yedek alma, geri yükleme tatbikatı, felaket senaryosu |
+| [Güvenlik](SECURITY.md) | CVE durumu, imzalama, olay müdahalesi |
 | [Case Study](docs/CASE-STUDY.md) | Problem, çözüm, teknik yapı ve pilot metrikleri |
 
 ## Kapsam dışı

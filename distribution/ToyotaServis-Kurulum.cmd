@@ -108,6 +108,7 @@ if /I not "%ROOT%"=="%INSTALL_DIR%\" (
     copy /Y "%ROOT%ToyotaServis-Durdur.cmd" "%INSTALL_DIR%\ToyotaServis-Durdur.cmd" >nul
     copy /Y "%ROOT%ToyotaServis-Guncelle.cmd" "%INSTALL_DIR%\ToyotaServis-Guncelle.cmd" >nul
     if exist "%ROOT%OKUBENI.md" copy /Y "%ROOT%OKUBENI.md" "%INSTALL_DIR%\OKUBENI.md" >nul
+    if exist "%ROOT%BENIOKU.txt" copy /Y "%ROOT%BENIOKU.txt" "%INSTALL_DIR%\BENIOKU.txt" >nul
     if exist "%ROOT%scripts" (
         if not exist "%INSTALL_DIR%\scripts" mkdir "%INSTALL_DIR%\scripts"
         xcopy /E /I /Y "%ROOT%scripts" "%INSTALL_DIR%\scripts" >nul
@@ -180,6 +181,7 @@ if not exist "%ENVFILE%" (
     >> "%ENVFILE%" echo APP_PORT=%APP_PORT%
     >> "%ENVFILE%" echo BACKUP_RETENTION_DAYS=14
     >> "%ENVFILE%" echo BACKUP_HOST_DIR="%BACKUP_ENV_DIR%"
+    >> "%ENVFILE%" echo BACKUP_OFFSITE_DIR=
     >> "%ENVFILE%" echo SETUP_TOKEN=!NEW_SETUP_TOKEN!
     >> "%ENVFILE%" echo APP_UPDATE_ENABLED=false
     echo .env olusturuldu.
@@ -263,6 +265,15 @@ if defined TOYOTA_SKIP_SHORTCUTS (
 echo [6/6] Kisayollar hazirlaniyor...
 
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$ws=New-Object -ComObject WScript.Shell; $desktop=[Environment]::GetFolderPath('Desktop'); $s=$ws.CreateShortcut((Join-Path $desktop 'Toyota Servis.url')); $s.TargetPath='http://localhost:%APP_PORT%'; $s.Save(); $startup=[Environment]::GetFolderPath('Startup'); $l=$ws.CreateShortcut((Join-Path $startup 'Toyota Servis.lnk')); $l.TargetPath='%INSTALL_DIR%\ToyotaServis-Baslat.cmd'; $l.WorkingDirectory='%INSTALL_DIR%'; $l.WindowStyle=7; $l.Save()"
+
+if exist "%INSTALL_DIR%\scripts\install-health-check.ps1" (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "%INSTALL_DIR%\scripts\install-health-check.ps1" >> "%LOG%" 2>&1
+    if errorlevel 1 (
+        echo UYARI: Saglik kontrolu gorevi kurulamadi.
+    ) else (
+        echo Saglik kontrolu gorevi kuruldu: 15 dakikada bir.
+    )
+)
 
 :installed
 echo.
