@@ -123,6 +123,8 @@ if exist "%INSTALL_DIR%\scripts\harden-env.ps1" (
     if errorlevel 1 echo UYARI: .env izinleri sikilastirilamadi.
 )
 
+for /f "tokens=1,* delims==" %%A in ('findstr /B /C:"SETUP_TOKEN=" "%ENVFILE%" 2^>nul') do set "SETUP_TOKEN=%%B"
+
 if defined TOYOTA_SKIP_START (
     echo TOYOTA_SKIP_START=1: servisler baslatilmadi.
     goto finish_no_start
@@ -177,7 +179,11 @@ echo ============================================
 echo  KURULUM TAMAMLANDI
 echo ============================================
 echo  Yerel adres : http://localhost:%APP_PORT%
-echo  Ilk kurulum : http://localhost:%APP_PORT%/setup
+if defined SETUP_TOKEN (
+    echo  Ilk kurulum : http://localhost:%APP_PORT%/setup?token=%SETUP_TOKEN%
+) else (
+    echo  Ilk kurulum : http://localhost:%APP_PORT%/setup
+)
 echo  Giris       : http://localhost:%APP_PORT%/login
 echo.
 echo  Ilk kurulumda /setup ekranindan PATRON hesabini olusturun.
@@ -194,7 +200,11 @@ echo.
 if defined TOYOTA_NO_BROWSER (
     echo Tarayici otomatik acilmadi - TOYOTA_NO_BROWSER=1.
 ) else (
-    start "" "http://localhost:%APP_PORT%"
+    if defined SETUP_TOKEN (
+        start "" "http://localhost:%APP_PORT%/setup?token=%SETUP_TOKEN%"
+    ) else (
+        start "" "http://localhost:%APP_PORT%/setup"
+    )
 )
 exit /b 0
 

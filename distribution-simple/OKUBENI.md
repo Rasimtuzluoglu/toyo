@@ -46,7 +46,9 @@ Docker Desktop kurulu değilse kurulum durur ve uyarı verir; otomatik indirme/k
 1. ZIP’i yazılabilir bir klasöre çıkarın. Örnek: `D:\ToyotaServis`
 2. `KURULUM.cmd` dosyasına çift tıklayın.
 3. UAC iznini onaylayın.
-4. Kurulum sonunda `/setup` ekranı açılır; PATRON hesabını oluşturun.
+4. Kurulum sonunda **token içeren** `/setup?token=...` ekranı açılır; PATRON hesabını oluşturun.
+   Token olmadan `/setup` açılırsa güvenlik nedeniyle **403** döner. Token `.env` içindeki
+   `SETUP_TOKEN` değeridir.
 
 Kurulum yeri, `KURULUM.cmd` dosyasının bulunduğu klasördür. Farklı bir klasör için
 `TOYOTA_INSTALL_DIR` kullanılabilir:

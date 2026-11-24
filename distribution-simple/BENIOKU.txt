@@ -16,7 +16,10 @@ Kurulum:
 
 Adresler:
 - Uygulama: http://localhost:18080
+- Ilk kurulum: http://localhost:18080/setup?token=... (.env icindeki SETUP_TOKEN)
 - Giris    : http://localhost:18080/login
+
+Not: /setup adresi token olmadan 403 verir. Bu normaldir.
 
 Veri:
 - Veritabani toyota-servis-pgdata Docker volume'undedir.
