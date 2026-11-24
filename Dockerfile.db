@@ -4,7 +4,7 @@
 # Not: Resmi postgres imajındaki gosu binary'si silinse bile temel katman SBOM'unda
 # görünmeye devam ediyordu. Bu nedenle dosya sistemi, gosu silinmiş haliyle
 # temiz bir scratch katmanına kopyalanır.
-FROM postgres:16-alpine@sha256:f2f98726820d0342055351c6e9d36e705f5bfffb3dd53ff556325114b08afb6d AS source
+FROM postgres:18-alpine@sha256:0115267ab5a509022df9319c77be365cef335adb71556c75f60f5360ee247e71 AS source
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache su-exec \
