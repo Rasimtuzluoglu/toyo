@@ -1,6 +1,9 @@
 services:
   db:
-    image: postgres:16-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.db
+    image: servisdefteri-db:16
     container_name: servisdefteri-db
     restart: unless-stopped
     environment:

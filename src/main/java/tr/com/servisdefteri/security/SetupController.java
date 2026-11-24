@@ -1,5 +1,6 @@
 package tr.com.servisdefteri.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,11 +33,12 @@ public class SetupController {
 
     @GetMapping
     public String show(@RequestParam(name = "token", required = false) String token,
+                       HttpServletRequest request,
                        Model model, HttpServletResponse response) {
         if (userService.isInitialized()) {
             return "redirect:/login";
         }
-        if (!tokenMatches(token)) {
+        if (!tokenMatches(token, request == null ? null : request.getRemoteAddr())) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return "error/403";
         }
@@ -49,13 +51,14 @@ public class SetupController {
     public String create(@Valid @ModelAttribute("setupForm") SetupForm form,
                          BindingResult bindingResult,
                          @RequestParam(name = "token", required = false) String token,
+                         HttpServletRequest request,
                          Model model,
                          HttpServletResponse response,
                          RedirectAttributes redirectAttributes) {
         if (userService.isInitialized()) {
             return "redirect:/login";
         }
-        if (!tokenMatches(token)) {
+        if (!tokenMatches(token, request == null ? null : request.getRemoteAddr())) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             return "error/403";
         }
@@ -81,14 +84,17 @@ public class SetupController {
      * SETUP_TOKEN tanımlıysa kurulum ekranı yalnızca bu token ile açılabilir.
      * Tanımlı değilse eski davranış korunur (yalnızca loopback portuna bağlı kurulum).
      */
-    boolean tokenMatches(String provided) {
-        if (configuredToken.isEmpty()) {
-            return true;
+    boolean tokenMatches(String provided, String remoteAddress) {
+        if (!configuredToken.isEmpty()) {
+            if (provided == null) {
+                return false;
+            }
+            return MessageDigest.isEqual(configuredToken.getBytes(StandardCharsets.UTF_8),
+                    provided.getBytes(StandardCharsets.UTF_8));
         }
-        if (provided == null) {
-            return false;
-        }
-        return MessageDigest.isEqual(configuredToken.getBytes(StandardCharsets.UTF_8),
-                provided.getBytes(StandardCharsets.UTF_8));
+        // Token tanımlı değilse kurulum yalnızca bu bilgisayardan açılabilir.
+        return "127.0.0.1".equals(remoteAddress)
+                || "::1".equals(remoteAddress)
+                || "0:0:0:0:0:0:0:1".equals(remoteAddress);
     }
 }

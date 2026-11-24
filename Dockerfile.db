@@ -1,0 +1,8 @@
+# PostgreSQL 16 Alpine, Go tabanlı gosu yerine C tabanlı su-exec kullanır.
+# Amaç: gosu içindeki eski Go stdlib CVE'lerini kaldırmak.
+FROM postgres:16-alpine@sha256:f2f98726820d0342055351c6e9d36e705f5bfffb3dd53ff556325114b08afb6d
+
+RUN apk add --no-cache su-exec \
+    && rm -f /usr/local/bin/gosu /usr/local/bin/su-exec \
+    && ln -s /sbin/su-exec /usr/local/bin/gosu \
+    && ln -s /sbin/su-exec /usr/local/bin/su-exec

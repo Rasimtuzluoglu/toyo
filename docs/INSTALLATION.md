@@ -60,7 +60,7 @@ Bu kurulum yalnızca üzerinde çalıştığı bilgisayar için tasarlanmıştı
 
 - **Varsayılan ve önerilen:** `APP_BIND_ADDRESS=127.0.0.1`; uygulama yalnızca bu bilgisayardan açılır.
 - Uygulamayı `0.0.0.0` adresine bağlayarak yerel ağa açmayın; HTTP üzerinde çalıştığı için oturum bilgileri ağda açık gider. Uzaktan erişim gerekiyorsa TLS sonlandıran bir reverse proxy ayrıca kurulmalıdır.
-- **İlk kurulum:** `.env` içinde `SETUP_TOKEN` tanımlarsanız `/setup` ekranı yalnızca `http://localhost:18080/setup?token=...` ile açılır. Boş bırakılırsa kurulum yalnızca loopback portundan erişilebilir.
+- **İlk kurulum:** `.env` içinde `SETUP_TOKEN` tanımlayın; `/setup` yalnızca `http://localhost:18080/setup?token=...` ile açılır. Token boşsa kurulum yalnızca doğrudan loopback bağlantısında açılır; Docker üzerinden erişimde token zorunludur.
 - Windows Güvenlik Duvarı'nda 18080 portu için gelen kural açmayın; gerekmiyor.
 - Modem/router üzerinde bu port için **port yönlendirme yapmayın**.
 - Yedekleri aynı bilgisayarda tutmayın; harici disk/NAS için kaynak kurulumda `scripts/setup-backup-copy.ps1` çalıştırın veya **Yedek Al ve İndir** ile dışa alın.

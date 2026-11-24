@@ -9,10 +9,11 @@ COPY src ./src
 RUN mvn -B -q -DskipTests package
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-alpine@sha256:5d7689f47d670aca766b9503a70bccc2d73b4eb9221ae8f714ae958313c4ce70
 
 RUN apk upgrade --no-cache \
-    && apk add --no-cache tzdata wget postgresql16-client \
+    && apk add --no-cache tzdata postgresql16-client \
+    && apk del --no-cache sqlite sqlite-libs gnupg gpg gnupg-keyboxd \
     && addgroup -S app && adduser -S app -G app
 
 WORKDIR /app
@@ -23,6 +24,6 @@ USER app
 EXPOSE 18080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=5 \
-    CMD wget -qO- http://localhost:18080/actuator/health || exit 1
+    CMD /bin/busybox wget -qO- http://127.0.0.1:18080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-Duser.timezone=Europe/Istanbul", "-jar", "/app/app.jar"]

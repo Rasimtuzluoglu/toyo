@@ -1,7 +1,7 @@
 package tr.com.servisdefteri.update;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tr.com.servisdefteri.audit.AuditAction;
@@ -245,7 +245,7 @@ public class UpdateService {
         }
         try {
             return objectMapper.readTree(file.toFile());
-        } catch (IOException ex) {
+        } catch (RuntimeException ex) {
             return null;
         }
     }

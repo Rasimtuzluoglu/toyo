@@ -1,5 +1,6 @@
 package tr.com.servisdefteri.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,9 +23,11 @@ import java.util.Objects;
 public class ForgotPasswordController {
 
     private final UserService userService;
+    private final LoginAttemptService loginAttemptService;
 
-    public ForgotPasswordController(UserService userService) {
+    public ForgotPasswordController(UserService userService, LoginAttemptService loginAttemptService) {
         this.userService = userService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @GetMapping
@@ -36,6 +39,7 @@ public class ForgotPasswordController {
     @PostMapping
     public String reset(@Valid @ModelAttribute("forgotPasswordForm") ForgotPasswordForm form,
                         BindingResult bindingResult,
+                        HttpServletRequest request,
                         RedirectAttributes redirectAttributes) {
         if (!Objects.equals(form.getNewPassword(), form.getConfirmPassword())) {
             bindingResult.rejectValue("confirmPassword", "password.mismatch", "Parolalar eşleşmiyor.");
@@ -43,9 +47,17 @@ public class ForgotPasswordController {
         if (bindingResult.hasErrors()) {
             return "forgot-password";
         }
+        String ip = request.getRemoteAddr();
+        if (loginAttemptService.isRecoveryBlocked(form.getUsername(), ip)) {
+            bindingResult.reject("reset.locked",
+                    "Çok fazla hatalı deneme. Lütfen 15 dakika sonra tekrar deneyin.");
+            return "forgot-password";
+        }
         try {
             userService.resetPasswordWithRecoveryCode(form.getUsername(), form.getCode(), form.getNewPassword());
+            loginAttemptService.recoverySuccess(form.getUsername(), ip);
         } catch (BusinessRuleException ex) {
+            loginAttemptService.recoveryFailure(form.getUsername(), ip);
             bindingResult.reject("reset.failed", ex.getMessage());
             return "forgot-password";
         }

@@ -983,7 +983,7 @@ class UsabilityIT extends BusinessTestSupport {
             form.setTagline("Test Servis");
             form.setPrimaryColor("#0055aa");
             form.setLogo(new MockMultipartFile("logo", "logo.png", "image/png",
-                    "test-logo".getBytes(StandardCharsets.UTF_8)));
+                    java.util.Base64.getDecoder().decode(TINY_PNG.substring(TINY_PNG.indexOf(',') + 1))));
             businessSettingsService.update(form);
 
             BusinessSettings updated = businessSettingsService.get();
