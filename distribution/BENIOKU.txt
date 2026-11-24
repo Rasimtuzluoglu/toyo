@@ -8,6 +8,7 @@ Kurulum:
 - Hicbir klasor veya yedek yolu sormaz.
 - Docker Desktop yoksa kurmayi dener; Linux containers modunu kontrol eder.
 - Yedekler otomatik: %USERPROFILE%\ToyotaServis-Yedekler
+- 15 dakikalik saglik gozetmeni kurulur; sorun varsa uygulamayi yeniden baslatir.
 - Kurulum sonunda tarayici acilir; ilk PATRON hesabini olusturun.
 
 Adresler:

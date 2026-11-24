@@ -28,8 +28,39 @@ function Read-EnvValue($key, $defaultValue) {
     return $line.Substring($line.IndexOf('=') + 1).Trim().Trim('"')
 }
 
+function Get-ComposeFile {
+    $candidate = Join-Path $projectRoot "docker-compose.yml"
+    if (-not (Test-Path $candidate)) {
+        $candidate = Join-Path $projectRoot "docker-compose.dist.yml"
+    }
+    return $candidate
+}
+
+function Get-ComposeContainerName($role) {
+    $composeFile = Get-ComposeFile
+    if (-not (Test-Path $composeFile)) {
+        return $null
+    }
+    $matches = Select-String -Path $composeFile -Pattern 'container_name:\s*([A-Za-z0-9._-]+)' -AllMatches
+    foreach ($match in $matches) {
+        foreach ($name in $match.Matches) {
+            $value = $name.Groups[1].Value
+            if ($role -eq "app" -and $value -match "app") {
+                return $value
+            }
+            if ($role -eq "db" -and $value -match "db") {
+                return $value
+            }
+        }
+    }
+    return $null
+}
+
 function Get-RunningContainer($candidates) {
     foreach ($candidate in $candidates) {
+        if (-not $candidate) {
+            continue
+        }
         $found = docker ps --filter "name=^/$candidate$" --format "{{.Names}}" 2>$null
         if ($found -eq $candidate) {
             return $candidate
@@ -39,8 +70,10 @@ function Get-RunningContainer($candidates) {
 }
 
 $appPort = Read-EnvValue "APP_PORT" "18080"
-$appContainer = Get-RunningContainer @("servisdefteri-app", "toyota-servis-app")
-$dbContainer = Get-RunningContainer @("servisdefteri-db", "toyota-servis-db")
+$composeApp = Get-ComposeContainerName "app"
+$composeDb = Get-ComposeContainerName "db"
+$appContainer = Get-RunningContainer @($composeApp, "servisdefteri-app", "toyota-servis-app")
+$dbContainer = Get-RunningContainer @($composeDb, "servisdefteri-db", "toyota-servis-db")
 $health = $false
 $backupAgeHours = $null
 $offsiteAgeHours = $null
@@ -60,10 +93,7 @@ if ($appContainer) {
 }
 
 if (-not $health -and $AutoRestart) {
-    $composeFile = Join-Path $projectRoot "docker-compose.yml"
-    if (-not (Test-Path $composeFile)) {
-        $composeFile = Join-Path $projectRoot "docker-compose.dist.yml"
-    }
+    $composeFile = Get-ComposeFile
     Write-Log "Sağlık başarısız; servisler yeniden başlatılıyor."
     if (Test-Path $composeFile) {
         docker compose --project-directory $projectRoot --env-file $envPath -f $composeFile up -d *>> $logFile
