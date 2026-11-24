@@ -9,7 +9,7 @@ COPY src ./src
 RUN mvn -B -q -DskipTests package
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:21-jre-alpine@sha256:5d7689f47d670aca766b9503a70bccc2d73b4eb9221ae8f714ae958313c4ce70
+FROM eclipse-temurin:25-jre-alpine@sha256:69c2a26e9894016e274c880fa542956d005b3755f84db765145185e87405bd89
 
 RUN apk upgrade --no-cache \
     && apk add --no-cache tzdata postgresql16-client \
