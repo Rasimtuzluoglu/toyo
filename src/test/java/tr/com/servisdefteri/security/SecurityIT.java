@@ -60,7 +60,7 @@ class SecurityIT extends IntegrationTestSupport {
     void anonymousUserIsRedirectedToLogin() throws Exception {
         mockMvc.perform(get("/"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrlPattern("**/login"));
+                .andExpect(redirectedUrl("/login"));
     }
 
     @Test

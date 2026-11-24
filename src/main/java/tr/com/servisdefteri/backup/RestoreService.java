@@ -1,6 +1,6 @@
 package tr.com.servisdefteri.backup;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,7 +68,7 @@ public class RestoreService {
         }
         try {
             return objectMapper.readValue(statusFile.toFile(), Map.class);
-        } catch (IOException ex) {
+        } catch (RuntimeException ex) {
             log.warn("Geri yükleme durumu okunamadı: {}", ex.getMessage());
             return Map.of();
         }

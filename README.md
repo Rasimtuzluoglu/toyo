@@ -12,7 +12,7 @@
 
 <p align="center">
   <img alt="Java 21" src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white">
-  <img alt="Spring Boot 3.5" src="https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot&logoColor=white">
+  <img alt="Spring Boot 4.2" src="https://img.shields.io/badge/Spring_Boot-4.2-6DB33F?logo=springboot&logoColor=white">
   <img alt="PostgreSQL 16" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
   <img alt="Docker Compose" src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white">
   <img alt="173 test" src="https://img.shields.io/badge/tests-173%20passing-brightgreen">
@@ -108,7 +108,7 @@ Modüler monolit: tek Spring Boot uygulaması, tek PostgreSQL veritabanı, sunuc
 | Katman | Teknoloji |
 |---|---|
 | Dil | Java 21 LTS |
-| Çatı | Spring Boot 3.5.16 |
+| Çatı | Spring Boot 4.2.0 |
 | Web | Spring MVC + Thymeleaf |
 | Veri | Spring Data JPA / Hibernate, PostgreSQL 16 |
 | Migration | Flyway (V17) |
@@ -133,7 +133,7 @@ Modüler monolit: tek Spring Boot uygulaması, tek PostgreSQL veritabanı, sunuc
    Copy-Item .env.example .env
    ```
 
-2. `.env` içinde en az `POSTGRES_PASSWORD` değerini değiştirin. İlk işletme sahibini ortam değişkeninden oluşturmak isterseniz `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` ve `INITIAL_ADMIN_FULL_NAME` değerlerini de doldurun. **Varsayılan parola yoktur.**
+2. `.env` içinde en az `POSTGRES_PASSWORD` ve `SETUP_TOKEN` değerlerini değiştirin. İlk işletme sahibini ortam değişkeninden oluşturmak isterseniz `INITIAL_ADMIN_USERNAME`, `INITIAL_ADMIN_PASSWORD` ve `INITIAL_ADMIN_FULL_NAME` değerlerini de doldurun. **Varsayılan parola yoktur.**
    - `.env` izinlerini sıkılaştırın: `powershell -ExecutionPolicy Bypass -File .\scripts\harden-env.ps1`
    - Parola değiştirmek için: `powershell -ExecutionPolicy Bypass -File .\scripts\rotate-db-password.ps1`
 

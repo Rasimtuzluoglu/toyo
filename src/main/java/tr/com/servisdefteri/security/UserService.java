@@ -1,5 +1,6 @@
 package tr.com.servisdefteri.security;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,9 @@ public class UserService {
             "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".toCharArray();
     private static final int RECOVERY_CODE_LENGTH = 10;
     private static final Duration RECOVERY_CODE_TTL = Duration.ofHours(24);
+    /** Geçersiz kullanıcı adlarında da BCrypt maliyeti oluşturur; kullanıcı adı zamanlama sızıntısını azaltır. */
+    private static final String DUMMY_RECOVERY_HASH =
+            new BCryptPasswordEncoder(12).encode("dummy-recovery-code-value");
 
     private final UserRepository userRepository;
     private final InstallationStateRepository installationStateRepository;
@@ -187,12 +191,15 @@ public class UserService {
         PasswordPolicy.requireStrong(newPassword);
         User user = userRepository.findByUsernameIgnoreCase(normalizeUsername(username)).orElse(null);
         String normalizedCode = code == null ? "" : code.trim().toUpperCase(Locale.ROOT);
+        String storedHash = user == null || user.getRecoveryCodeHash() == null
+                ? DUMMY_RECOVERY_HASH : user.getRecoveryCodeHash();
+        boolean codeMatches = !normalizedCode.isBlank()
+                && passwordEncoder.matches(normalizedCode, storedHash);
         boolean valid = user != null && user.isEnabled()
                 && user.getRecoveryCodeHash() != null
                 && user.getRecoveryCodeExpiresAt() != null
                 && user.getRecoveryCodeExpiresAt().isAfter(LocalDateTime.now(clock))
-                && !normalizedCode.isBlank()
-                && passwordEncoder.matches(normalizedCode, user.getRecoveryCodeHash());
+                && codeMatches;
         if (!valid) {
             throw new BusinessRuleException(
                     "Kullanıcı adı veya kurtarma kodu hatalı ya da kodun süresi dolmuş.");

@@ -2,6 +2,7 @@ package tr.com.servisdefteri.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.session.SessionRegistry;
@@ -9,8 +10,8 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import tr.com.servisdefteri.audit.AuditAction;
 import tr.com.servisdefteri.audit.AuditService;
 import tr.com.servisdefteri.security.LoginFailureHandler;
@@ -61,7 +62,7 @@ public class SecurityConfig {
                         .failureHandler(failureHandler)
                         .permitAll())
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
+                        .logoutRequestMatcher(PathPatternRequestMatcher.pathPattern(HttpMethod.POST, "/logout"))
                         .addLogoutHandler((request, response, authentication) ->
                                 auditService.record(AuditAction.LOGOUT, "Oturum", null, "Kullanıcı çıkışı"))
                         .logoutSuccessUrl("/login?logout")

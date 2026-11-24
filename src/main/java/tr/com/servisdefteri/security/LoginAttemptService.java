@@ -58,6 +58,21 @@ public class LoginAttemptService {
         remove(ipKey(ip));
     }
 
+    /** Parola kurtarma kodu denemeleri icin ayri kilit anahtari. */
+    public boolean isRecoveryBlocked(String username, String ip) {
+        return isBlockedKey(recoveryUserKey(username)) || isBlockedKey(recoveryIpKey(ip));
+    }
+
+    public void recoveryFailure(String username, String ip) {
+        increment(recoveryUserKey(username));
+        increment(recoveryIpKey(ip));
+    }
+
+    public void recoverySuccess(String username, String ip) {
+        remove(recoveryUserKey(username));
+        remove(recoveryIpKey(ip));
+    }
+
     private boolean isBlockedKey(String key) {
         if (key == null) {
             return false;
@@ -138,6 +153,20 @@ public class LoginAttemptService {
             return null;
         }
         return "ip:" + ip.trim();
+    }
+
+    private String recoveryUserKey(String username) {
+        if (username == null || username.isBlank()) {
+            return null;
+        }
+        return "recovery-user:" + username.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String recoveryIpKey(String ip) {
+        if (ip == null || ip.isBlank()) {
+            return null;
+        }
+        return "recovery-ip:" + ip.trim();
     }
 
     private String currentIp() {
