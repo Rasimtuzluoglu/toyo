@@ -1,0 +1,24 @@
+TOYOTA SERVIS - DOCKER KURULUM
+
+1) Bu klasoru flas bellege kopyalayin.
+2) Hedef bilgisayarda KURULUM.cmd dosyasina cift tiklayin.
+3) UAC (yonetici izni) ekranini onaylayin.
+
+Kurulum:
+- Hicbir klasor veya yedek yolu sormaz.
+- Docker Desktop yoksa kurmayi dener; Linux containers modunu kontrol eder.
+- Yedekler otomatik: %USERPROFILE%\ToyotaServis-Yedekler
+- Kurulum sonunda tarayici acilir; ilk PATRON hesabini olusturun.
+
+Adresler:
+- Uygulama: http://localhost:18080
+- Giris    : http://localhost:18080/login
+
+Sorun devam ederse:
+- Docker Desktop tepsisine sag tik -> "Switch to Linux containers".
+- Eski/yarim konteynerler icin: docker rm -f toyota-servis-app toyota-servis-db
+- Log: %TEMP%\ToyotaServis-Kurulum.log
+
+Bu klasorde uygulamanin kaynak kodu yoktur; yalnizca derlenmis Docker imajlari bulunur.
+
+Ayrintili bilgi: OKUBENI.md

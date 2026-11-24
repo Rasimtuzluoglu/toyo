@@ -24,5 +24,9 @@ logs/
 *.dump
 *.sql.gz
 
+# Dağıtım paketi imaj arşivi (büyük dosya)
+distribution/*.tar
+distribution/.env
+
 .DS_Store
 Thumbs.db
